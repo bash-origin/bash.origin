@@ -1,0 +1,79 @@
+#!/bin/bash
+# License: http://unlicense.org/
+
+###############################
+# Declare Boot Functions
+###############################
+
+function BO_setResult {
+	local  __resultvar=$1
+    eval $__resultvar="'$2'"
+	return 0
+}
+
+function BO_deriveSelfDir {
+	local SOURCE="$1"
+	local DIR=""
+	while [ -h "$SOURCE" ]; do
+	  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+	  SOURCE="$(readlink "$SOURCE")"
+	  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+	done
+	BO_setResult $1 "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+	return 0
+}
+
+
+###############################
+# Boot self
+###############################
+
+BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
+
+
+###############################
+# Ensure minimal Environment
+###############################
+
+if [ -z "$HOME" ]; then
+	echo "ERROR: 'HOME' environment variable is not set (file: $__DIR__/bash.origin)!"
+	exit 1
+fi
+
+
+###############################
+# Set Globals
+###############################
+
+BO_ROOT_SCRIPT_PATH="$HOME/bash.origin"
+BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
+
+
+###############################
+# Declare Utility Functions
+###############################
+
+
+
+###############################
+# Initialize & Act
+###############################
+
+BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
+
+if [ "$1" == "DO" ]; then
+
+	if [ "$2" == "install" ]; then
+
+		if [ ! -f "$BO_ROOT_SCRIPT_PATH" ]; then
+			echo "Copying '$__DIR__/bash.origin' to '$BO_ROOT_SCRIPT_PATH'"
+			cp -f "$__DIR__/bash.origin" "$BO_ROOT_SCRIPT_PATH"
+		else
+			# TODO: Copy if version has changed.
+			echo "Skip copy of '$__DIR__/bash.origin' as '$BO_ROOT_SCRIPT_PATH' already exists."
+		fi
+		exit 0
+	fi
+	echo "ERROR: Unknown DO command '$2'!"
+	exit 1
+fi

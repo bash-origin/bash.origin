@@ -1,0 +1,7 @@
+{
+	"name": "bash.origin",
+	"version": "0.1.0",
+	"scripts": {
+		"install": "./bash.origin DO install"
+	}
+}

@@ -1,0 +1,3 @@
+#!/bin/bash
+. "$HOME/bash.origin"
+BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
