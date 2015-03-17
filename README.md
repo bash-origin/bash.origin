@@ -52,7 +52,7 @@ BO_run_node -v
 Examples
 --------
 
-  * `examples/01-HelloWorld` - Simple variable passing and common functions using [npm](http://npmjs.org) package layout.
+  * [examples/01-HelloWorld](https://github.com/cadorn/bash.origin/tree/master/examples/01-HelloWorld) - Simple variable passing and common functions using [npm](http://npmjs.org) package layout.
 
 
 Conventions
@@ -78,7 +78,7 @@ Obtain a value for `__BO_DIR__` pointing to the directory containing our script 
 
 The idea is that by *knowing your own script directory* (`__BO_DIR__`) you can **include a common package** that is included by all packages of your system that have scripted *entry points*. This common package contains a **script prototype** which is sourced by all scripts.
 
-For an example see `examples/01-HelloWorld`.
+For an example see [examples/01-HelloWorld](https://github.com/cadorn/bash.origin/tree/master/examples/01-HelloWorld).
 
 
 ### 4. Call `BO_run_*` to run common programs
