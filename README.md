@@ -1,7 +1,7 @@
 bash.origin
 ===========
 
-The original spark for this project came from needing an easy way to get the **path of the current Bast script** which is [way harder that it should be](http://stackoverflow.com/a/246128/330439).
+The original spark for this project came from needing an easy way to get the **path of the current Bast script** which is [way harder than it should be](http://stackoverflow.com/a/246128/330439).
 
 It has now turned into a minimal set of Bash conventions and utilities to bootstrap a system.
 
@@ -148,3 +148,4 @@ License
 =======
 
 [UNLICENSE](http://unlicense.org/)
+
