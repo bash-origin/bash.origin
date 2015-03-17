@@ -26,7 +26,9 @@ No matter how `bash.origin` was installed above; it can be used in any script th
 ````
 #!/bin/bash
 . "$HOME/bash.origin"
-BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
+eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+BO_deriveSelfDir __DIR__ "$BO_SELF_BASH_SOURCE"
+
 
 BO_run_node -v
 
@@ -50,8 +52,8 @@ This will also run `BO_sourceProfile`.
 
 Obtain a value for `__DIR__` pointing to the directory containing our script using:
 
-    BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
-
+	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+	BO_deriveSelfDir __DIR__ "$BO_SELF_BASH_SOURCE"
 
 ### 3. Call `BO_run_*` to run common programs
 
@@ -79,7 +81,8 @@ Used in functions to return values:
 
 ### `__DIR__` of own script
 
-    BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
+	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+	BO_deriveSelfDir __DIR__ "$BO_SELF_BASH_SOURCE"
 
 
 ### `BO_sourceProfile`
