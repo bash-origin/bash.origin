@@ -30,12 +30,13 @@ function BO_deriveSelfDir {
 	return 0
 }
 
-
-###############################
-# Boot self
-###############################
-
-BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
+function BO_sourceProfile {
+	if [ -f "$HOME/.profile" ]; then
+		. "$HOME/.profile"
+	elif [ -f "$HOME/.bash_profile" ]; then
+		. "$HOME/.bash_profile"
+	fi
+}
 
 
 ###############################
@@ -46,6 +47,15 @@ if [ -z "$HOME" ]; then
 	echo "$BO_LOG_PREFIX""ERROR: 'HOME' environment variable is not set (file: $__DIR__/bash.origin)!"
 	exit 1
 fi
+
+
+###############################
+# Boot self
+###############################
+
+BO_sourceProfile
+BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
+
 
 
 ###############################
@@ -62,14 +72,6 @@ BO_VERSION_NVM_NODE="0.10"
 ###############################
 # Declare Utility Functions
 ###############################
-
-function BO_sourceProfile {
-	if [ -f "$HOME/.profile" ]; then
-		. "$HOME/.profile"
-	elif [ -f "$HOME/.bash_profile" ]; then
-		. "$HOME/.bash_profile"
-	fi
-}
 
 function BO_ensure_node {
 	if hash node 2>/dev/null; then
@@ -101,11 +103,10 @@ function BO_run_node {
 
 
 ###############################
-# Initialize & Act
+# Act
 ###############################
 
-BO_sourceProfile
-BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
+# TODO: Setup alias for `BO` so we can call from scripts.
 
 if [ "$1" == "BO" ]; then
 

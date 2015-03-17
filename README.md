@@ -3,7 +3,7 @@ bash.origin
 
 A minimal set of Bash conventions and utilities to bootstrap a system.
 
-I need a consistent starting point for Bash scripts so I don't have to re-write the same code over and over when writing scripts to bootstrap `node` and other binaries.
+I need a consistent starting point for Bash scripts so I don't have to re-write the same code over and over when writing scripts to bootstrap `node` and other programs.
 
 
 Install
@@ -23,7 +23,6 @@ Usage
 
 No matter how `bash.origin` was installed above; it can be used in any script thereafter using:
 
-`bin/cmd` ~
 ````
 #!/bin/bash
 . "$HOME/bash.origin"
