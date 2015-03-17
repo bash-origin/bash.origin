@@ -28,8 +28,7 @@ No matter how `bash.origin` was installed above; it can be used in any script th
 # Source https://github.com/cadorn/bash.origin
 . "$HOME/bash.origin"
 eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-BO_deriveSelfDir __DIR__ "$BO_SELF_BASH_SOURCE"
-
+BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
 BO_run_node -v
 
@@ -49,12 +48,12 @@ Source the *Root Bash Script* located at `~/bash.origin` using:
 This will also run `BO_sourceProfile`.
 
 
-### 2. Derive `__DIR__` for own file
+### 2. Derive `__BO_DIR__` for own file
 
-Obtain a value for `__DIR__` pointing to the directory containing our script using:
+Obtain a value for `__BO_DIR__` pointing to the directory containing our script using:
 
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-	BO_deriveSelfDir __DIR__ "$BO_SELF_BASH_SOURCE"
+	BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
 ### 3. Call `BO_run_*` to run common programs
 
@@ -80,10 +79,10 @@ Used in functions to return values:
 	ourFunc RESULT_VAR ...
 
 
-### `__DIR__` of own script
+### `__BO_DIR__` of own script
 
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-	BO_deriveSelfDir __DIR__ "$BO_SELF_BASH_SOURCE"
+	BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
 
 ### `BO_sourceProfile`
@@ -104,6 +103,32 @@ Ensure the latest stable version of [node](http://nodejs.org) is installed using
 ### `BO_run_node`
 
 Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file using [node](http://nodejs.org).
+
+
+### `BO_sourcePrototype`
+
+Allows scripts to inherit a common envrionment from a *prototype* script.
+
+**script.sh***
+````
+#!/bin/bash
+# Source https://github.com/cadorn/bash.origin
+. "$HOME/bash.origin"
+eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
+
+BO_sourcePrototype "$__BO_DIR__/common.prototype" $@
+````
+
+**common.prototype***
+````
+#!/bin/bash
+# Source https://github.com/cadorn/bash.origin
+eval __PROTOTYPE__BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+BO_deriveSelfDir __PROTOTYPE__BO_DIR__ "$__PROTOTYPE__BO_SELF_BASH_SOURCE"
+
+BO_run_node "$__PROTOTYPE__BO_DIR__/pto.js" --plugin "$__BO_DIR__/.." $@
+````
 
 
 License

@@ -20,6 +20,7 @@ function BO_setResult {
 }
 
 function BO_deriveSelfDir {
+	# @source http://stackoverflow.com/a/246128/330439
 	local SOURCE="$2"
 	local DIR=""
 	while [ -h "$SOURCE" ]; do
@@ -45,7 +46,7 @@ function BO_sourceProfile {
 ###############################
 
 if [ -z "$HOME" ]; then
-	echo "$BO_LOG_PREFIX""ERROR: 'HOME' environment variable is not set (file: $__DIR__/bash.origin)!"
+	echo "$BO_LOG_PREFIX""ERROR: 'HOME' environment variable is not set (file: $__BO_DIR__/bash.origin)!"
 	exit 1
 fi
 
@@ -57,7 +58,7 @@ fi
 BO_sourceProfile
 
 eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-BO_deriveSelfDir __DIR__ "$BO_SELF_BASH_SOURCE"
+BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
 
 ###############################
@@ -74,6 +75,10 @@ BO_VERSION_NVM_NODE="0.10"
 ###############################
 # Declare Utility Functions
 ###############################
+
+function BO_sourcePrototype {
+	. "$1" ${*:2}
+}
 
 function BO_ensure_node {
 	if hash node 2>/dev/null; then
@@ -119,11 +124,11 @@ if [ "$1" == "BO" ]; then
 			rm -f "$BO_ROOT_SCRIPT_PATH" || true
 		fi
 		if [ ! -f "$BO_ROOT_SCRIPT_PATH" ]; then
-			echo "$BO_LOG_PREFIX""Copying '$__DIR__/bash.origin' to '$BO_ROOT_SCRIPT_PATH'"
-			cp -f "$__DIR__/bash.origin" "$BO_ROOT_SCRIPT_PATH"
+			echo "$BO_LOG_PREFIX""Copying '$__BO_DIR__/bash.origin' to '$BO_ROOT_SCRIPT_PATH'"
+			cp -f "$__BO_DIR__/bash.origin" "$BO_ROOT_SCRIPT_PATH"
 		else
 			# TODO: Copy if version has changed.
-			echo "$BO_LOG_PREFIX""Skip copy of '$__DIR__/bash.origin' as '$BO_ROOT_SCRIPT_PATH' already exists."
+			echo "$BO_LOG_PREFIX""Skip copy of '$__BO_DIR__/bash.origin' as '$BO_ROOT_SCRIPT_PATH' already exists."
 		fi
 		echo "$BO_LOG_PREFIX""boot.origin installed!"
 		exit 0
