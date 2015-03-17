@@ -1,0 +1,10 @@
+#!/bin/bash
+# Source https://github.com/cadorn/bash.origin
+. "$HOME/bash.origin"
+eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
+
+BO_sourcePrototype "$__BO_DIR__/../node_modules/translate/bin/translate.prototype" de
+
+ask "German"
+translate "$1"

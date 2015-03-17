@@ -49,6 +49,12 @@ BO_run_node -v
 ````
 
 
+Examples
+--------
+
+  * `examples/01-HelloWorld` - Simple variable passing and common functions using [npm](http://npmjs.org) package layout.
+
+
 Conventions
 ===========
 
@@ -68,7 +74,14 @@ Obtain a value for `__BO_DIR__` pointing to the directory containing our script 
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 	BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
-### 3. Call `BO_run_*` to run common programs
+### 3. Use `BO_sourcePrototype` to setup a common environment for programs
+
+The idea is that by *knowing your own script directory* (`__BO_DIR__`) you can **include a common package** that is included by all packages of your system that have scripted *entry points*. This common package contains a **script prototype** which is sourced by all scripts.
+
+For an example see `examples/01-HelloWorld`.
+
+
+### 4. Call `BO_run_*` to run common programs
 
 The following programs are supported:
 
@@ -120,7 +133,7 @@ Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file
 
 ### `BO_sourcePrototype`
 
-Allows scripts to inherit a common envrionment from a *prototype* script.
+Allows scripts to inherit a common environment from a *prototype* script.
 
 **script.sh**
 ````
