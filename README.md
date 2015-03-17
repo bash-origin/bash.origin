@@ -1,13 +1,26 @@
 bash.origin
 ===========
 
-A minimal set of Bash conventions and utilities to bootstrap a system.
+The original spark for this project came from needing an easy way to get the **path of the current Bast script** which is [way harder that it should be](http://stackoverflow.com/a/246128/330439).
+
+It has now turned into a minimal set of Bash conventions and utilities to bootstrap a system.
 
 I need a consistent starting point for Bash scripts so I don't have to re-write the same code over and over when writing scripts to bootstrap `node` and other programs.
 
+Overview
+--------
+
+`bash.origin` ensures that when you run a script to install a project or do some work such as run `node` it is launched using a consistent set of [environment variables](http://en.wikipedia.org/wiki/Environment_variable).
+
+This can be used to *bootstrap a system* by ensuring **ALL ENTRY POINTS** to the system **FIRST SOURCE bash.origin BEFORE DOING ANYTHING**. Once this is achieved, one can use `bash.origin` to inject common environment variables and custom signing functions which will subsequently be available to all scripts and commands run within the system.
+
+It is important to note that this approach **MUST NOT BE USED FOR SENSITIVE DATA** but is intended to be used for *root configuration keys and hashes* as well as *pointers to resources* and *version numbers*.
+
+To inherit from a common environment use the [BO_sourcePrototype](https://github.com/cadorn/bash.origin#bo_sourceprototype) utility.
+
 
 Install
--------
+=======
 
 For use in arbitrary scripts to copy the `bash.origin` script to `~/bash.origin`:
 
@@ -37,7 +50,7 @@ BO_run_node -v
 
 
 Conventions
------------
+===========
 
 ### 1. Source Root Bash Script
 
@@ -67,7 +80,7 @@ To install the program for instant access later, simply call it once and ask it 
 
 
 Utilities
----------
+=========
 
 ### `BO_setResult`
 
@@ -109,7 +122,7 @@ Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file
 
 Allows scripts to inherit a common envrionment from a *prototype* script.
 
-**script.sh***
+**script.sh**
 ````
 #!/bin/bash
 # Source https://github.com/cadorn/bash.origin
@@ -120,7 +133,7 @@ BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 BO_sourcePrototype "$__BO_DIR__/common.prototype" $@
 ````
 
-**common.prototype***
+**common.prototype**
 ````
 #!/bin/bash
 # Source https://github.com/cadorn/bash.origin
