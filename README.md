@@ -25,7 +25,7 @@ No matter how `bash.origin` was installed above; it can be used in any script th
 
 ````
 #!/bin/bash
-
+# Source https://github.com/cadorn/bash.origin
 . "$HOME/bash.origin"
 eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 BO_deriveSelfDir __DIR__ "$BO_SELF_BASH_SOURCE"
