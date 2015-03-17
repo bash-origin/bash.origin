@@ -2,6 +2,13 @@
 # License: http://unlicense.org/
 
 ###############################
+# Declare Boot Globals
+###############################
+
+BO_LOG_PREFIX="[BO] "
+
+
+###############################
 # Declare Boot Functions
 ###############################
 
@@ -36,44 +43,89 @@ BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
 ###############################
 
 if [ -z "$HOME" ]; then
-	echo "ERROR: 'HOME' environment variable is not set (file: $__DIR__/bash.origin)!"
+	echo "$BO_LOG_PREFIX""ERROR: 'HOME' environment variable is not set (file: $__DIR__/bash.origin)!"
 	exit 1
 fi
 
 
 ###############################
-# Set Globals
+# Declare Globals
 ###############################
 
 BO_ROOT_SCRIPT_PATH="$HOME/bash.origin"
 BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
+
+BO_VERSION_NVM="0.10.37"
+BO_VERSION_NVM_NODE="0.10"
 
 
 ###############################
 # Declare Utility Functions
 ###############################
 
+function BO_sourceProfile {
+	if [ -f "$HOME/.profile" ]; then
+		. "$HOME/.profile"
+	elif [ -f "$HOME/.bash_profile" ]; then
+		. "$HOME/.bash_profile"
+	fi
+}
+
+function BO_ensure_node {
+	if hash node 2>/dev/null; then
+		return
+	fi
+	BO_sourceProfile
+	if hash node 2>/dev/null; then
+		return
+	fi
+	BO_ensure_nvm
+	nvm use "$BO_VERSION_NVM_NODE"
+}
+
+function BO_ensure_nvm {
+	# @see https://github.com/creationix/nvm
+	if hash nvm 2>/dev/null; then
+		return;
+	fi
+	# TODO: Ask user before installing nvm.
+	echo "$BO_LOG_PREFIX""Installing nvm"
+	curl "https://raw.githubusercontent.com/creationix/nvm/v$BO_VERSION_NVM/install.sh" | sh
+	BO_sourceProfile
+}
+
+function BO_run_node {
+	BO_ensure_node
+	node $@
+}
 
 
 ###############################
 # Initialize & Act
 ###############################
 
+BO_sourceProfile
 BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
 
-if [ "$1" == "DO" ]; then
+if [ "$1" == "BO" ]; then
 
+	## Usage: `bash.origin BO install [-f]
 	if [ "$2" == "install" ]; then
-
+		if [ "$3" == "-f" ]; then
+			echo "$BO_LOG_PREFIX""Removing '$BO_ROOT_SCRIPT_PATH' due to forced-install (BO install -f)"
+			rm -f "$BO_ROOT_SCRIPT_PATH" || true
+		fi
 		if [ ! -f "$BO_ROOT_SCRIPT_PATH" ]; then
-			echo "Copying '$__DIR__/bash.origin' to '$BO_ROOT_SCRIPT_PATH'"
+			echo "$BO_LOG_PREFIX""Copying '$__DIR__/bash.origin' to '$BO_ROOT_SCRIPT_PATH'"
 			cp -f "$__DIR__/bash.origin" "$BO_ROOT_SCRIPT_PATH"
 		else
 			# TODO: Copy if version has changed.
-			echo "Skip copy of '$__DIR__/bash.origin' as '$BO_ROOT_SCRIPT_PATH' already exists."
+			echo "$BO_LOG_PREFIX""Skip copy of '$__DIR__/bash.origin' as '$BO_ROOT_SCRIPT_PATH' already exists."
 		fi
+		echo "$BO_LOG_PREFIX""boot.origin installed!"
 		exit 0
 	fi
-	echo "ERROR: Unknown DO command '$2'!"
+
+	echo "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
 	exit 1
 fi
