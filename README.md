@@ -51,6 +51,8 @@ Examples
 
   * [examples/02-SourceMultiplePrototypes](https://github.com/cadorn/bash.origin/tree/master/examples/02-SourceMultiplePrototypes) - Variable scope isolation when sourcing multiple prototypes.
 
+  * [examples/03-CliPlugin](https://github.com/cadorn/bash.origin/tree/master/examples/03-CliPlugin) - Plugin implementations callable from the command-line using a common framework.
+
 
 Conventions
 ===========
