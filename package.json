@@ -3,5 +3,10 @@
 	"version": "0.1.3",
 	"scripts": {
 		"install": "./bash.origin BO install -f"
+	},
+	"config": {
+		"pio.deploy.converter": {
+			"name": "nodejs-lib"
+		}
 	}
 }

@@ -1,3 +1,4 @@
 #!/bin/bash
-. "$HOME/bash.origin"
-BO_deriveSelfDir __DIR__ "$BO_READ_SELF_BASH_SOURCE"
+# Source https://github.com/cadorn/bash.origin
+eval __PROTOTYPE__BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+BO_deriveSelfDir __PROTOTYPE__BO_DIR__ "$__PROTOTYPE__BO_SELF_BASH_SOURCE"
