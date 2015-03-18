@@ -40,11 +40,6 @@ No matter how `bash.origin` was installed above; it can be used in any script th
 #!/bin/bash
 # Source https://github.com/cadorn/bash.origin
 . "$HOME/bash.origin"
-eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
-
-BO_run_node -v
-
 ...
 ````
 
@@ -54,25 +49,30 @@ Examples
 
   * [examples/01-HelloWorld](https://github.com/cadorn/bash.origin/tree/master/examples/01-HelloWorld) - Simple variable passing and common functions using [npm](http://npmjs.org) package layout.
 
+  * [examples/02-SourceMultiplePrototypes](https://github.com/cadorn/bash.origin/tree/master/examples/02-SourceMultiplePrototypes) - Variable scope isolation when sourcing multiple prototypes.
+
 
 Conventions
 ===========
 
-### 1. Source Root Bash Script
+### 1. Bash Module Boilerplate
 
-Source the *Root Bash Script* located at `~/bash.origin` using:
+	#!/bin/bash
+	# Source https://github.com/cadorn/bash.origin
+	. "$HOME/bash.origin"
+	function init {
+		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+		local __BO_DIR__="$___TMP___"
 
-    . "$HOME/bash.origin"
+		...
+	}
+	init
 
-This will also run `BO_sourceProfile`.
+NOTE: Sourcing `$HOME/bash.origin` will also run `BO_sourceProfile`.
 
+### 2. Use `__BO_DIR__` for own script file directory
 
-### 2. Derive `__BO_DIR__` for own file
-
-Obtain a value for `__BO_DIR__` pointing to the directory containing our script using:
-
-	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-	BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
 ### 3. Use `BO_sourcePrototype` to setup a common environment for programs
 
@@ -108,7 +108,10 @@ Used in functions to return values:
 ### `__BO_DIR__` of own script
 
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-	BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
+	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+	local __BO_DIR__="$___TMP___"
+
+Use a *local* variable in the `init` function to keep the scope local to the module.
 
 
 ### `BO_sourceProfile`
@@ -130,31 +133,18 @@ Ensure the latest stable version of [node](http://nodejs.org) is installed using
 
 Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file using [node](http://nodejs.org).
 
+### `BO_isBeingSourced`
+
+Determine if the current script is being sourced using `BO_sourcePrototype`.
+
+	BO_isBeingSourced IS_SOURCED
+
 
 ### `BO_sourcePrototype`
 
-Allows scripts to inherit a common environment from a *prototype* script.
+Allows scripts to inherit from other scripts.
 
-**script.sh**
-````
-#!/bin/bash
-# Source https://github.com/cadorn/bash.origin
-. "$HOME/bash.origin"
-eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
-
-BO_sourcePrototype "$__BO_DIR__/common.prototype" $@
-````
-
-**common.prototype**
-````
-#!/bin/bash
-# Source https://github.com/cadorn/bash.origin
-eval __PROTOTYPE__BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-BO_deriveSelfDir __PROTOTYPE__BO_DIR__ "$__PROTOTYPE__BO_SELF_BASH_SOURCE"
-
-BO_run_node "$__PROTOTYPE__BO_DIR__/pto.js" --plugin "$__BO_DIR__/.." $@
-````
+For a nested example see [examples/02-SourceMultiplePrototypes](https://github.com/cadorn/bash.origin/tree/master/examples/02-SourceMultiplePrototypes).
 
 
 License

@@ -1,0 +1,29 @@
+#!/bin/bash
+# Source https://github.com/cadorn/bash.origin
+. "$HOME/bash.origin"
+function init {
+	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+	local __BO_DIR__="$___TMP___"
+
+	local PREFIX="$1"
+
+	echo "$PREFIX>-- SUB1 - $__BO_DIR__"
+	BO_isBeingSourced ___TMP___
+	echo "$PREFIX| (sub1) BO_isBeingSourced: $___TMP___"
+	echo "$PREFIX| Source ..."
+	BO_sourcePrototype $__BO_DIR__/../sub2/main "$PREFIX|---"
+	hello "$PREFIX|"
+	BO_isBeingSourced ___TMP___
+	echo "$PREFIX| (sub1) BO_isBeingSourced: $___TMP___"
+	echo "$PREFIX| Run ..."
+	$__BO_DIR__/../sub2/main "$PREFIX|---"
+	BO_isBeingSourced ___TMP___
+	echo "$PREFIX| (sub1) BO_isBeingSourced: $___TMP___"
+	echo "$PREFIX<-- SUB1 - $__BO_DIR__"
+
+	function hello {
+		echo "$1 Hello from SUB1"
+	}
+}
+init "$1"

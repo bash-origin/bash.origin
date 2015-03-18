@@ -6,9 +6,15 @@ function init {
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 	local __BO_DIR__="$___TMP___"
 
-	BO_sourcePrototype "$__BO_DIR__/../node_modules/translate/bin/translate.prototype" de
+	local PREFIX="$1"
 
-	ask "German"
-	translate "$1"
+	function hello {
+		echo "$1 Hello from SUB2"
+	}
+
+	echo "$PREFIX>-- SUB2 - $__BO_DIR__"
+	BO_isBeingSourced ___TMP___
+	echo "$PREFIX| (sub2) BO_isBeingSourced: $___TMP___"
+	echo "$PREFIX<-- SUB2 - $__BO_DIR__"
 }
 init "$1"

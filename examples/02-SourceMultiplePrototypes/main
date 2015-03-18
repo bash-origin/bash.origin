@@ -1,0 +1,26 @@
+#!/bin/bash
+# Source https://github.com/cadorn/bash.origin
+. "$HOME/bash.origin"
+function init {
+	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+	local __BO_DIR__="$___TMP___"
+
+	echo ">-- ROOT - $__BO_DIR__"
+	BO_isBeingSourced ___TMP___
+	echo "| (root) BO_isBeingSourced: $___TMP___"
+	echo "| Source ..."
+	BO_sourcePrototype $__BO_DIR__/sub1/main "|---"
+	hello "|"
+	BO_sourcePrototype $__BO_DIR__/sub2/main "|---"
+	hello "|"
+	BO_isBeingSourced ___TMP___
+	echo "| (root) BO_isBeingSourced: $___TMP___"
+	echo "| Run ..."
+	$__BO_DIR__/sub1/main "|---"
+	$__BO_DIR__/sub2/main "|---"
+	BO_isBeingSourced ___TMP___
+	echo "| (root) BO_isBeingSourced: $___TMP___"
+	echo "<-- ROOT - $__BO_DIR__"
+}
+init
