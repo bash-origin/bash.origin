@@ -106,7 +106,7 @@ function BO_sourcePrototype {
 	#done < <(bash -s <<< 'export VARNAME=something; env -0')
 }
 
-function BO_isBeingSourced {
+function BO_isSourced {
 	BO_setResult $1 "$__ON_INIT__BO_IS_SOURCING"
 }
 

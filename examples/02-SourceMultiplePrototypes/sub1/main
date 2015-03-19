@@ -10,17 +10,17 @@ function init {
 	local PREFIX="$1"
 
 	echo "$PREFIX>-- SUB1 - $__BO_DIR__"
-	BO_isBeingSourced ___TMP___
-	echo "$PREFIX| (sub1) BO_isBeingSourced: $___TMP___"
+	BO_isSourced ___TMP___
+	echo "$PREFIX| (sub1) BO_isSourced: $___TMP___"
 	echo "$PREFIX| Source ..."
 	BO_sourcePrototype $__BO_DIR__/../sub2/main "$PREFIX|---"
 	hello "$PREFIX|"
-	BO_isBeingSourced ___TMP___
-	echo "$PREFIX| (sub1) BO_isBeingSourced: $___TMP___"
+	BO_isSourced ___TMP___
+	echo "$PREFIX| (sub1) BO_isSourced: $___TMP___"
 	echo "$PREFIX| Run ..."
 	$__BO_DIR__/../sub2/main "$PREFIX|---"
-	BO_isBeingSourced ___TMP___
-	echo "$PREFIX| (sub1) BO_isBeingSourced: $___TMP___"
+	BO_isSourced ___TMP___
+	echo "$PREFIX| (sub1) BO_isSourced: $___TMP___"
 	echo "$PREFIX<-- SUB1 - $__BO_DIR__"
 
 	function hello {

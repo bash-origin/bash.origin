@@ -14,8 +14,8 @@ function init {
 	}
 
 	echo "$PREFIX>-- SUB2 - $__BO_DIR__"
-	BO_isBeingSourced ___TMP___
-	echo "$PREFIX| (sub2) BO_isBeingSourced: $___TMP___"
+	BO_isSourced ___TMP___
+	echo "$PREFIX| (sub2) BO_isSourced: $___TMP___"
 	echo "$PREFIX<-- SUB2 - $__BO_DIR__"
 }
 init "$1"

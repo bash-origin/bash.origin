@@ -8,20 +8,20 @@ function init {
 
 
 	echo ">-- ROOT - $__BO_DIR__"
-	BO_isBeingSourced ___TMP___
-	echo "| (root) BO_isBeingSourced: $___TMP___"
+	BO_isSourced ___TMP___
+	echo "| (root) BO_isSourced: $___TMP___"
 	echo "| Source ..."
 	BO_sourcePrototype $__BO_DIR__/sub1/main "|---"
 	hello "|"
 	BO_sourcePrototype $__BO_DIR__/sub2/main "|---"
 	hello "|"
-	BO_isBeingSourced ___TMP___
-	echo "| (root) BO_isBeingSourced: $___TMP___"
+	BO_isSourced ___TMP___
+	echo "| (root) BO_isSourced: $___TMP___"
 	echo "| Run ..."
 	$__BO_DIR__/sub1/main "|---"
 	$__BO_DIR__/sub2/main "|---"
-	BO_isBeingSourced ___TMP___
-	echo "| (root) BO_isBeingSourced: $___TMP___"
+	BO_isSourced ___TMP___
+	echo "| (root) BO_isSourced: $___TMP___"
 	echo "<-- ROOT - $__BO_DIR__"
 }
 init

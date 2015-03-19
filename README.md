@@ -155,11 +155,11 @@ Ensure the latest stable version of [node](http://nodejs.org) is installed using
 
 Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file using [node](http://nodejs.org).
 
-### `BO_isBeingSourced`
+### `BO_isSourced`
 
 Determine if the current script is being sourced using `BO_sourcePrototype`.
 
-	BO_isBeingSourced IS_SOURCED
+	BO_isSourced IS_SOURCED
 
 
 ### `BO_sourcePrototype`

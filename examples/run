@@ -20,7 +20,7 @@ function init {
 
 	function install {
 		format "HEADER" "Installing latest 'bash.origin'"
-		pushd "$__BO_DIR__"
+		pushd "$__BO_DIR__/.."
 			BO_run_npm install
 		popd
 		format "FOOTER"
@@ -28,7 +28,7 @@ function init {
 
 	function run {
 		format "HEADER" "$1"
-		"$__BO_DIR__/examples/$1/main"
+		"$__BO_DIR__/$1/main"
 		format "FOOTER"
 	}
 
