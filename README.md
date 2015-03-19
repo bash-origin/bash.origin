@@ -53,6 +53,8 @@ Examples
 
   * [examples/03-CliPlugin](https://github.com/cadorn/bash.origin/tree/master/examples/03-CliPlugin) - Plugin implementations callable from the command-line using a common framework.
 
+  * [examples/04-ProvisionWithSMI](https://github.com/cadorn/bash.origin/tree/master/examples/04-ProvisionWithSMI) - provision dependencies for a package using [smi](https://github.com/sourcemint/smi).
+
 
 Conventions
 ===========
@@ -92,6 +94,19 @@ The following programs are supported:
 The program is installed on first use if it is not already installed.
 
 To install the program for instant access later, simply call it once and ask it for its version. i.e. `BO_run_node -v`
+
+
+### 5. Use `BO_systemCachePath` to keep system-global code packages
+
+Every global code package has a hostname-based URI and version:
+
+	BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+
+The path returned for the above call will be:
+
+	$HOME/.bash.origin.cache/github.com~sourcemint~smi/0.35.8
+
+The whole point is that these **paths are predictable** and can be assumed as provisioned by programs booted using `bash.origin` *by the time the program boots*.
 
 
 Utilities
@@ -147,6 +162,27 @@ Determine if the current script is being sourced using `BO_sourcePrototype`.
 Allows scripts to inherit from other scripts.
 
 For a nested example see [examples/02-SourceMultiplePrototypes](https://github.com/cadorn/bash.origin/tree/master/examples/02-SourceMultiplePrototypes).
+
+
+### `BO_systemCachePath`
+
+Example:
+
+	BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+
+
+### `BO_isInSystemCache`
+
+Example:
+
+	BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+
+
+### `BO_run_smi`
+
+Run [smi](https://github.com/sourcemint/smi) on a directory in order to install dependencies.
+
+For a simple example see [examples/04-ProvisionWithSMI](https://github.com/cadorn/bash.origin/tree/master/examples/04-ProvisionWithSMI).
 
 
 License

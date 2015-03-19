@@ -37,5 +37,6 @@ function init {
 	run "01-HelloWorld"
 	run "02-SourceMultiplePrototypes"
 	run "03-CliPlugin"
+	run "04-ProvisionWithSMI"
 }
 init
