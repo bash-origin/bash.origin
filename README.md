@@ -30,6 +30,11 @@ For use as a package dependency to copy the `bash.origin` script to `~/bash.orig
 
 	npm install bash.origin --save
 
+Demo/Tests
+----------
+
+	./run-examples
+
 
 Usage
 -----
