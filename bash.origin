@@ -2,11 +2,15 @@
 # Source: https://github.com/cadorn/bash.origin
 # License: http://unlicense.org/
 
+function init {
+
 ###############################
 # Declare Boot Globals
 ###############################
 
 BO_LOG_PREFIX="[BO] "
+BO_ROOT_SCRIPT_PATH="$HOME/bash.origin"
+BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
 
 
 ###############################
@@ -46,7 +50,7 @@ function BO_sourceProfile {
 ###############################
 
 if [ -z "$HOME" ]; then
-	echo "$BO_LOG_PREFIX""ERROR: 'HOME' environment variable is not set (file: ~/bash.origin)!"
+	echo "$BO_LOG_PREFIX""ERROR: 'HOME' environment variable is not set (file: $BO_ROOT_SCRIPT_PATH)!"
 	exit 1
 fi
 
@@ -58,7 +62,8 @@ fi
 BO_sourceProfile
 
 eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-BO_deriveSelfDir BO_DIR "$BO_SELF_BASH_SOURCE"
+BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+local BO_DIR="$___TMP___"
 
 
 ###############################
@@ -71,11 +76,20 @@ else
 	__ON_INIT__BO_IS_SOURCING="0"
 fi
 
-BO_ROOT_SCRIPT_PATH="$HOME/bash.origin"
-BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
+BO_SYSTEM_CACHE_DIR="$BO_DIR/.bash.origin.cache"
 
 BO_VERSION_NVM="0.10.37"
 BO_VERSION_NVM_NODE="0.10"
+BO_VERSION_SMI_CLI="0.35.8"
+
+
+###############################
+# Init self
+###############################
+
+if [ ! -d "$BO_SYSTEM_CACHE_DIR" ]; then
+	mkdir "$BO_SYSTEM_CACHE_DIR"
+fi
 
 
 ###############################
@@ -113,7 +127,7 @@ function BO_ensure_nvm {
 	if hash nvm 2>/dev/null; then
 		return;
 	fi
-	# TODO: Ask user before installing nvm.
+	# TODO: Ask user before installing.
 	echo "$BO_LOG_PREFIX""Installing nvm"
 	curl "https://raw.githubusercontent.com/creationix/nvm/v$BO_VERSION_NVM/install.sh" | sh
 	BO_sourceProfile
@@ -127,6 +141,46 @@ function BO_run_node {
 function BO_run_npm {
 	BO_ensure_node
 	npm $@
+}
+
+function BO_ensure_smi {
+	BO_ensure_node
+	local CACHED_PATH
+	BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+	if [ "$CACHED_PATH" == "" ]; then
+		# TODO: Ask user before installing.
+		echo "$BO_LOG_PREFIX""Installing smi"
+		BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+		# TODO: Install into "$SMI_CACHE_PATH.`now`" and only rename on success.
+		mkdir -p "$CACHED_PATH"
+		# TODO: Stop this from also being written to stdout.
+		echo '{"name":"tmp","version":"0.0.0","dependencies":{"smi.cli":"'$BO_VERSION_SMI_CLI'"}}' | tee "$CACHED_PATH/package.json"
+		pushd "$CACHED_PATH"
+			BO_run_npm install --production
+		popd
+	fi
+	BO_setResult $1 "$CACHED_PATH"
+}
+
+function BO_run_smi {
+	local SMI_CACHE_PATH
+	BO_ensure_smi SMI_CACHE_PATH
+	"$SMI_CACHE_PATH/node_modules/.bin/smi" $@
+}
+
+function BO_systemCachePath {
+	local URI_DIRNAME=`echo "$2" | sed 's/\//~/g'`
+	BO_setResult $1 "$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME/$3"
+}
+
+function BO_isInSystemCache {
+	local CACHE_PATH
+	BO_systemCachePath CACHE_PATH "$2" "$3"
+	if [ -d "$CACHE_PATH" ]; then
+		BO_setResult $1 "$CACHE_PATH"
+	else
+		BO_setResult $1 ""
+	fi
 }
 
 
@@ -158,3 +212,6 @@ if [ "$1" == "BO" ]; then
 	echo "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
 	exit 1
 fi
+
+}
+init $@

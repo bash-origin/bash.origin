@@ -6,6 +6,7 @@ function init {
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 	local __BO_DIR__="$___TMP___"
 
+
 	local PREFIX="$1"
 
 	echo "$PREFIX>-- SUB1 - $__BO_DIR__"

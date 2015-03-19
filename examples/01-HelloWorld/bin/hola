@@ -6,6 +6,7 @@ function init {
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 	local __BO_DIR__="$___TMP___"
 
+
 	BO_sourcePrototype "$__BO_DIR__/../node_modules/translate/bin/translate.prototype" es
 
 	ask "Spanish"
