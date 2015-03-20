@@ -22,13 +22,25 @@ To inherit from a common environment use the [BO_sourcePrototype](https://github
 Install
 =======
 
-For use in arbitrary scripts to copy the `bash.origin` script to `~/bash.origin`:
+Use in bash to copy the `bash.origin` script to `~/.bash.origin`:
+
+	#!/bin/bash
+	if [ ! -f "$HOME/.bash.origin" ]; then
+		# TODO: Alternatively use `wget`
+		curl -H "Pragma: no-cache, must-revalidate" \
+		     -H "Cache-Control: no-cache, must revalidate" \
+		     "https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin" \
+		     | BO="install" sh
+	fi
+
+Use [npm](http://npmjs.org) to copy the `bash.origin` script to `~/.bash.origin`:
 
 	npm install -g bash.origin
 
-For use as a package dependency to copy the `bash.origin` script to `~/bash.origin` when your package is installed:
+Use as a [npm](http://npmjs.org) package dependency to copy the `bash.origin` script to `~/.bash.origin` when your package is installed:
 
 	npm install bash.origin --save
+
 
 Demo/Tests
 ----------
