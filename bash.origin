@@ -1,310 +1,308 @@
 #!/bin/bash
 # Source: https://github.com/cadorn/bash.origin
 # License: http://unlicense.org/
-set -e
 function init {
 
-###############################
-# Declare Boot Globals
-###############################
+	###############################
+	# Declare Boot Globals
+	###############################
 
-BO_LOG_PREFIX="[BO] "
-BO_ROOT_SCRIPT_PATH="$HOME/.bash.origin"
-BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
-
-
-###############################
-# Declare Boot Functions
-###############################
-
-function BO_setResult {
-	local  __resultvar=$1
-    eval $__resultvar="'$2'"
-	return 0
-}
-
-function BO_deriveSelfDir {
-	# @source http://stackoverflow.com/a/246128/330439
-	local SOURCE="$2"
-	local DIR=""
-	while [ -h "$SOURCE" ]; do
-	  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-	  SOURCE="$(readlink "$SOURCE")"
-	  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-	done
-	BO_setResult $1 "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-	return 0
-}
-
-function BO_sourceProfile {
-	if [ -f "$HOME/.profile" ]; then
-		. "$HOME/.profile"
-	elif [ -f "$HOME/.bash_profile" ]; then
-		. "$HOME/.bash_profile"
-	fi
-}
+	BO_LOG_PREFIX="[BO] "
+	BO_ROOT_SCRIPT_PATH="$HOME/.bash.origin"
+	BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
 
 
-###############################
-# Ensure minimal Environment
-###############################
+	###############################
+	# Declare Boot Functions
+	###############################
 
-if [ -z "$HOME" ]; then
-	echo "$BO_LOG_PREFIX""ERROR: 'HOME' environment variable is not set (file: $BO_ROOT_SCRIPT_PATH)!"
-	exit 1
-fi
-
-
-###############################
-# Boot self
-###############################
-
-BO_sourceProfile
-
-eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
-local BO_DIR="$___TMP___"
-
-
-###############################
-# Declare Globals
-###############################
-
-if [ "$BO_IS_SOURCING" == "1" ]; then
-	__ON_INIT__BO_IS_SOURCING="1"
-else
-	__ON_INIT__BO_IS_SOURCING="0"
-fi
-
-BO_ROOT_SOURCE_URL="https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin"
-BO_SYSTEM_CACHE_DIR="$BO_DIR/.bash.origin.cache"
-
-BO_VERSION_NVM="0.10.37"
-BO_VERSION_NVM_NODE="0.10"
-BO_VERSION_SMI_CLI="0.35.8"
-
-
-###############################
-# Declare Utility Functions
-###############################
-
-function BO_has {
-  type "$1" > /dev/null 2>&1
-}
-
-function BO_sourcePrototype {
-	local __ON_INIT__BO_IS_SOURCING
-	#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
-	BO_IS_SOURCING="1"
-    . "$1" ${*:2}
-	#while IFS= read -r -d $'\0' line; do
-	#    export "$line"
-	#done < <(bash -s <<< 'export VARNAME=something; env -0')
-}
-
-function BO_isSourced {
-	BO_setResult $1 "$__ON_INIT__BO_IS_SOURCING"
-}
-
-function BO_ensure_node {
-	if BO_has "node"; then
-		return
-	fi
-	BO_sourceProfile
-	if BO_has "node"; then
-		return
-	fi
-	BO_ensure_nvm
-	nvm use "$BO_VERSION_NVM_NODE"
-}
-
-function BO_ensure_nvm {
-	# @see https://github.com/creationix/nvm
-	if BO_has "nvm"; then
-		return;
-	fi
-	# TODO: Ask user before installing.
-	echo "$BO_LOG_PREFIX""Installing nvm"
-	# TODO: Alternatively use `wget`
-	curl \
-	    -H "Pragma: no-cache, must-revalidate" \
-	    -H "Cache-Control: no-cache, must revalidate" \
-	    "https://raw.githubusercontent.com/creationix/nvm/v$BO_VERSION_NVM/install.sh" \
-	    | sh
-	BO_sourceProfile
-}
-
-function BO_run_node {
-	BO_ensure_node
-	node $@
-}
-
-function BO_run_npm {
-	BO_ensure_node
-	npm $@
-}
-
-function BO_ensure_smi {
-	BO_ensure_node
-	local CACHED_PATH
-	BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "install"
-	if [ "$CACHED_PATH" == "" ]; then
-		# TODO: Ask user before installing.
-		echo "$BO_LOG_PREFIX""Installing smi"
-		BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "install"
-		# TODO: Install into "$SMI_CACHE_PATH.`now`" and only rename on success.
-		mkdir -p "$CACHED_PATH"
-		# TODO: Stop this from also being written to stdout.
-		echo '{"name":"tmp","version":"0.0.0","dependencies":{"smi.cli":"'$BO_VERSION_SMI_CLI'"}}' | tee "$CACHED_PATH/package.json"
-		pushd "$CACHED_PATH"
-			BO_run_npm install --production
-		popd
-	fi
-	BO_setResult $1 "$CACHED_PATH"
-}
-
-function BO_run_smi {
-	local SMI_CACHE_PATH_
-	BO_ensure_smi SMI_CACHE_PATH_
-	"$SMI_CACHE_PATH_/node_modules/.bin/smi" $@
-}
-
-function BO_systemCachePath {
-	local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
-	local DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_/$3/$4"
-  	local DOWNLOAD_DIR_="$( dirname "$DOWNLOAD_PATH_")"
-  	if [ ! -d "$DOWNLOAD_DIR_" ]; then
-		mkdir -p "$DOWNLOAD_DIR_"
-  	fi
-	BO_setResult $1 "$DOWNLOAD_PATH_"
-}
-
-function BO_isInSystemCache {
-	local CACHE_PATH__
-	BO_systemCachePath CACHE_PATH__ "$2" "$3" "$4"
-	if [ -f "$CACHE_PATH__" ]; then
-		BO_setResult $1 "$CACHE_PATH__"
-	else
-		BO_setResult $1 ""
-	fi
-}
-
-function BO_downloadToSystemCache {
-	local DOWNLOAD_PATH__
-	BO_systemCachePath DOWNLOAD_PATH__ "$2" "$3" "$4"
-	local DOWNLOAD_URL="$5"
-	# TODO: Append '?t=$(date +%s)' to URL to force download?
-  	function download {
-		if BO_has "curl"; then
-			curl \
-			    -L \
-			    -H "Pragma: no-cache, must-revalidate" \
-			    -H "Cache-Control: no-cache, must revalidate" \
-			    $*
-		elif BO_has "wget"; then
-			# Emulate curl with wget
-			# @source https://github.com/creationix/nvm/blob/master/install.sh
-			# TODO: Add nocache flag.
-			local ARGS=$(echo "$*" | command sed -e 's/--progress-bar /--progress=bar /' \
-				-e 's/-L //' \
-				-e 's/-I /--server-response /' \
-				-e 's/-s /-q /' \
-				-e 's/-o /-O /' \
-				-e 's/-C - /-c /')
-			wget $ARGS
-		fi
-  	}
-  	if [ -f "$DOWNLOAD_PATH__" ]; then
-		echo "$BO_LOG_PREFIX""Download path '$DOWNLOAD_PATH__' exists. Removing."
-		rm -Rf "$DOWNLOAD_PATH__"
-  	fi
-	echo "$BO_LOG_PREFIX""Downloading '$DOWNLOAD_URL' to '$DOWNLOAD_PATH__'"
-	download -s "$DOWNLOAD_URL" -o "$DOWNLOAD_PATH__" || {
-		echo >&2 "$BO_LOG_PREFIX""Failed to download '$DOWNLOAD_URL'"
-		return 1
+	function BO_setResult {
+		local  __resultvar=$1
+	    eval $__resultvar="'$2'"
+		return 0
 	}
-	BO_setResult $1 "$DOWNLOAD_PATH__"
-}
 
-function BO_ensureInSystemCache {
-	local DOWNLOAD_PATH___
-	BO_systemCachePath DOWNLOAD_PATH___ "$2" "$3" "$4"
-	if [ ! -f "$DOWNLOAD_PATH___" ]; then
-		BO_downloadToSystemCache DOWNLOAD_PATH___ "$2" "$3" "$4" "$5"
+	function BO_deriveSelfDir {
+		# @source http://stackoverflow.com/a/246128/330439
+		local SOURCE="$2"
+		local DIR=""
+		while [ -h "$SOURCE" ]; do
+		  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+		  SOURCE="$(readlink "$SOURCE")"
+		  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+		done
+		BO_setResult $1 "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+		return 0
+	}
+
+	function BO_sourceProfile {
+		if [ -f "$HOME/.profile" ]; then
+			. "$HOME/.profile"
+		elif [ -f "$HOME/.bash_profile" ]; then
+			. "$HOME/.bash_profile"
+		fi
+	}
+
+
+	###############################
+	# Ensure minimal Environment
+	###############################
+
+	if [ -z "$HOME" ]; then
+		echo "$BO_LOG_PREFIX""ERROR: 'HOME' environment variable is not set (file: $BO_ROOT_SCRIPT_PATH)!"
+		exit 1
 	fi
-	BO_setResult $1 "$DOWNLOAD_PATH___"
-}
-
-function BO_ensurePlugin {
-	local PLUGIN_ID="$2"
-	local PLUGIN_URL="https://raw.githubusercontent.com/bash-origin/$PLUGIN_ID/master/$PLUGIN_ID"
-	local PLUGIN_PATH
-	BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_ID" "master" "$PLUGIN_ID"
-	if [ "$PLUGIN_PATH" == "" ]; then
-		# TODO: Ask user before installing.
-		echo "$BO_LOG_PREFIX""Installing plugin: github.com/bash-origin/$PLUGIN_ID"
-		BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_ID" "master" "$PLUGIN_ID" "$PLUGIN_URL"
-	fi
-	BO_setResult $1 "$PLUGIN_PATH"
-}
-
-function BO_callPlugin {
-	local PLUGIN_PATH_
-	BO_ensurePlugin PLUGIN_PATH_ "$1"
-	. "$PLUGIN_PATH_"
-	"$2" ${*:3}
-}
 
 
-###############################
-# Act
-###############################
+	###############################
+	# Boot self
+	###############################
 
-function BO_self_install {
-	if [ "$2" == "-f" ]; then
-		echo "$BO_LOG_PREFIX""Removing '$BO_ROOT_SCRIPT_PATH' due to forced-install (BO install -f)"
-		rm -f "$BO_ROOT_SCRIPT_PATH" || true
-	fi
-	if [ ! -f "$BO_ROOT_SCRIPT_PATH" ]; then
-		echo "$BO_LOG_PREFIX""Copying '$1' to '$BO_ROOT_SCRIPT_PATH'"
-		cp -f "$1" "$BO_ROOT_SCRIPT_PATH"
+	BO_sourceProfile
+
+	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+	local BO_DIR="$___TMP___"
+
+
+	###############################
+	# Declare Globals
+	###############################
+
+	if [ "$BO_IS_SOURCING" == "1" ]; then
+		__ON_INIT__BO_IS_SOURCING="1"
 	else
-		# TODO: Copy if version has changed.
-		echo "$BO_LOG_PREFIX""Skip copy of '$1' as '$BO_ROOT_SCRIPT_PATH' already exists."
+		__ON_INIT__BO_IS_SOURCING="0"
 	fi
-	echo "$BO_LOG_PREFIX""boot.origin installed!"
-}
 
-function BO_self_update {
-	local BASH_ORIGIN_PATH
-	local FOUND_PREVIOUS_CACHE="0"
-  	if [ -d "$BO_SYSTEM_CACHE_DIR" ]; then
-  		FOUND_PREVIOUS_CACHE="1"
-  	fi
-	BO_downloadToSystemCache BASH_ORIGIN_PATH "github.com/bash-origin/bash.origin" "master" "bash.origin" "$BO_ROOT_SOURCE_URL?t=$(date +%s)"
-	BO_self_install "$BASH_ORIGIN_PATH" -f
-	if [ "$FOUND_PREVIOUS_CACHE" == "0" ]; then
-		rm -Rf "$BO_SYSTEM_CACHE_DIR"
-	fi
-	echo "$BO_LOG_PREFIX""boot.origin updated!"
-}
+	BO_ROOT_SOURCE_URL="https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin"
+	BO_SYSTEM_CACHE_DIR="$BO_DIR/.bash.origin.cache"
 
-if [ "$1" == "BO" ]; then
-	## Usage: `bash.origin BO install [-f]
-	if [ "$2" == "install" ]; then
-		BO_self_install "$BO_DIR/bash.origin" "$3"
-		exit 0
-	elif [ "$2" == "update" ]; then
+	BO_VERSION_NVM="0.10.37"
+	BO_VERSION_NVM_NODE="0.10"
+	BO_VERSION_SMI_CLI="0.35.8"
+
+
+	###############################
+	# Declare Utility Functions
+	###############################
+
+	function BO_has {
+	  type "$1" > /dev/null 2>&1
+	}
+
+	function BO_sourcePrototype {
+		local __ON_INIT__BO_IS_SOURCING
+		#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
+		BO_IS_SOURCING="1"
+	    . "$1" ${*:2}
+		#while IFS= read -r -d $'\0' line; do
+		#    export "$line"
+		#done < <(bash -s <<< 'export VARNAME=something; env -0')
+	}
+
+	function BO_isSourced {
+		BO_setResult $1 "$__ON_INIT__BO_IS_SOURCING"
+	}
+
+	function BO_ensure_node {
+		if BO_has "node"; then
+			return
+		fi
+		BO_sourceProfile
+		if BO_has "node"; then
+			return
+		fi
+		BO_ensure_nvm
+		nvm use "$BO_VERSION_NVM_NODE"
+	}
+
+	function BO_ensure_nvm {
+		# @see https://github.com/creationix/nvm
+		if BO_has "nvm"; then
+			return;
+		fi
+		# TODO: Ask user before installing.
+		echo "$BO_LOG_PREFIX""Installing nvm"
+		# TODO: Alternatively use `wget`
+		curl \
+		    -H "Pragma: no-cache, must-revalidate" \
+		    -H "Cache-Control: no-cache, must revalidate" \
+		    "https://raw.githubusercontent.com/creationix/nvm/v$BO_VERSION_NVM/install.sh" \
+		    | sh
+		BO_sourceProfile
+	}
+
+	function BO_run_node {
+		BO_ensure_node
+		node $@
+	}
+
+	function BO_run_npm {
+		BO_ensure_node
+		npm $@
+	}
+
+	function BO_ensure_smi {
+		BO_ensure_node
+		local CACHED_PATH
+		BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "install"
+		if [ "$CACHED_PATH" == "" ]; then
+			# TODO: Ask user before installing.
+			echo "$BO_LOG_PREFIX""Installing smi"
+			BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "install"
+			# TODO: Install into "$SMI_CACHE_PATH.`now`" and only rename on success.
+			mkdir -p "$CACHED_PATH"
+			# TODO: Stop this from also being written to stdout.
+			echo '{"name":"tmp","version":"0.0.0","dependencies":{"smi.cli":"'$BO_VERSION_SMI_CLI'"}}' | tee "$CACHED_PATH/package.json"
+			pushd "$CACHED_PATH"
+				BO_run_npm install --production
+			popd
+		fi
+		BO_setResult $1 "$CACHED_PATH"
+	}
+
+	function BO_run_smi {
+		local SMI_CACHE_PATH_
+		BO_ensure_smi SMI_CACHE_PATH_
+		"$SMI_CACHE_PATH_/node_modules/.bin/smi" $@
+	}
+
+	function BO_systemCachePath {
+		local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
+		local DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_/$3/$4"
+	  	local DOWNLOAD_DIR_="$( dirname "$DOWNLOAD_PATH_")"
+	  	if [ ! -d "$DOWNLOAD_DIR_" ]; then
+			mkdir -p "$DOWNLOAD_DIR_"
+	  	fi
+		BO_setResult $1 "$DOWNLOAD_PATH_"
+	}
+
+	function BO_isInSystemCache {
+		local CACHE_PATH__
+		BO_systemCachePath CACHE_PATH__ "$2" "$3" "$4"
+		if [ -f "$CACHE_PATH__" ]; then
+			BO_setResult $1 "$CACHE_PATH__"
+		else
+			BO_setResult $1 ""
+		fi
+	}
+
+	function BO_downloadToSystemCache {
+		local DOWNLOAD_PATH__
+		BO_systemCachePath DOWNLOAD_PATH__ "$2" "$3" "$4"
+		local DOWNLOAD_URL="$5"
+		# TODO: Append '?t=$(date +%s)' to URL to force download?
+	  	function download {
+			if BO_has "curl"; then
+				curl \
+				    -L \
+				    -H "Pragma: no-cache, must-revalidate" \
+				    -H "Cache-Control: no-cache, must revalidate" \
+				    $*
+			elif BO_has "wget"; then
+				# Emulate curl with wget
+				# @source https://github.com/creationix/nvm/blob/master/install.sh
+				# TODO: Add nocache flag.
+				local ARGS=$(echo "$*" | command sed -e 's/--progress-bar /--progress=bar /' \
+					-e 's/-L //' \
+					-e 's/-I /--server-response /' \
+					-e 's/-s /-q /' \
+					-e 's/-o /-O /' \
+					-e 's/-C - /-c /')
+				wget $ARGS
+			fi
+	  	}
+	  	if [ -f "$DOWNLOAD_PATH__" ]; then
+			echo "$BO_LOG_PREFIX""Download path '$DOWNLOAD_PATH__' exists. Removing."
+			rm -Rf "$DOWNLOAD_PATH__"
+	  	fi
+		echo "$BO_LOG_PREFIX""Downloading '$DOWNLOAD_URL' to '$DOWNLOAD_PATH__'"
+		download -s "$DOWNLOAD_URL" -o "$DOWNLOAD_PATH__" || {
+			echo >&2 "$BO_LOG_PREFIX""Failed to download '$DOWNLOAD_URL'"
+			return 1
+		}
+		BO_setResult $1 "$DOWNLOAD_PATH__"
+	}
+
+	function BO_ensureInSystemCache {
+		local DOWNLOAD_PATH___
+		BO_systemCachePath DOWNLOAD_PATH___ "$2" "$3" "$4"
+		if [ ! -f "$DOWNLOAD_PATH___" ]; then
+			BO_downloadToSystemCache DOWNLOAD_PATH___ "$2" "$3" "$4" "$5"
+		fi
+		BO_setResult $1 "$DOWNLOAD_PATH___"
+	}
+
+	function BO_ensurePlugin {
+		local PLUGIN_ID="$2"
+		local PLUGIN_URL="https://raw.githubusercontent.com/bash-origin/$PLUGIN_ID/master/$PLUGIN_ID"
+		local PLUGIN_PATH
+		BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_ID" "master" "$PLUGIN_ID"
+		if [ "$PLUGIN_PATH" == "" ]; then
+			# TODO: Ask user before installing.
+			echo "$BO_LOG_PREFIX""Installing plugin: github.com/bash-origin/$PLUGIN_ID"
+			BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_ID" "master" "$PLUGIN_ID" "$PLUGIN_URL"
+		fi
+		BO_setResult $1 "$PLUGIN_PATH"
+	}
+
+	function BO_callPlugin {
+		local PLUGIN_PATH_
+		BO_ensurePlugin PLUGIN_PATH_ "$1"
+		. "$PLUGIN_PATH_"
+		"$2" ${*:3}
+	}
+
+
+	###############################
+	# Act
+	###############################
+
+	function BO_self_install {
+		if [ "$2" == "-f" ]; then
+			echo "$BO_LOG_PREFIX""Removing '$BO_ROOT_SCRIPT_PATH' due to forced-install (BO install -f)"
+			rm -f "$BO_ROOT_SCRIPT_PATH" || true
+		fi
+		if [ ! -f "$BO_ROOT_SCRIPT_PATH" ]; then
+			echo "$BO_LOG_PREFIX""Copying '$1' to '$BO_ROOT_SCRIPT_PATH'"
+			cp -f "$1" "$BO_ROOT_SCRIPT_PATH"
+		else
+			# TODO: Copy if version has changed.
+			echo "$BO_LOG_PREFIX""Skip copy of '$1' as '$BO_ROOT_SCRIPT_PATH' already exists."
+		fi
+		echo "$BO_LOG_PREFIX""boot.origin installed!"
+	}
+
+	function BO_self_update {
+		local BASH_ORIGIN_PATH
+		local FOUND_PREVIOUS_CACHE="0"
+	  	if [ -d "$BO_SYSTEM_CACHE_DIR" ]; then
+	  		FOUND_PREVIOUS_CACHE="1"
+	  	fi
+		BO_downloadToSystemCache BASH_ORIGIN_PATH "github.com/bash-origin/bash.origin" "master" "bash.origin" "$BO_ROOT_SOURCE_URL?t=$(date +%s)"
+		BO_self_install "$BASH_ORIGIN_PATH" -f
+		if [ "$FOUND_PREVIOUS_CACHE" == "0" ]; then
+			rm -Rf "$BO_SYSTEM_CACHE_DIR"
+		fi
+		echo "$BO_LOG_PREFIX""boot.origin updated!"
+	}
+
+	if [ "$1" == "BO" ]; then
+		## Usage: `bash.origin BO install [-f]
+		if [ "$2" == "install" ]; then
+			BO_self_install "$BO_DIR/bash.origin" "$3"
+			exit 0
+		elif [ "$2" == "update" ]; then
+			BO_self_update
+			exit 0
+		fi
+		echo "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
+		exit 1
+	elif [ "$BO" == "install" ]; then
 		BO_self_update
+		BO=""
 		exit 0
 	fi
-	echo "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
-	exit 1
-elif [ "$BO" == "install" ]; then
-	BO_self_update
-	BO=""
-	exit 0
-fi
-
 }
 init $@
