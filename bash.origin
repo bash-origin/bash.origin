@@ -263,6 +263,12 @@ function BO_self_install {
 	echo "$BO_LOG_PREFIX""boot.origin installed!"
 }
 
+function BO_self_update {
+	local BASH_ORIGIN_PATH
+	BO_downloadToSystemCache BASH_ORIGIN_PATH "github.com/bash-origin/bash.origin" "master" "bash.origin" "$BO_ROOT_SOURCE_URL?t=$(date +%s)"
+	BO_self_install "$BASH_ORIGIN_PATH" -f
+	echo "$BO_LOG_PREFIX""boot.origin updated!"
+}
 
 if [ "$1" == "BO" ]; then
 	## Usage: `bash.origin BO install [-f]
@@ -270,16 +276,13 @@ if [ "$1" == "BO" ]; then
 		BO_self_install "$BO_DIR/bash.origin" "$3"
 		exit 0
 	elif [ "$2" == "update" ]; then
-		local BASH_ORIGIN_PATH
-		BO_downloadToSystemCache BASH_ORIGIN_PATH "github.com/bash-origin/bash.origin" "master" "bash.origin" "$BO_ROOT_SOURCE_URL?t=$(date +%s)"
-		BO_self_install "$BASH_ORIGIN_PATH" -f
-		echo "$BO_LOG_PREFIX""boot.origin updated!"
+		BO_self_update
 		exit 0
 	fi
 	echo "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
 	exit 1
 elif [ "$BO" == "install" ]; then
-	BO_self_install "$BO_DIR/bash.origin" "-f"
+	BO_self_update
 	BO=""
 	exit 0
 fi
