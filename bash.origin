@@ -9,7 +9,7 @@ function init {
 ###############################
 
 BO_LOG_PREFIX="[BO] "
-BO_ROOT_SCRIPT_PATH="$HOME/bash.origin"
+BO_ROOT_SCRIPT_PATH="$HOME/.bash.origin"
 BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
 
 

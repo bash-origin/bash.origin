@@ -1,6 +1,6 @@
 #!/bin/bash
 # Source https://github.com/cadorn/bash.origin
-. "$HOME/bash.origin"
+. "$HOME/.bash.origin"
 function init {
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
