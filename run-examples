@@ -43,5 +43,6 @@ function init {
 	run "03-CliPlugin"
 	run "04-ProvisionWithSMI"
 	run "05-DownloadToSystemCache"
+	run "06-ModifyPromptWithPlugin"
 }
 init

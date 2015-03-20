@@ -62,12 +62,11 @@ Examples
 --------
 
   * [examples/01-HelloWorld](https://github.com/cadorn/bash.origin/tree/master/examples/01-HelloWorld) - Simple variable passing and common functions using [npm](http://npmjs.org) package layout.
-
   * [examples/02-SourceMultiplePrototypes](https://github.com/cadorn/bash.origin/tree/master/examples/02-SourceMultiplePrototypes) - Variable scope isolation when sourcing multiple prototypes.
-
   * [examples/03-CliPlugin](https://github.com/cadorn/bash.origin/tree/master/examples/03-CliPlugin) - Plugin implementations callable from the command-line using a common framework.
-
-  * [examples/04-ProvisionWithSMI](https://github.com/cadorn/bash.origin/tree/master/examples/04-ProvisionWithSMI) - provision dependencies for a package using [smi](https://github.com/sourcemint/smi).
+  * [examples/04-ProvisionWithSMI](https://github.com/cadorn/bash.origin/tree/master/examples/04-ProvisionWithSMI) - Provision dependencies for a package using [smi](https://github.com/sourcemint/smi).
+  * [examples/05-DownloadToSystemCache](https://github.com/cadorn/bash.origin/tree/master/examples/05-DownloadToSystemCache) - Download a file from a URL to the local system cache.
+  * [examples/06-ModifyPromptWithPlugin](https://github.com/cadorn/bash.origin/tree/master/examples/06-ModifyPromptWithPlugin) - Modify the prompt using the [github.com/bash-origin/bash.origin.prompt](https://github.com/bash-origin/bash.origin.prompt) plugin.
 
 
 Conventions
@@ -226,8 +225,24 @@ Run [smi](https://github.com/sourcemint/smi) on a directory in order to install 
 For a simple example see [examples/04-ProvisionWithSMI](https://github.com/cadorn/bash.origin/tree/master/examples/04-ProvisionWithSMI).
 
 
+### `BO_ensurePlugin`
+
+Make sure a [Bash.Origin](https://github.com/bash-origin) plugin is installed. See `BO_callPlugin`.
+
+
+### `BO_callPlugin`
+
+Call a [Bash.Origin](https://github.com/bash-origin) plugin and install it if it does not exist.
+
+Taken from the [examples/06-ModifyPromptWithPlugin](https://github.com/cadorn/bash.origin/tree/master/examples/06-ModifyPromptWithPlugin) example which loads the [github.com/bash-origin/bash.origin.prompt](https://github.com/bash-origin/bash.origin.prompt) plugin:
+
+	BO_callPlugin "bash.origin.prompt" setPrompt "workspace" "$__BO_DIR__"
+
+
 License
 =======
+
+Original Author: [Christoph Dorn](http://christophdorn.com)
 
 [UNLICENSE](http://unlicense.org/)
 

@@ -182,7 +182,7 @@ function BO_systemCachePath {
 function BO_isInSystemCache {
 	local CACHE_PATH__
 	BO_systemCachePath CACHE_PATH__ "$2" "$3" "$4"
-	if [ -d "$CACHE_PATH__" ]; then
+	if [ -f "$CACHE_PATH__" ]; then
 		BO_setResult $1 "$CACHE_PATH__"
 	else
 		BO_setResult $1 ""
@@ -233,6 +233,26 @@ function BO_ensureInSystemCache {
 		BO_downloadToSystemCache DOWNLOAD_PATH___ "$2" "$3" "$4" "$5"
 	fi
 	BO_setResult $1 "$DOWNLOAD_PATH___"
+}
+
+function BO_ensurePlugin {
+	local PLUGIN_ID="$2"
+	local PLUGIN_URL="https://raw.githubusercontent.com/bash-origin/$PLUGIN_ID/master/$PLUGIN_ID"
+	local PLUGIN_PATH
+	BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_ID" "master" "$PLUGIN_ID"
+	if [ "$PLUGIN_PATH" == "" ]; then
+		# TODO: Ask user before installing.
+		echo "$BO_LOG_PREFIX""Installing plugin: github.com/bash-origin/$PLUGIN_ID"
+		BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_ID" "master" "$PLUGIN_ID" "$PLUGIN_URL"
+	fi
+	BO_setResult $1 "$PLUGIN_PATH"
+}
+
+function BO_callPlugin {
+	local PLUGIN_PATH_
+	BO_ensurePlugin PLUGIN_PATH_ "$1"
+	. "$PLUGIN_PATH_"
+	"$2" ${*:3}
 }
 
 
