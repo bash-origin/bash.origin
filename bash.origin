@@ -1,7 +1,7 @@
 #!/bin/bash
 # Source: https://github.com/cadorn/bash.origin
 # License: http://unlicense.org/
-
+set -e
 function init {
 
 ###############################
@@ -76,6 +76,7 @@ else
 	__ON_INIT__BO_IS_SOURCING="0"
 fi
 
+BO_ROOT_SOURCE_URL="https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin"
 BO_SYSTEM_CACHE_DIR="$BO_DIR/.bash.origin.cache"
 
 BO_VERSION_NVM="0.10.37"
@@ -96,6 +97,10 @@ fi
 # Declare Utility Functions
 ###############################
 
+function BO_has {
+  type "$1" > /dev/null 2>&1
+}
+
 function BO_sourcePrototype {
 	local __ON_INIT__BO_IS_SOURCING
 	#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
@@ -111,11 +116,11 @@ function BO_isSourced {
 }
 
 function BO_ensure_node {
-	if hash node 2>/dev/null; then
+	if BO_has "node"; then
 		return
 	fi
 	BO_sourceProfile
-	if hash node 2>/dev/null; then
+	if BO_has "node"; then
 		return
 	fi
 	BO_ensure_nvm
@@ -124,11 +129,12 @@ function BO_ensure_node {
 
 function BO_ensure_nvm {
 	# @see https://github.com/creationix/nvm
-	if hash nvm 2>/dev/null; then
+	if BO_has "nvm"; then
 		return;
 	fi
 	# TODO: Ask user before installing.
 	echo "$BO_LOG_PREFIX""Installing nvm"
+	# TODO: Alternatively use `wget`
 	curl "https://raw.githubusercontent.com/creationix/nvm/v$BO_VERSION_NVM/install.sh" | sh
 	BO_sourceProfile
 }
@@ -146,11 +152,11 @@ function BO_run_npm {
 function BO_ensure_smi {
 	BO_ensure_node
 	local CACHED_PATH
-	BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+	BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "install"
 	if [ "$CACHED_PATH" == "" ]; then
 		# TODO: Ask user before installing.
 		echo "$BO_LOG_PREFIX""Installing smi"
-		BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+		BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "install"
 		# TODO: Install into "$SMI_CACHE_PATH.`now`" and only rename on success.
 		mkdir -p "$CACHED_PATH"
 		# TODO: Stop this from also being written to stdout.
@@ -170,12 +176,12 @@ function BO_run_smi {
 
 function BO_systemCachePath {
 	local URI_DIRNAME=`echo "$2" | sed 's/\//~/g'`
-	BO_setResult $1 "$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME/$3"
+	BO_setResult $1 "$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME/$3/$4"
 }
 
 function BO_isInSystemCache {
 	local CACHE_PATH
-	BO_systemCachePath CACHE_PATH "$2" "$3"
+	BO_systemCachePath CACHE_PATH "$2" "$3" "$4"
 	if [ -d "$CACHE_PATH" ]; then
 		BO_setResult $1 "$CACHE_PATH"
 	else
@@ -183,34 +189,88 @@ function BO_isInSystemCache {
 	fi
 }
 
+function BO_downloadToSystemCache {
+	local DOWNLOAD_PATH
+	BO_systemCachePath DOWNLOAD_PATH "$2" "$3" "$4"
+	local DOWNLOAD_URL="$5"
+  	function download {
+		if BO_has "curl"; then
+			curl -L $*
+		elif BO_has "wget"; then
+			# Emulate curl with wget
+			# @source https://github.com/creationix/nvm/blob/master/install.sh
+			local ARGS=$(echo "$*" | command sed -e 's/--progress-bar /--progress=bar /' \
+				-e 's/-L //' \
+				-e 's/-I /--server-response /' \
+				-e 's/-s /-q /' \
+				-e 's/-o /-O /' \
+				-e 's/-C - /-c /')
+			wget $ARGS
+		fi
+  	}
+  	if [ -f "$DOWNLOAD_PATH" ]; then
+		echo "$BO_LOG_PREFIX""Download path '$DOWNLOAD_PATH' exists. Removing."
+		rm -Rf "$DOWNLOAD_PATH"
+  	fi
+  	local DOWNLOAD_DIR="$( dirname "$DOWNLOAD_PATH")"
+  	if [ ! -d "$DOWNLOAD_DIR" ]; then
+		mkdir -p "$DOWNLOAD_DIR"
+  	fi
+	echo "$BO_LOG_PREFIX""Downloading '$DOWNLOAD_URL' to '$DOWNLOAD_PATH'"
+	download -s "$DOWNLOAD_URL" -o "$DOWNLOAD_PATH" || {
+		echo >&2 "$BO_LOG_PREFIX""Failed to download '$DOWNLOAD_URL'"
+		return 1
+	}
+	BO_setResult $1 "$DOWNLOAD_PATH"
+}
+
+function BO_ensureInSystemCache {
+	local DOWNLOAD_PATH
+	BO_systemCachePath DOWNLOAD_PATH "$2" "$3" "$4"
+	if [ ! -f "$DOWNLOAD_PATH" ]; then
+		BO_downloadToSystemCache DOWNLOAD_PATH "$2" "$3" "$4" "$5"
+	fi
+	BO_setResult $1 "$DOWNLOAD_PATH"
+}
+
 
 ###############################
 # Act
 ###############################
 
-# TODO: Setup alias for `BO` so we can call from scripts.
+function BO_self_install {
+	if [ "$2" == "-f" ]; then
+		echo "$BO_LOG_PREFIX""Removing '$BO_ROOT_SCRIPT_PATH' due to forced-install (BO install -f)"
+		rm -f "$BO_ROOT_SCRIPT_PATH" || true
+	fi
+	if [ ! -f "$BO_ROOT_SCRIPT_PATH" ]; then
+		echo "$BO_LOG_PREFIX""Copying '$1' to '$BO_ROOT_SCRIPT_PATH'"
+		cp -f "$1" "$BO_ROOT_SCRIPT_PATH"
+	else
+		# TODO: Copy if version has changed.
+		echo "$BO_LOG_PREFIX""Skip copy of '$1' as '$BO_ROOT_SCRIPT_PATH' already exists."
+	fi
+	echo "$BO_LOG_PREFIX""boot.origin installed!"
+}
 
 if [ "$1" == "BO" ]; then
-
 	## Usage: `bash.origin BO install [-f]
 	if [ "$2" == "install" ]; then
-		if [ "$3" == "-f" ]; then
-			echo "$BO_LOG_PREFIX""Removing '$BO_ROOT_SCRIPT_PATH' due to forced-install (BO install -f)"
-			rm -f "$BO_ROOT_SCRIPT_PATH" || true
-		fi
-		if [ ! -f "$BO_ROOT_SCRIPT_PATH" ]; then
-			echo "$BO_LOG_PREFIX""Copying '$BO_DIR/bash.origin' to '$BO_ROOT_SCRIPT_PATH'"
-			cp -f "$BO_DIR/bash.origin" "$BO_ROOT_SCRIPT_PATH"
-		else
-			# TODO: Copy if version has changed.
-			echo "$BO_LOG_PREFIX""Skip copy of '$BO_DIR/bash.origin' as '$BO_ROOT_SCRIPT_PATH' already exists."
-		fi
-		echo "$BO_LOG_PREFIX""boot.origin installed!"
+		BO_self_install "$BO_DIR/bash.origin" "$3"
+		exit 0
+	elif [ "$2" == "update" ]; then
+		local BASH_ORIGIN_PATH
+		BO_downloadToSystemCache BASH_ORIGIN_PATH "github.com/bash-origin/bash.origin" "master" "bash.origin" "$BO_ROOT_SOURCE_URL"
+		BO_self_install "$BASH_ORIGIN_PATH" -f
+		echo "$BO_LOG_PREFIX""boot.origin updated!"
 		exit 0
 	fi
-
 	echo "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
 	exit 1
+elif [ "$BO" == "install" ]; then
+	BO_self_install "$BO_DIR/bash.origin" "-f"
+	BO=""
+	exit 0
 fi
 
 }

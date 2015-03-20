@@ -1,0 +1,13 @@
+#!/bin/bash
+# Source https://github.com/cadorn/bash.origin
+. "$HOME/bash.origin"
+function init {
+	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+	local __BO_DIR__="$___TMP___"
+
+	BO_ensureInSystemCache DOWNLOADED_PATH "github.com/bash-origin/bash.origin" "0.1.5" "archive.tar.gz" "https://github.com/bash-origin/bash.origin/archive/v0.1.5.tar.gz"
+
+	echo "DOWNLOADED_PATH: $DOWNLOADED_PATH"
+}
+init

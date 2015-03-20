@@ -103,19 +103,24 @@ To install the program for instant access later, simply call it once and ask it 
 
 ### 5. Use `BO_systemCachePath` to keep system-global code packages
 
-Every global code package has a hostname-based URI and version:
+Every global code package has a hostname-based URI, version and aspect:
 
-	BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+	BO_systemCachePath CACHED_PATH "$ID" "$VERSION" "$ASPECT"
 
 The path returned for the above call will be:
 
-	$HOME/.bash.origin.cache/github.com~sourcemint~smi/0.35.8
+	$HOME/.bash.origin.cache/$ID/$VERSION/$ASPECT
 
 The whole point is that these **paths are predictable** and can be assumed as provisioned by programs booted using `bash.origin` *by the time the program boots*.
 
 
 Utilities
 =========
+
+### `BO_has`
+
+Check if a command is available using `if BO_has "curl"; then ...`.
+
 
 ### `BO_setResult`
 
@@ -155,6 +160,7 @@ Ensure the latest stable version of [node](http://nodejs.org) is installed using
 
 Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file using [node](http://nodejs.org).
 
+
 ### `BO_isSourced`
 
 Determine if the current script is being sourced using `BO_sourcePrototype`.
@@ -173,14 +179,35 @@ For a nested example see [examples/02-SourceMultiplePrototypes](https://github.c
 
 Example:
 
-	BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+	BO_systemCachePath CACHED_PATH \
+		"github.com/sourcemint/smi" \
+		"$BO_VERSION_SMI_CLI" \
+		"install"
 
 
 ### `BO_isInSystemCache`
 
 Example:
 
-	BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+	BO_isInSystemCache CACHED_PATH \
+		"github.com/sourcemint/smi" \
+		"$BO_VERSION_SMI_CLI" \
+		"install"
+
+
+### `BO_downloadToSystemCache`
+
+	BO_ensureInSystemCache DOWNLOADED_PATH \
+		"github.com/bash-origin/bash.origin" \
+		"0.1.5" \
+		"archive.tar.gz" \
+		"https://github.com/bash-origin/bash.origin/archive/v0.1.5.tar.gz"
+
+Replaces file if already exists.
+
+### `BO_ensureInSystemCache`
+
+Same as `BO_downloadToSystemCache` but does not replace file if already exists.
 
 
 ### `BO_run_smi`
