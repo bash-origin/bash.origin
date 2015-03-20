@@ -3,7 +3,7 @@ if [ ! -f "$HOME/.bash.origin" ]; then
 	# TODO: Alternatively use `wget`
 	curl -H "Pragma: no-cache, must-revalidate" \
 	     -H "Cache-Control: no-cache, must revalidate" \
-	     "https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin" \
+	     "https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin?t=$(date +%s)" \
 	     | BO="install" sh
 fi
 # Source https://github.com/cadorn/bash.origin

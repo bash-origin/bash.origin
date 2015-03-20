@@ -197,6 +197,7 @@ function BO_downloadToSystemCache {
 	local DOWNLOAD_PATH
 	BO_systemCachePath DOWNLOAD_PATH "$2" "$3" "$4"
 	local DOWNLOAD_URL="$5"
+	# TODO: Append '?t=$(date +%s)' to URL to force download?
   	function download {
 		if BO_has "curl"; then
 			curl \
@@ -270,7 +271,7 @@ if [ "$1" == "BO" ]; then
 		exit 0
 	elif [ "$2" == "update" ]; then
 		local BASH_ORIGIN_PATH
-		BO_downloadToSystemCache BASH_ORIGIN_PATH "github.com/bash-origin/bash.origin" "master" "bash.origin" "$BO_ROOT_SOURCE_URL"
+		BO_downloadToSystemCache BASH_ORIGIN_PATH "github.com/bash-origin/bash.origin" "master" "bash.origin" "$BO_ROOT_SOURCE_URL?t=$(date +%s)"
 		BO_self_install "$BASH_ORIGIN_PATH" -f
 		echo "$BO_LOG_PREFIX""boot.origin updated!"
 		exit 0
