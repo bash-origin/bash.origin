@@ -166,7 +166,7 @@ function BO_ensure_smi {
 function BO_run_smi {
 	local SMI_CACHE_PATH_
 	BO_ensure_smi SMI_CACHE_PATH_
-	"$SMI_CACHE_PATH/node_modules/.bin/smi" $@
+	"$SMI_CACHE_PATH_/node_modules/.bin/smi" $@
 }
 
 function BO_systemCachePath {
