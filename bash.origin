@@ -164,34 +164,34 @@ function BO_ensure_smi {
 }
 
 function BO_run_smi {
-	local SMI_CACHE_PATH
-	BO_ensure_smi SMI_CACHE_PATH
+	local SMI_CACHE_PATH_
+	BO_ensure_smi SMI_CACHE_PATH_
 	"$SMI_CACHE_PATH/node_modules/.bin/smi" $@
 }
 
 function BO_systemCachePath {
-	local URI_DIRNAME=`echo "$2" | sed 's/\//~/g'`
-	local DOWNLOAD_PATH="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME/$3/$4"
-  	local DOWNLOAD_DIR="$( dirname "$DOWNLOAD_PATH")"
-  	if [ ! -d "$DOWNLOAD_DIR" ]; then
-		mkdir -p "$DOWNLOAD_DIR"
+	local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
+	local DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_/$3/$4"
+  	local DOWNLOAD_DIR_="$( dirname "$DOWNLOAD_PATH_")"
+  	if [ ! -d "$DOWNLOAD_DIR_" ]; then
+		mkdir -p "$DOWNLOAD_DIR_"
   	fi
-	BO_setResult $1 "$DOWNLOAD_PATH"
+	BO_setResult $1 "$DOWNLOAD_PATH_"
 }
 
 function BO_isInSystemCache {
-	local CACHE_PATH
-	BO_systemCachePath CACHE_PATH "$2" "$3" "$4"
-	if [ -d "$CACHE_PATH" ]; then
-		BO_setResult $1 "$CACHE_PATH"
+	local CACHE_PATH__
+	BO_systemCachePath CACHE_PATH__ "$2" "$3" "$4"
+	if [ -d "$CACHE_PATH__" ]; then
+		BO_setResult $1 "$CACHE_PATH__"
 	else
 		BO_setResult $1 ""
 	fi
 }
 
 function BO_downloadToSystemCache {
-	local DOWNLOAD_PATH
-	BO_systemCachePath DOWNLOAD_PATH "$2" "$3" "$4"
+	local DOWNLOAD_PATH__
+	BO_systemCachePath DOWNLOAD_PATH__ "$2" "$3" "$4"
 	local DOWNLOAD_URL="$5"
 	# TODO: Append '?t=$(date +%s)' to URL to force download?
   	function download {
@@ -214,25 +214,25 @@ function BO_downloadToSystemCache {
 			wget $ARGS
 		fi
   	}
-  	if [ -f "$DOWNLOAD_PATH" ]; then
-		echo "$BO_LOG_PREFIX""Download path '$DOWNLOAD_PATH' exists. Removing."
-		rm -Rf "$DOWNLOAD_PATH"
+  	if [ -f "$DOWNLOAD_PATH__" ]; then
+		echo "$BO_LOG_PREFIX""Download path '$DOWNLOAD_PATH__' exists. Removing."
+		rm -Rf "$DOWNLOAD_PATH__"
   	fi
-	echo "$BO_LOG_PREFIX""Downloading '$DOWNLOAD_URL' to '$DOWNLOAD_PATH'"
-	download -s "$DOWNLOAD_URL" -o "$DOWNLOAD_PATH" || {
+	echo "$BO_LOG_PREFIX""Downloading '$DOWNLOAD_URL' to '$DOWNLOAD_PATH__'"
+	download -s "$DOWNLOAD_URL" -o "$DOWNLOAD_PATH__" || {
 		echo >&2 "$BO_LOG_PREFIX""Failed to download '$DOWNLOAD_URL'"
 		return 1
 	}
-	BO_setResult $1 "$DOWNLOAD_PATH"
+	BO_setResult $1 "$DOWNLOAD_PATH__"
 }
 
 function BO_ensureInSystemCache {
-	local DOWNLOAD_PATH
-	BO_systemCachePath DOWNLOAD_PATH "$2" "$3" "$4"
-	if [ ! -f "$DOWNLOAD_PATH" ]; then
-		BO_downloadToSystemCache DOWNLOAD_PATH "$2" "$3" "$4" "$5"
+	local DOWNLOAD_PATH___
+	BO_systemCachePath DOWNLOAD_PATH___ "$2" "$3" "$4"
+	if [ ! -f "$DOWNLOAD_PATH___" ]; then
+		BO_downloadToSystemCache DOWNLOAD_PATH___ "$2" "$3" "$4" "$5"
 	fi
-	BO_setResult $1 "$DOWNLOAD_PATH"
+	BO_setResult $1 "$DOWNLOAD_PATH___"
 }
 
 
