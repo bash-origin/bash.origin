@@ -253,6 +253,8 @@ function BO_self_install {
 	echo "$BO_LOG_PREFIX""boot.origin installed!"
 }
 
+echo "BO: $BO"
+
 if [ "$1" == "BO" ]; then
 	## Usage: `bash.origin BO install [-f]
 	if [ "$2" == "install" ]; then
@@ -268,6 +270,7 @@ if [ "$1" == "BO" ]; then
 	echo "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
 	exit 1
 elif [ "$BO" == "install" ]; then
+echo "DO INSTALL!!"
 	BO_self_install "$BO_DIR/bash.origin" "-f"
 	BO=""
 	exit 0
