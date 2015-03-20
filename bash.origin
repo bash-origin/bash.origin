@@ -135,7 +135,7 @@ function BO_ensure_nvm {
 	# TODO: Ask user before installing.
 	echo "$BO_LOG_PREFIX""Installing nvm"
 	# TODO: Alternatively use `wget`
-	curl "https://raw.githubusercontent.com/creationix/nvm/v$BO_VERSION_NVM/install.sh" | sh
+	curl -H 'Pragma: no-cache' "https://raw.githubusercontent.com/creationix/nvm/v$BO_VERSION_NVM/install.sh" | sh
 	BO_sourceProfile
 }
 
@@ -195,10 +195,11 @@ function BO_downloadToSystemCache {
 	local DOWNLOAD_URL="$5"
   	function download {
 		if BO_has "curl"; then
-			curl -L $*
+			curl -L -H 'Pragma: no-cache' $*
 		elif BO_has "wget"; then
 			# Emulate curl with wget
 			# @source https://github.com/creationix/nvm/blob/master/install.sh
+			# TODO: Add nocache flag.
 			local ARGS=$(echo "$*" | command sed -e 's/--progress-bar /--progress=bar /' \
 				-e 's/-L //' \
 				-e 's/-I /--server-response /' \
