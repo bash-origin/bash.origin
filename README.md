@@ -27,10 +27,7 @@ Use in bash to copy the `bash.origin` script to `~/.bash.origin`:
 	#!/bin/bash
 	if [ ! -f "$HOME/.bash.origin" ]; then
 		# TODO: Alternatively use `wget`
-		curl -H "Pragma: no-cache, must-revalidate" \
-		     -H "Cache-Control: no-cache, must revalidate" \
-		     "https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin" \
-		     | BO="install" sh
+		curl "https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin?t=$(date +%s)" | BO="install" sh
 	fi
 
 Use [npm](http://npmjs.org) to copy the `bash.origin` script to `~/.bash.origin`:
