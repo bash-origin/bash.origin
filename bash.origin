@@ -85,15 +85,6 @@ BO_VERSION_SMI_CLI="0.35.8"
 
 
 ###############################
-# Init self
-###############################
-
-if [ ! -d "$BO_SYSTEM_CACHE_DIR" ]; then
-	mkdir "$BO_SYSTEM_CACHE_DIR"
-fi
-
-
-###############################
 # Declare Utility Functions
 ###############################
 
@@ -180,7 +171,12 @@ function BO_run_smi {
 
 function BO_systemCachePath {
 	local URI_DIRNAME=`echo "$2" | sed 's/\//~/g'`
-	BO_setResult $1 "$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME/$3/$4"
+	local DOWNLOAD_PATH="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME/$3/$4"
+  	local DOWNLOAD_DIR="$( dirname "$DOWNLOAD_PATH")"
+  	if [ ! -d "$DOWNLOAD_DIR" ]; then
+		mkdir -p "$DOWNLOAD_DIR"
+  	fi
+	BO_setResult $1 "$DOWNLOAD_PATH"
 }
 
 function BO_isInSystemCache {
@@ -222,10 +218,6 @@ function BO_downloadToSystemCache {
 		echo "$BO_LOG_PREFIX""Download path '$DOWNLOAD_PATH' exists. Removing."
 		rm -Rf "$DOWNLOAD_PATH"
   	fi
-  	local DOWNLOAD_DIR="$( dirname "$DOWNLOAD_PATH")"
-  	if [ ! -d "$DOWNLOAD_DIR" ]; then
-		mkdir -p "$DOWNLOAD_DIR"
-  	fi
 	echo "$BO_LOG_PREFIX""Downloading '$DOWNLOAD_URL' to '$DOWNLOAD_PATH'"
 	download -s "$DOWNLOAD_URL" -o "$DOWNLOAD_PATH" || {
 		echo >&2 "$BO_LOG_PREFIX""Failed to download '$DOWNLOAD_URL'"
@@ -265,8 +257,15 @@ function BO_self_install {
 
 function BO_self_update {
 	local BASH_ORIGIN_PATH
+	local FOUND_PREVIOUS_CACHE="0"
+  	if [ -d "$BO_SYSTEM_CACHE_DIR" ]; then
+  		FOUND_PREVIOUS_CACHE="1"
+  	fi
 	BO_downloadToSystemCache BASH_ORIGIN_PATH "github.com/bash-origin/bash.origin" "master" "bash.origin" "$BO_ROOT_SOURCE_URL?t=$(date +%s)"
 	BO_self_install "$BASH_ORIGIN_PATH" -f
+	if [ "$FOUND_PREVIOUS_CACHE" == "0" ]; then
+		rm -Rf "$BO_SYSTEM_CACHE_DIR"
+	fi
 	echo "$BO_LOG_PREFIX""boot.origin updated!"
 }
 
