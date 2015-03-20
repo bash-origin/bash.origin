@@ -10,7 +10,7 @@ I need a consistent starting point for Bash scripts so I don't have to re-write 
 Overview
 --------
 
-`bash.origin` ensures that when you run a script to install a project or do some work such as run `node` it is launched using a consistent set of [environment variables](http://en.wikipedia.org/wiki/Environment_variable).
+`bash.origin` ensures that when you run a script to install a project or do some work such as run `node` it is launched using a consistent set of [environment variables](http://en.wikipedia.org/wiki/Environment_variable) and pre-provisioned assets.
 
 This can be used to *bootstrap a system* by ensuring **ALL ENTRY POINTS** to the system **FIRST SOURCE bash.origin BEFORE DOING ANYTHING**. Once this is achieved, one can use `bash.origin` to inject common environment variables and custom signing functions which will subsequently be available to all scripts and commands run within the system.
 
