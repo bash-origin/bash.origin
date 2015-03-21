@@ -173,6 +173,15 @@ Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file
 ### `BO_run_npm`
 
 
+### `BO_link_*`
+
+`BO_link_* "$BIN_BASE_PATH"` works for:
+
+  * `BO_link_node`
+  * `BO_link_npm`
+  * `BO_link_smi`
+
+
 ### `BO_isSourced`
 
 Determine if the current script is being sourced using `BO_sourcePrototype`.

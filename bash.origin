@@ -133,6 +133,18 @@ function init {
 		BO_sourceProfile
 	}
 
+	function BO_link_node {
+		rm -f "$1" > /dev/null 2>&1 || true
+		BO_ensure_node
+		ln -s "$NVM_BIN/node" "$1/node"
+	}
+
+	function BO_link_npm {		
+		rm -f "$1" > /dev/null 2>&1 || true
+		BO_ensure_node
+		ln -s "$NVM_BIN/npm" "$1/npm"
+	}
+
 	function BO_run_node {
 		BO_ensure_node
 		node $@
@@ -160,6 +172,13 @@ function init {
 			popd
 		fi
 		BO_setResult $1 "$CACHED_PATH"
+	}
+
+	function BO_link_smi {
+		rm -f "$1" || true
+		local SMI_CACHE_PATH_
+		BO_ensure_smi SMI_CACHE_PATH_
+		ln -s "$SMI_CACHE_PATH_/node_modules/.bin/smi" "$1/smi"
 	}
 
 	function BO_run_smi {
