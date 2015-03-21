@@ -12,11 +12,7 @@ Overview
 
 `bash.origin` ensures that when you run a script to install a project or do some work such as run `node` it is launched using a consistent set of [environment variables](http://en.wikipedia.org/wiki/Environment_variable) and pre-provisioned assets.
 
-This can be used to *bootstrap a system* by ensuring **ALL ENTRY POINTS** to the system **FIRST SOURCE bash.origin BEFORE DOING ANYTHING**. Once this is achieved, one can use `bash.origin` to inject common environment variables and custom signing functions which will subsequently be available to all scripts and commands run within the system.
-
-It is important to note that this approach **MUST NOT BE USED FOR SENSITIVE DATA** but is intended to be used for *root configuration keys and hashes* as well as *pointers to resources* and *version numbers*.
-
-To inherit from a common environment use the [BO_sourcePrototype](https://github.com/cadorn/bash.origin#bo_sourceprototype) utility.
+This can be used to *bootstrap a system* by ensuring **ALL ENTRY POINTS** to the system **FIRST SOURCE bash.origin BEFORE DOING ANYTHING**. Once this is achieved, one can use `bash.origin` to, among other things, inject common environment variables and custom signing functions which will subsequently be available to all scripts and commands run within the system.
 
 
 Install
@@ -39,12 +35,6 @@ Use as a [npm](http://npmjs.org) package dependency to copy the `bash.origin` sc
 	npm install bash.origin --save
 
 
-Demo/Tests
-----------
-
-	./run-examples
-
-
 Usage
 -----
 
@@ -56,6 +46,12 @@ No matter how `bash.origin` was installed above; it can be used in any script th
 . "$HOME/.bash.origin"
 ...
 ````
+
+
+Demo/Tests
+----------
+
+	./run-examples
 
 
 Examples
