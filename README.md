@@ -170,6 +170,9 @@ Ensure the latest stable version of [node](http://nodejs.org) is installed using
 Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file using [node](http://nodejs.org).
 
 
+### `BO_run_npm`
+
+
 ### `BO_isSourced`
 
 Determine if the current script is being sourced using `BO_sourcePrototype`.
@@ -217,6 +220,13 @@ Replaces file if already exists.
 ### `BO_ensureInSystemCache`
 
 Same as `BO_downloadToSystemCache` but does not replace file if already exists.
+
+
+### `BO_ensureExtracted`
+
+Extract an archive file:
+
+	BO_ensureExtracted EXTRACTED_PATH "$DOWNLOADED_PATH"
 
 
 ### `BO_run_smi`

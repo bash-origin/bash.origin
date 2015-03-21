@@ -234,6 +234,24 @@ function init {
 		BO_setResult $1 "$DOWNLOAD_PATH___"
 	}
 
+	function BO_ensureExtracted {
+		local DOWNLOADED_PATH_="$2"
+		if [[ "$DOWNLOADED_PATH_" == *".zip" ]]; then
+			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.zip$//g'`
+			if [ ! -d "$EXTRACTED_PATH_" ]; then			
+				pushd "$(dirname $DOWNLOADED_PATH_)"
+					unzip -d "$(basename $EXTRACTED_PATH_)" "$(basename $DOWNLOADED_PATH_)"
+					local RESOLVED_PATH=("${EXTRACTED_PATH_}"/*)
+					mv -f "${RESOLVED_PATH}"/* "$(basename $EXTRACTED_PATH_)"
+					rm -Rf "$RESOLVED_PATH"
+				popd
+			fi
+			BO_setResult $1 "$EXTRACTED_PATH_"
+		else
+			echo "$BO_LOG_PREFIX""ERROR: Unable to extract path '$DOWNLOADED_PATH_'!"
+		fi
+	}
+
 	function BO_ensurePlugin {
 		local PLUGIN_ID="$2"
 		local PLUGIN_URL="https://raw.githubusercontent.com/bash-origin/$PLUGIN_ID/master/$PLUGIN_ID"
