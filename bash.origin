@@ -134,13 +134,13 @@ function init {
 	}
 
 	function BO_link_node {
-		rm -f "$1" > /dev/null 2>&1 || true
+		rm -f "$1/node" > /dev/null 2>&1 || true
 		BO_ensure_node
 		ln -s "$NVM_BIN/node" "$1/node"
 	}
 
 	function BO_link_npm {		
-		rm -f "$1" > /dev/null 2>&1 || true
+		rm -f "$1/npm" > /dev/null 2>&1 || true
 		BO_ensure_node
 		ln -s "$NVM_BIN/npm" "$1/npm"
 	}
@@ -167,9 +167,9 @@ function init {
 			mkdir -p "$CACHED_PATH"
 			# TODO: Stop this from also being written to stdout.
 			echo '{"name":"tmp","version":"0.0.0","dependencies":{"smi.cli":"'$BO_VERSION_SMI_CLI'"}}' | tee "$CACHED_PATH/package.json"
-			pushd "$CACHED_PATH"
+			pushd "$CACHED_PATH" > /dev/null
 				BO_run_npm install --production
-			popd
+			popd > /dev/null
 		fi
 		BO_setResult $1 "$CACHED_PATH"
 	}
@@ -258,12 +258,12 @@ function init {
 		if [[ "$DOWNLOADED_PATH_" == *".zip" ]]; then
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.zip$//g'`
 			if [ ! -d "$EXTRACTED_PATH_" ]; then			
-				pushd "$(dirname $DOWNLOADED_PATH_)"
+				pushd "$(dirname $DOWNLOADED_PATH_)" > /dev/null
 					unzip -d "$(basename $EXTRACTED_PATH_)" "$(basename $DOWNLOADED_PATH_)"
 					local RESOLVED_PATH=("${EXTRACTED_PATH_}"/*)
 					mv -f "${RESOLVED_PATH}"/* "$(basename $EXTRACTED_PATH_)"
 					rm -Rf "$RESOLVED_PATH"
-				popd
+				popd > /dev/null
 			fi
 			BO_setResult $1 "$EXTRACTED_PATH_"
 		else
