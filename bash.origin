@@ -317,10 +317,14 @@ function init {
 
 	function BO_callPlugin {
 		local PLUGIN_PATH_
-		if [[ "$1" == "/"* ]]; then
-			PLUGIN_PATH_="$1"
+		if [ -f "$BO_PACKAGES_DIR/$1" ]; then
+			PLUGIN_PATH_="$BO_PACKAGES_DIR/$1"
 		else
-			BO_ensurePlugin PLUGIN_PATH_ "$1"
+			if [[ "$1" == "/"* ]]; then
+				PLUGIN_PATH_="$1"
+			else
+				BO_ensurePlugin PLUGIN_PATH_ "$1"
+			fi
 		fi
 		BO_sourcePrototype "$PLUGIN_PATH_"
 		"$2" ${*:3}

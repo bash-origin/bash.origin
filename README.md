@@ -268,6 +268,8 @@ Taken from the [examples/06-ModifyPromptWithPlugin](https://github.com/cadorn/ba
 
 	BO_callPlugin "bash.origin.prompt" setPrompt "workspace" "$__BO_DIR__"
 
+Instead of using a named plugin an absolute path may be specified. i.e. `/path/to/bash.origin.prompt`.
+
 
 License
 =======
