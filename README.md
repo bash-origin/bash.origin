@@ -155,6 +155,11 @@ Use a *local* variable in the `init` function to keep the scope local to the mod
 Load the bash profile from `$HOME/*` to init the environment.
 
 
+### `BO_checkVerbose`
+
+Check if `-v` was specified on the command line.
+
+
 ### `BO_ensure_nvm`
 
 Ensure [nvm](https://github.com/creationix/nvm) is installed.
