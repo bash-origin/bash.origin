@@ -89,6 +89,11 @@ Conventions
 
 NOTE: Sourcing `$HOME/bash.origin` will also run `BO_sourceProfile`.
 
+#### Custom `bash.origin`
+
+If `BO_ROOT_SCRIPT_PATH` is set (to a path pointing to a specific revision of `bash.origin`) prior to sourcing `bash.origin` the specified script will be delegated to by `$HOME/.bash.origin` as soon as it loads.
+
+
 ### 2. Use `__BO_DIR__` for own script file directory
 
 

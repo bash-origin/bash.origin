@@ -3,6 +3,18 @@
 # License: http://unlicense.org/
 function init {
 
+	local ORIGINAL_BO_ROOT_SCRIPT_PATH="$BO_ROOT_SCRIPT_PATH"
+
+	###############################
+	# Ensure minimal Environment
+	###############################
+
+	if [ -z "$HOME" ]; then
+		echo "[BO] ERROR: 'HOME' environment variable is not set!"
+		exit 1
+	fi
+
+
 	###############################
 	# Declare Boot Globals
 	###############################
@@ -45,16 +57,6 @@ function init {
 
 
 	###############################
-	# Ensure minimal Environment
-	###############################
-
-	if [ -z "$HOME" ]; then
-		echo "$BO_LOG_PREFIX""ERROR: 'HOME' environment variable is not set (file: $BO_ROOT_SCRIPT_PATH)!"
-		exit 1
-	fi
-
-
-	###############################
 	# Boot self
 	###############################
 
@@ -63,6 +65,25 @@ function init {
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 	local BO_DIR="$___TMP___"
+
+
+	###############################
+	# Delegate if requested
+	###############################
+
+	if [ "$ORIGINAL_BO_ROOT_SCRIPT_PATH" != "" ]; then
+		if [ -f "$ORIGINAL_BO_ROOT_SCRIPT_PATH" ]; then
+			local ORIGINAL_BO_ROOT_SCRIPT_DIR
+			BO_deriveSelfDir ORIGINAL_BO_ROOT_SCRIPT_DIR "$ORIGINAL_BO_ROOT_SCRIPT_PATH"
+			if [ "$BO_DIR" != "$ORIGINAL_BO_ROOT_SCRIPT_DIR" ]; then
+				# Delegate to the Bash.Origin script at 'ORIGINAL_BO_ROOT_SCRIPT_PATH'
+				# which was set before calling us.
+				export BO_ROOT_SCRIPT_PATH="$ORIGINAL_BO_ROOT_SCRIPT_PATH"
+				. "$ORIGINAL_BO_ROOT_SCRIPT_PATH"
+				return;
+			fi
+		fi
+	fi
 
 
 	###############################
