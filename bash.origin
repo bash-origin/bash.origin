@@ -201,11 +201,11 @@ function init {
 	function BO_ensure_smi {
 		BO_ensure_node
 		local CACHED_PATH
-		BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "install"
+		BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
 		if [ "$CACHED_PATH" == "" ]; then
 			# TODO: Ask user before installing.
 			echo "$BO_LOG_PREFIX""Installing smi"
-			BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "install"
+			BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
 			# TODO: Install into "$SMI_CACHE_PATH.`now`" and only rename on success.
 			mkdir -p "$CACHED_PATH"
 			# TODO: Stop this from also being written to stdout.
@@ -355,10 +355,14 @@ function init {
 
 	function BO_callPlugin {
 		local PLUGIN_PATH_
-		if [[ "$1" == "/"* ]]; then
-			PLUGIN_PATH_="$1"
+		if [ -e "$BO_SYSTEM_CACHE_DIR/$1" ]; then
+			PLUGIN_PATH_="$BO_SYSTEM_CACHE_DIR/$1"
 		else
-			BO_ensurePlugin "PLUGIN_PATH_" "$1"
+			if [[ "$1" == "/"* ]]; then
+				PLUGIN_PATH_="$1"
+			else
+				BO_ensurePlugin "PLUGIN_PATH_" "$1"
+			fi
 		fi
 		BO_sourcePrototype "$PLUGIN_PATH_"
 		"$2" ${*:3}
