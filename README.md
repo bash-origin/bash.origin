@@ -117,13 +117,17 @@ To install the program for instant access later, simply call it once and ask it 
 
 ### 5. Use `BO_systemCachePath` to keep system-global code packages
 
-Every global code package has a hostname-based URI, version and aspect:
+Every global code package has a hostname-based URI and version:
 
-	BO_systemCachePath CACHED_PATH "$ID" "$VERSION" "$ASPECT"
+	BO_systemCachePath CACHED_PATH "$ID" "$VERSION"
 
 The path returned for the above call will be:
 
-	$HOME/.bash.origin.cache/$ID/$VERSION/$ASPECT
+	"$BO_SYSTEM_CACHE_DIR/$ID~$VERSION_MAJOR/source/vcs/master"
+
+if found, or if not:
+
+	"$BO_SYSTEM_CACHE_DIR/$ID~$VERSION_MAJOR/source/snapshot/$VERSION"
 
 The whole point is that these **paths are predictable** and can be assumed as provisioned by programs booted using `bash.origin` *by the time the program boots*.
 
@@ -231,14 +235,13 @@ Example:
 	BO_ensureInSystemCache DOWNLOADED_PATH \
 		"github.com/bash-origin/bash.origin" \
 		"0.1.5" \
-		"archive.tar.gz" \
-		"https://github.com/bash-origin/bash.origin/archive/v0.1.5.tar.gz"
+		"https://github.com/bash-origin/bash.origin/archive/v0.1.5.zip"
 
-Replaces file if already exists.
+Extracts archives. Replaces if already exists.
 
 ### `BO_ensureInSystemCache`
 
-Same as `BO_downloadToSystemCache` but does not replace file if already exists.
+Same as `BO_downloadToSystemCache` but does not replace if already exists.
 
 
 ### `BO_ensureExtracted`
