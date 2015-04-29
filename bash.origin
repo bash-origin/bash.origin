@@ -201,33 +201,32 @@ function init {
 	function BO_ensure_smi {
 		BO_ensure_node
 		local CACHED_PATH
-		BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+		BO_isInSystemCache CACHED_PATH1 "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
 		if [ "$CACHED_PATH" == "" ]; then
 			# TODO: Ask user before installing.
-			echo "$BO_LOG_PREFIX""Installing smi"
-			BO_systemCachePath CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
-			# TODO: Install into "$SMI_CACHE_PATH.`now`" and only rename on success.
-			mkdir -p "$CACHED_PATH"
+			echo "$BO_LOG_PREFIX""Installing smi ..."
+			BO_ensureInSystemCache "DOWNLOADED_PATH" "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "https://github.com/sourcemint/smi/archive/v$BO_VERSION_SMI_CLI.zip"
+			# TODO: Install into "$DOWNLOADED_PATH.`now`" and only rename on success.
 			# TODO: Stop this from also being written to stdout.
-			echo '{"name":"tmp","version":"0.0.0","dependencies":{"smi.cli":"'$BO_VERSION_SMI_CLI'"}}' | tee "$CACHED_PATH/package.json"
-			pushd "$CACHED_PATH" > /dev/null
+			pushd "$DOWNLOADED_PATH" > /dev/null
 				BO_run_npm install --production
 			popd > /dev/null
+			echo "$BO_LOG_PREFIX""... smi installed"
 		fi
-		BO_setResult $1 "$CACHED_PATH"
+		BO_setResult $1 "$DOWNLOADED_PATH"
 	}
 
 	function BO_link_smi {
 		rm -f "$1" || true
 		local SMI_CACHE_PATH_
 		BO_ensure_smi SMI_CACHE_PATH_
-		ln -s "$SMI_CACHE_PATH_/node_modules/.bin/smi" "$1/smi"
+		ln -s "$SMI_CACHE_PATH_/bin/smi" "$1/smi"
 	}
 
 	function BO_run_smi {
 		local SMI_CACHE_PATH_
 		BO_ensure_smi SMI_CACHE_PATH_
-		"$SMI_CACHE_PATH_/node_modules/.bin/smi" $@
+		"$SMI_CACHE_PATH_/bin/smi" $@
 	}
 
 	function BO_systemCachePath {
