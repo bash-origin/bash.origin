@@ -135,6 +135,10 @@ function init {
 	}
 
 	function BO_sourcePrototype {
+		if [ ! -e "$1" ]; then
+			echo "$BO_LOG_PREFIX""ERROR: Cannot source '$1'. File not found!"
+			return 1
+		fi
 		local __ON_INIT__BO_IS_SOURCING
 		#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
 		BO_IS_SOURCING="1"
