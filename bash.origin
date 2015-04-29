@@ -389,6 +389,8 @@ function init {
 	}
 
 	function BO_self_update {
+echo "TODO: BO_self_update"		
+exit 1
 		local BASH_ORIGIN_PATH
 		local FOUND_PREVIOUS_CACHE="0"
 	  	if [ -d "$BO_SYSTEM_CACHE_DIR" ]; then
