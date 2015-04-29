@@ -127,6 +127,13 @@ function init {
 		BO_setResult "$1" "$_VERBOSE"
 	}
 
+	function BO_log {
+		if [ "$1" != "1" ]; then
+			return;
+		fi
+		echo ${*:2}
+	}
+
 	function BO_sourcePrototype {
 		local __ON_INIT__BO_IS_SOURCING
 		#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
@@ -253,7 +260,7 @@ function init {
 		local DOWNLOAD_PATH__
 		BO_systemCachePath DOWNLOAD_PATH__ "$2" "$3"
 		local DOWNLOAD_URL_="$4"
-		local DOWNLOAD_FILE_EXTENSION_=`echo "$DOWNLOAD_URL_" | perl -wnE 'say for /\.[^\.]+/g'`
+		local DOWNLOAD_FILE_EXTENSION_=`echo "$DOWNLOAD_URL_" | perl -wnE 'say for /\.([^\.]+)$/g'`
 		# TODO: Append '?t=$(date +%s)' to URL to force download?
 	  	function download {
 			if BO_has "curl"; then
@@ -275,15 +282,31 @@ function init {
 				wget $ARGS
 			fi
 	  	}
-	  	if [ -e "$DOWNLOAD_PATH__" ]; then
-			echo "$BO_LOG_PREFIX""Download path '$DOWNLOAD_PATH__' exists. Removing."
-			rm -Rf "$DOWNLOAD_PATH__"
+	  	local ARCHIVE_DOWNLOAD_PATH__
+	  	if [ "$DOWNLOAD_FILE_EXTENSION_" == "zip" ]; then
+	  		ARCHIVE_DOWNLOAD_PATH__="$DOWNLOAD_PATH__.$DOWNLOAD_FILE_EXTENSION_"
+	  	else
+			echo "$BO_LOG_PREFIX""ERROR: Derived file extension '$DOWNLOAD_FILE_EXTENSION_' from url '$DOWNLOAD_URL_' not supported!"
+			return 1
 	  	fi
-		echo "$BO_LOG_PREFIX""Downloading '$DOWNLOAD_URL_' to '$DOWNLOAD_PATH__'"
-		download -s "$DOWNLOAD_URL_" -o "$DOWNLOAD_PATH__" || {
-			echo >&2 "$BO_LOG_PREFIX""Failed to download '$DOWNLOAD_URL_'"
+	  	if [ -e "$ARCHIVE_DOWNLOAD_PATH__" ]; then
+			echo "$BO_LOG_PREFIX""Download path '$ARCHIVE_DOWNLOAD_PATH__' exists. Removing."
+			rm -Rf "$ARCHIVE_DOWNLOAD_PATH__"
+	  	fi
+		echo "$BO_LOG_PREFIX""Downloading '$DOWNLOAD_URL_' to '$ARCHIVE_DOWNLOAD_PATH__'"
+		download -s "$DOWNLOAD_URL_" -o "$ARCHIVE_DOWNLOAD_PATH__" || {
+			echo >&2 "$BO_LOG_PREFIX""Failed to download '$ARCHIVE_DOWNLOAD_PATH__'"
 			return 1
 		}
+		echo "$BO_LOG_PREFIX""Extracting '$ARCHIVE_DOWNLOAD_PATH__' to '$DOWNLOAD_PATH__'"
+		BO_ensureExtracted "EXTRACTED_PATH__" "$ARCHIVE_DOWNLOAD_PATH__" || {
+			echo >&2 "$BO_LOG_PREFIX""Failed to extract '$ARCHIVE_DOWNLOAD_PATH__'"
+			return 1
+		}
+		if [ "$EXTRACTED_PATH__" != "$DOWNLOAD_PATH__" ]; then
+			echo >&2 "$BO_LOG_PREFIX""ERROR: Actual extracted path '$EXTRACTED_PATH__' does not match expected path '$DOWNLOAD_PATH__'!"
+			return 1
+		fi
 		BO_setResult $1 "$DOWNLOAD_PATH__"
 	}
 
@@ -309,34 +332,33 @@ function init {
 				popd > /dev/null
 			fi
 			BO_setResult $1 "$EXTRACTED_PATH_"
+			return 0
 		else
-			echo "$BO_LOG_PREFIX""ERROR: Unable to extract path '$DOWNLOADED_PATH_'!"
+			echo >&2 "$BO_LOG_PREFIX""ERROR: Unable to extract path '$DOWNLOADED_PATH_'!"			
+			return 1
 		fi
 	}
 
 	function BO_ensurePlugin {
-		local PLUGIN_ID="$2"
-		local PLUGIN_URL="https://raw.githubusercontent.com/bash-origin/$PLUGIN_ID/master/$PLUGIN_ID"
+		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^([^@]+)@/g'`
+		local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@([^@]+)$/g'`
+		local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		local PLUGIN_PATH
-		BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_ID" "master" "$PLUGIN_ID"
+		BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION"
 		if [ "$PLUGIN_PATH" == "" ]; then
 			# TODO: Ask user before installing.
-			echo "$BO_LOG_PREFIX""Installing plugin: github.com/bash-origin/$PLUGIN_ID"
-			BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_ID" "master" "$PLUGIN_ID" "$PLUGIN_URL"
+			echo "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
+			BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
 		fi
-		BO_setResult $1 "$PLUGIN_PATH"
+		BO_setResult $1 "$PLUGIN_PATH/$PLUGIN_NAME"
 	}
 
 	function BO_callPlugin {
 		local PLUGIN_PATH_
-		if [ -f "$BO_PACKAGES_DIR/$1" ]; then
-			PLUGIN_PATH_="$BO_PACKAGES_DIR/$1"
+		if [[ "$1" == "/"* ]]; then
+			PLUGIN_PATH_="$1"
 		else
-			if [[ "$1" == "/"* ]]; then
-				PLUGIN_PATH_="$1"
-			else
-				BO_ensurePlugin PLUGIN_PATH_ "$1"
-			fi
+			BO_ensurePlugin "PLUGIN_PATH_" "$1"
 		fi
 		BO_sourcePrototype "$PLUGIN_PATH_"
 		"$2" ${*:3}
@@ -348,18 +370,19 @@ function init {
 	###############################
 
 	function BO_self_install {
+		BO_checkVerbose "VERBOSE" "$@"
 		if [ "$2" == "-f" ]; then
-			echo "$BO_LOG_PREFIX""Removing '$BO_ROOT_SCRIPT_PATH' due to forced-install (BO install -f)"
+			BO_log "$VERBOSE" "$BO_LOG_PREFIX""Removing '$BO_ROOT_SCRIPT_PATH' due to forced-install (BO install -f)"
 			rm -f "$BO_ROOT_SCRIPT_PATH" || true
 		fi
 		if [ ! -f "$BO_ROOT_SCRIPT_PATH" ]; then
-			echo "$BO_LOG_PREFIX""Copying '$1' to '$BO_ROOT_SCRIPT_PATH'"
+			BO_log "$VERBOSE" "$BO_LOG_PREFIX""Copying '$1' to '$BO_ROOT_SCRIPT_PATH'"
 			cp -f "$1" "$BO_ROOT_SCRIPT_PATH"
 		else
 			# TODO: Copy if version has changed.
-			echo "$BO_LOG_PREFIX""Skip copy of '$1' as '$BO_ROOT_SCRIPT_PATH' already exists."
+			BO_log "$VERBOSE" "$BO_LOG_PREFIX""Skip copy of '$1' as '$BO_ROOT_SCRIPT_PATH' already exists."
 		fi
-		echo "$BO_LOG_PREFIX""boot.origin installed!"
+		BO_log "$VERBOSE" "$BO_LOG_PREFIX""boot.origin installed!"
 	}
 
 	function BO_self_update {

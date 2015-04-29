@@ -169,6 +169,13 @@ Load the bash profile from `$HOME/*` to init the environment.
 Check if `-v` was specified on the command line.
 
 
+### `BO_log`
+
+Log a message respecting *verbose* flag:
+
+	BO_log "$VERBOSE" "Log message"
+
+
 ### `BO_ensure_nvm`
 
 Ensure [nvm](https://github.com/creationix/nvm) is installed.
@@ -269,7 +276,7 @@ Call a [Bash.Origin](https://github.com/bash-origin) plugin and install it if it
 
 Taken from the [examples/06-ModifyPromptWithPlugin](https://github.com/cadorn/bash.origin/tree/master/examples/06-ModifyPromptWithPlugin) example which loads the [github.com/bash-origin/bash.origin.prompt](https://github.com/bash-origin/bash.origin.prompt) plugin:
 
-	BO_callPlugin "bash.origin.prompt" setPrompt "workspace" "$__BO_DIR__"
+	BO_callPlugin "bash.origin.prompt@0.1.1" setPrompt "workspace" "$__BO_DIR__"
 
 Instead of using a named plugin an absolute path may be specified. i.e. `/path/to/bash.origin.prompt`.
 

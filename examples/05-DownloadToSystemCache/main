@@ -7,7 +7,7 @@ function init {
 	local __BO_DIR__="$___TMP___"
 
 
-	BO_ensureInSystemCache DOWNLOADED_PATH "github.com/bash-origin/bash.origin" "0.1.5" "https://github.com/bash-origin/bash.origin/archive/v0.1.5.zip"
+	BO_ensureInSystemCache "DOWNLOADED_PATH" "github.com/bash-origin/bash.origin" "0.1.5" "https://github.com/bash-origin/bash.origin/archive/v0.1.5.zip"
 
 	echo "DOWNLOADED_PATH: $DOWNLOADED_PATH"
 }

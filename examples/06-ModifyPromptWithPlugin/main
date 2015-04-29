@@ -7,6 +7,11 @@ function init {
 	local __BO_DIR__="$___TMP___"
 
 
-	BO_callPlugin "bash.origin.prompt" setPrompt "workspace" "$__BO_DIR__"
+	BO_callPlugin "bash.origin.prompt@0.1.1" setPrompt "workspace" "$__BO_DIR__"
+
+	# or
+
+	BO_ensureInSystemCache "DOWNLOADED_PATH" "github.com/bash-origin/bash.origin.prompt" "0.1.1" "https://github.com/bash-origin/bash.origin.prompt/archive/v0.1.1.zip"
+	BO_callPlugin "$DOWNLOADED_PATH/bash.origin.prompt" setPrompt "workspace" "$__BO_DIR__"
 }
 init
