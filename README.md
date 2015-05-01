@@ -169,6 +169,21 @@ Load the bash profile from `$HOME/*` to init the environment.
 Check if `-v` was specified on the command line.
 
 
+### `BO_dedupe_PATH`
+
+Removes duplicate paths from the `PATH` environment variable.
+
+
+### `BO_strip_PATH`
+
+Remove a path from the `PATH` environment variable.
+
+
+### `BO_prepend_PATH`
+
+Prepend a path to the `PATH` environment variable.
+
+
 ### `BO_log`
 
 Log a message respecting *verbose* flag:

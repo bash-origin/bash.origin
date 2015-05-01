@@ -152,6 +152,24 @@ function init {
 		BO_setResult $1 "$__ON_INIT__BO_IS_SOURCING"
 	}
 
+	function BO_dedupe_PATH {
+		# @source http://unix.stackexchange.com/a/149054
+		export PATH="$(echo $PATH | perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, scalar <>))')"
+	}
+
+	function BO_strip_PATH {
+		local WORK=:$PATH:
+		local REMOVE="$1"
+		WORK=${WORK/:$REMOVE:/:}
+		WORK=${WORK%:}
+		WORK=${WORK#:}
+		export PATH=$WORK
+	}
+
+	function BO_prepend_PATH {
+		export PATH="$1:$PATH"
+	}
+
 	function BO_ensure_node {
 		if BO_has "node"; then
 			return
