@@ -234,8 +234,9 @@ function init {
 				BO_run_npm install --production
 			popd > /dev/null
 			echo "$BO_LOG_PREFIX""... smi installed"
+			CACHED_PATH="$DOWNLOADED_PATH"
 		fi
-		BO_setResult $1 "$DOWNLOADED_PATH"
+		BO_setResult $1 "$CACHED_PATH"
 	}
 
 	function BO_link_smi {
