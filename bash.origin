@@ -205,7 +205,7 @@ function init {
 	function BO_ensure_smi {
 		BO_ensure_node
 		local CACHED_PATH
-		BO_isInSystemCache CACHED_PATH1 "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
+		BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
 		if [ "$CACHED_PATH" == "" ]; then
 			# TODO: Ask user before installing.
 			echo "$BO_LOG_PREFIX""Installing smi ..."
@@ -221,7 +221,7 @@ function init {
 	}
 
 	function BO_link_smi {
-		rm -f "$1" || true
+		rm -f "$1/smi" > /dev/null 2>&1 || true
 		local SMI_CACHE_PATH_
 		BO_ensure_smi SMI_CACHE_PATH_
 		ln -s "$SMI_CACHE_PATH_/bin/smi" "$1/smi"
