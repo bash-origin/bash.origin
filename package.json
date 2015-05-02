@@ -1,6 +1,9 @@
 {
   "name": "bash.origin",
-  "version": "0.1.14",
+  "version": "0.1.15",
+  "bin": {
+    "bash.origin": "./bash.origin"
+  },
   "scripts": {
     "install": "./bash.origin BO install"
   },
