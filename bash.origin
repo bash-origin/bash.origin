@@ -54,6 +54,16 @@ function init {
 		fi
 	}
 
+	function BO_checkVerbose {
+		local _VERBOSE=""
+		if [[ $@ =~ -\w*v ]]; then
+		    _VERBOSE="1"
+		elif [[ $@ =~ -\w*d ]]; then
+		    _VERBOSE="1"
+		fi
+		BO_setResult "$1" "$_VERBOSE"
+	}
+
 
 	###############################
 	# Boot self
@@ -64,6 +74,9 @@ function init {
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 	local BO_DIR="$___TMP___"
+
+	BO_checkVerbose "VERBOSE" "$@"
+	export VERBOSE
 
 
 	###############################
@@ -115,16 +128,6 @@ function init {
 
 	function BO_has {
 	  type "$1" > /dev/null 2>&1
-	}
-
-	function BO_checkVerbose {
-		local _VERBOSE="0"
-		if [[ $@ =~ -\w*v ]]; then
-		    _VERBOSE="1"
-		elif [[ $@ =~ -\w*d ]]; then
-		    _VERBOSE="1"
-		fi
-		BO_setResult "$1" "$_VERBOSE"
 	}
 
 	function BO_log {
