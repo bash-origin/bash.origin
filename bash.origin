@@ -265,7 +265,7 @@ function init {
 	function BO_systemCachePath {
 		local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
 		local URI_MAJOR_VERSION_=`echo "$3" | perl -wnE 'say for /^\d+/g'`
-		local DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/vcs/master"
+		local DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/installed/master"
 		if [ -d "$DOWNLOAD_PATH_" ]; then
 			BO_setResult $1 "$DOWNLOAD_PATH_"
 		else

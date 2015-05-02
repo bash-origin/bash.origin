@@ -125,7 +125,7 @@ Every global code package has a hostname-based URI and version:
 
 The path returned for the above call will be:
 
-	"$BO_SYSTEM_CACHE_DIR/$ID~$VERSION_MAJOR/source/vcs/master"
+	"$BO_SYSTEM_CACHE_DIR/$ID~$VERSION_MAJOR/source/installed/master"
 
 if found, or if not:
 
