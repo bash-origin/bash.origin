@@ -87,7 +87,9 @@ Conventions
 	}
 	init
 
-NOTE: Sourcing `$HOME/bash.origin` will also run `BO_sourceProfile`.
+NOTE: Sourcing `$HOME/bash.origin` will:
+  * run `BO_sourceProfile`
+  * set `VERBOSE=1` environment variable if `-v` flag found in invocation arguments
 
 #### Custom `bash.origin`
 
@@ -167,6 +169,11 @@ Load the bash profile from `$HOME/*` to init the environment.
 ### `BO_checkVerbose`
 
 Check if `-v` was specified on the command line.
+
+
+### `BO_ensure_executable`
+
+Make sure a command at a given path is executable.
 
 
 ### `BO_dedupe_PATH`

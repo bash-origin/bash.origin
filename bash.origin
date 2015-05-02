@@ -173,6 +173,13 @@ function init {
 		export PATH="$1:$PATH"
 	}
 
+	function BO_ensure_executable {
+		if [[ ! -x "$1" ]]; then
+			BO_log "$VERBOSE" "Making path '$1' executable."
+			chmod ug+x "$1"
+		fi
+	}
+
 	function BO_ensure_node {
 		if BO_has "node"; then
 			return
