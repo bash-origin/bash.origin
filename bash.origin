@@ -84,7 +84,7 @@ function init {
 	###############################
 
 	if [ "$BO_ROOT_SCRIPT_PATH" != "" ]; then
-		if [ -f "$BO_ROOT_SCRIPT_PATH" ]; then
+		if [ -e "$BO_ROOT_SCRIPT_PATH" ]; then
 			local ORIGINAL_BO_ROOT_SCRIPT_DIR
 			BO_deriveSelfDir ORIGINAL_BO_ROOT_SCRIPT_DIR "$BO_ROOT_SCRIPT_PATH"
 			if [ "$BO_DIR" != "$ORIGINAL_BO_ROOT_SCRIPT_DIR" ]; then
