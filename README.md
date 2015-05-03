@@ -303,6 +303,38 @@ Taken from the [examples/06-ModifyPromptWithPlugin](https://github.com/cadorn/ba
 Instead of using a named plugin an absolute path may be specified. i.e. `/path/to/bash.origin.prompt`.
 
 
+Use-Cases
+=========
+
+NodeJS Install Script
+---------------------
+
+`package.json`:
+
+	{
+	  "scripts": {
+	    "install": "./bin/install"
+	  },
+	  "dependencies": {
+	    "bash.origin": "0.1.x"
+	  }
+	}
+
+`bin/install`:
+
+	#!/bin/bash
+	# Source https://github.com/cadorn/bash.origin
+	. "$HOME/.bash.origin"
+	function init {
+		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+		local __BO_DIR__="$___TMP___"
+
+		# Your install code
+	}
+	init $@
+
+
 License
 =======
 
