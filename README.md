@@ -137,6 +137,15 @@ The whole point is that these **paths are predictable** and can be assumed as pr
 Utilities
 =========
 
+### `BO_format`
+
+Log wrapped data or other templates:
+
+	BO_format "$VERBOSE" "HEADER" "Section Heading"
+	...
+	BO_format "$VERBOSE" "FOOTER"
+
+
 ### `BO_has`
 
 Check if a command is available using `if BO_has "curl"; then ...`.

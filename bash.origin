@@ -126,6 +126,21 @@ function init {
 	# Declare Utility Functions
 	###############################
 
+	function BO_format {
+		if [ "$1" != "1" ]; then
+			return;
+		fi
+		if [ "$2" == "HEADER" ]; then
+			echo "##################################################";
+			echo "# $3";
+			echo "##################################################";
+		fi
+		if [ "$2" == "FOOTER" ]; then
+			echo "##################################################";
+			echo ""
+		fi
+	}
+
 	function BO_has {
 	  type "$1" > /dev/null 2>&1
 	}
