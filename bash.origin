@@ -55,7 +55,7 @@ function init {
 	}
 
 	function BO_checkVerbose {
-		local _VERBOSE=""
+		local _VERBOSE="$VERBOSE"
 		# Look for '-v' or '-d' flags.
 		if echo "$@" | grep -q -Ee '($|\s*)-\w*[vd]\w*(\s*|$)'; then
 		    _VERBOSE="1"
