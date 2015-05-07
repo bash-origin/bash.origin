@@ -180,6 +180,11 @@ Load the bash profile from `$HOME/*` to init the environment.
 Check if `-v` was specified on the command line.
 
 
+### `BO_sudo`
+
+Run a command using `sudo`.
+
+
 ### `BO_ensure_executable`
 
 Make sure a command at a given path is executable.

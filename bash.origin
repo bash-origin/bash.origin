@@ -153,6 +153,15 @@ function init {
 		echo ${*:2}
 	}
 
+	function BO_sudo {
+		# TODO: Detect if we even need to ask for sudo. If not just run command.
+		local NEED_TO_ASK="1"
+		if [ "$NEED_TO_ASK" == "1" ]; then
+			echo "WARNING: Asking for sudo access to run: $1"
+		fi
+		sudo $1
+	}
+
 	function BO_sourcePrototype {
 		if [ ! -e "$1" ]; then
 			echo "$BO_LOG_PREFIX""ERROR: Cannot source '$1'. File not found!"
@@ -335,6 +344,8 @@ function init {
 	  	local ARCHIVE_DOWNLOAD_PATH__
 	  	if [ "$DOWNLOAD_FILE_EXTENSION_" == "zip" ]; then
 	  		ARCHIVE_DOWNLOAD_PATH__="$DOWNLOAD_PATH__.$DOWNLOAD_FILE_EXTENSION_"
+	  	elif [ "$DOWNLOAD_FILE_EXTENSION_" == "phar" ]; then
+	  		ARCHIVE_DOWNLOAD_PATH__="$DOWNLOAD_PATH__.$DOWNLOAD_FILE_EXTENSION_"
 	  	else
 			echo "$BO_LOG_PREFIX""ERROR: Derived file extension '$DOWNLOAD_FILE_EXTENSION_' from url '$DOWNLOAD_URL_' not supported!"
 			return 1
@@ -381,6 +392,12 @@ function init {
 					rm -Rf "$RESOLVED_PATH"
 				popd > /dev/null
 			fi
+			BO_setResult $1 "$EXTRACTED_PATH_"
+			return 0
+		elif [[ "$DOWNLOADED_PATH_" == *".phar" ]]; then
+			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.phar$//g'`
+			ln -s "$(basename "$DOWNLOADED_PATH_")" "$EXTRACTED_PATH_"
+			# No need to extract.
 			BO_setResult $1 "$EXTRACTED_PATH_"
 			return 0
 		else
