@@ -93,9 +93,13 @@ function init {
 				return;
 			fi
 		else
-			if [ "$BO_ROOT_SCRIPT_PATH" != "$HOME/.bash.origin" ]; then
-				echo "ERROR: 'BO_ROOT_SCRIPT_PATH' ($BO_ROOT_SCRIPT_PATH) not found!"
-				exit 1
+			if [ "$1" != "BO" ]; then
+				if [ "$2" != "install" ]; then
+					if [ "$BO_ROOT_SCRIPT_PATH" != "$HOME/.bash.origin" ]; then
+						echo "ERROR: 'BO_ROOT_SCRIPT_PATH' ($BO_ROOT_SCRIPT_PATH) not found!"
+						exit 1
+					fi
+				fi
 			fi
 		fi
 	else

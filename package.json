@@ -8,8 +8,10 @@
     "install": "./bash.origin BO install"
   },
   "config": {
-    "pio.deploy.converter": {
-      "name": "nodejs-lib"
+    "pio.pinf.io/0": {
+      "on": {
+        "postdeploy": "./bash.origin BO install -f"
+      }
     }
   }
 }
