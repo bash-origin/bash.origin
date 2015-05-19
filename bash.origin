@@ -83,18 +83,18 @@ function init {
 	###############################
 
 	if [ "$BO_ROOT_SCRIPT_PATH" != "" ]; then
-		if [ -e "$BO_ROOT_SCRIPT_PATH" ]; then
-			local ORIGINAL_BO_ROOT_SCRIPT_DIR
-			BO_deriveSelfDir ORIGINAL_BO_ROOT_SCRIPT_DIR "$BO_ROOT_SCRIPT_PATH"
-			if [ "$BO_DIR" != "$ORIGINAL_BO_ROOT_SCRIPT_DIR" ]; then
-				# Delegate to the Bash.Origin script at 'BO_ROOT_SCRIPT_PATH'
-				# which was set before calling us.
-				. "$BO_ROOT_SCRIPT_PATH"
-				return;
-			fi
-		else
-			if [ "$1" != "BO" ]; then
-				if [ "$2" != "install" ]; then
+		if [ "$1" != "BO" ]; then
+			if [ "$2" != "install" ]; then
+				if [ -e "$BO_ROOT_SCRIPT_PATH" ]; then
+					local ORIGINAL_BO_ROOT_SCRIPT_DIR
+					BO_deriveSelfDir ORIGINAL_BO_ROOT_SCRIPT_DIR "$BO_ROOT_SCRIPT_PATH"
+					if [ "$BO_DIR" != "$ORIGINAL_BO_ROOT_SCRIPT_DIR" ]; then
+						# Delegate to the Bash.Origin script at 'BO_ROOT_SCRIPT_PATH'
+						# which was set before calling us.
+						. "$BO_ROOT_SCRIPT_PATH"
+						return;
+					fi
+				else
 					if [ "$BO_ROOT_SCRIPT_PATH" != "$HOME/.bash.origin" ]; then
 						echo "ERROR: 'BO_ROOT_SCRIPT_PATH' ($BO_ROOT_SCRIPT_PATH) not found!"
 						exit 1
