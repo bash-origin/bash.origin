@@ -5,15 +5,6 @@ function init {
 
 	local ORIGINAL_BO_ROOT_SCRIPT_PATH="$BO_ROOT_SCRIPT_PATH"
 
-	###############################
-	# Ensure minimal Environment
-	###############################
-
-	if [ -z "$HOME" ]; then
-		echo "[BO] ERROR: 'HOME' environment variable is not set!"
-		exit 1
-	fi
-
 
 	###############################
 	# Declare Boot Globals
@@ -26,6 +17,13 @@ function init {
 	###############################
 	# Declare Boot Functions
 	###############################
+
+	function BO_ensure_env_HOME {
+		if [ -n "${!HOME:-}" ]; then
+			echo "[BO] ERROR: 'HOME' environment variable is not set! Used by: $1"
+			exit 1
+		fi
+	}
 
 	function BO_setResult {
 		local  __resultvar=$1
@@ -47,6 +45,7 @@ function init {
 	}
 
 	function BO_sourceProfile {
+		BO_ensure_env_HOME "BO_sourceProfile"
 		if [ -f "$HOME/.profile" ]; then
 			. "$HOME/.profile"
 		elif [ -f "$HOME/.bash_profile" ]; then
@@ -95,6 +94,7 @@ function init {
 						return;
 					fi
 				else
+					BO_ensure_env_HOME "Delegate to BO_ROOT_SCRIPT_PATH"
 					if [ "$BO_ROOT_SCRIPT_PATH" != "$HOME/.bash.origin" ]; then
 						echo "ERROR: 'BO_ROOT_SCRIPT_PATH' ($BO_ROOT_SCRIPT_PATH) not found!"
 						exit 1
@@ -103,6 +103,7 @@ function init {
 			fi
 		fi
 	else
+		BO_ensure_env_HOME "Use default .bash.origin"
 		BO_ROOT_SCRIPT_PATH="$HOME/.bash.origin"
 	fi
 
@@ -119,6 +120,7 @@ function init {
 
 	BO_ROOT_SOURCE_URL="https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin"
 	if [ -z "$BO_SYSTEM_CACHE_DIR" ]; then
+		BO_ensure_env_HOME "Use default .bash.origin.cache"
 		BO_SYSTEM_CACHE_DIR="$HOME/.bash.origin.cache"
 	fi
 

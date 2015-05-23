@@ -48,7 +48,7 @@ No matter how `bash.origin` was installed above; it can be used in any script th
 ````
 #!/bin/bash
 # Source https://github.com/cadorn/bash.origin
-. "$HOME/.bash.origin"
+if [ -z "$BO_ROOT_SCRIPT_PATH" ]; then . "$HOME/.bash.origin"; else . "$BO_ROOT_SCRIPT_PATH"; fi
 ...
 ````
 
