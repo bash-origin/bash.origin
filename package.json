@@ -10,7 +10,7 @@
   "config": {
     "pio.pinf.io/0": {
       "on": {
-        "postdeploy": "./bash.origin BO install -f"
+        "postsync": "./bash.origin BO install -f"
       }
     }
   }
