@@ -218,23 +218,26 @@ function init {
 			return
 		fi
 		BO_ensure_nvm
+		BO_log "$VERBOSE" "Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 		nvm use "$BO_VERSION_NVM_NODE" > /dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			nvm install "$BO_VERSION_NVM_NODE"
+			nvm use "$BO_VERSION_NVM_NODE"
+		fi
 	}
 
 	function BO_ensure_nvm {
 		# @see https://github.com/creationix/nvm
-		if BO_has "nvm"; then
-			return;
-		fi
-		# TODO: Ask user before installing.
-		echo "$BO_LOG_PREFIX""Installing nvm"
-		# TODO: Alternatively use `wget`
-		curl \
-		    -H "Pragma: no-cache, must-revalidate" \
-		    -H "Cache-Control: no-cache, must revalidate" \
-		    "https://raw.githubusercontent.com/creationix/nvm/v$BO_VERSION_NVM/install.sh" \
-		    | sh
-		BO_sourceProfile
+		BO_ensureInSystemCache "NVM_PATH_" "github.com/creationix/nvm" "0.24.2" "https://github.com/creationix/nvm/archive/v0.24.2.tar.gz"
+		pushd "$NVM_PATH_" > /dev/null
+			. "$NVM_PATH_/nvm.sh"
+		popd > /dev/null
+#		curl \
+#		    -H "Pragma: no-cache, must-revalidate" \
+#		    -H "Cache-Control: no-cache, must revalidate" \
+#		    "https://raw.githubusercontent.com/creationix/nvm/v$BO_VERSION_NVM/install.sh" \
+#		    | sh
+#		BO_sourceProfile
 	}
 
 	function BO_link_node {
@@ -266,7 +269,7 @@ function init {
 		if [ "$CACHED_PATH" == "" ]; then
 			# TODO: Ask user before installing.
 			echo "$BO_LOG_PREFIX""Installing smi ..."
-			BO_ensureInSystemCache "DOWNLOADED_PATH" "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "https://github.com/sourcemint/smi/archive/v$BO_VERSION_SMI_CLI.zip"
+			BO_ensureInSystemCache "DOWNLOADED_PATH" "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "https://github.com/sourcemint/smi/archive/v$BO_VERSION_SMI_CLI.tar.gz"
 			# TODO: Install into "$DOWNLOADED_PATH.`now`" and only rename on success.
 			# TODO: Stop this from also being written to stdout.
 			pushd "$DOWNLOADED_PATH" > /dev/null
@@ -349,10 +352,13 @@ function init {
 			fi
 	  	}
 	  	local ARCHIVE_DOWNLOAD_PATH__
-	  	if [ "$DOWNLOAD_FILE_EXTENSION_" == "zip" ]; then
-	  		ARCHIVE_DOWNLOAD_PATH__="$DOWNLOAD_PATH__.$DOWNLOAD_FILE_EXTENSION_"
+	  	if [ "$DOWNLOAD_FILE_EXTENSION_" == "gz" ]; then
+	  		# TODO: Don't assume '.tar.'. Check to make sure.
+	  		ARCHIVE_DOWNLOAD_PATH__="$DOWNLOAD_PATH__.tar.gz"
+	  	elif [ "$DOWNLOAD_FILE_EXTENSION_" == "zip" ]; then
+	  		ARCHIVE_DOWNLOAD_PATH__="$DOWNLOAD_PATH__.zip"
 	  	elif [ "$DOWNLOAD_FILE_EXTENSION_" == "phar" ]; then
-	  		ARCHIVE_DOWNLOAD_PATH__="$DOWNLOAD_PATH__.$DOWNLOAD_FILE_EXTENSION_"
+	  		ARCHIVE_DOWNLOAD_PATH__="$DOWNLOAD_PATH__.phar"
 	  	else
 			echo "$BO_LOG_PREFIX""ERROR: Derived file extension '$DOWNLOAD_FILE_EXTENSION_' from url '$DOWNLOAD_URL_' not supported!"
 			return 1
@@ -389,7 +395,18 @@ function init {
 
 	function BO_ensureExtracted {
 		local DOWNLOADED_PATH_="$2"
-		if [[ "$DOWNLOADED_PATH_" == *".zip" ]]; then
+		if [[ "$DOWNLOADED_PATH_" == *".tar.gz" ]]; then
+			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.tar\.gz$//g'`
+			if [ ! -d "$EXTRACTED_PATH_" ]; then
+				pushd "$(dirname $DOWNLOADED_PATH_)" > /dev/null
+					tar -xzf "$(basename $DOWNLOADED_PATH_)"
+					local RESOLVED_PATH=("$(pwd)"/*/*)
+					mv -f "$(dirname "$RESOLVED_PATH")" "$(basename $EXTRACTED_PATH_)"
+				popd > /dev/null
+			fi
+			BO_setResult $1 "$EXTRACTED_PATH_"
+			return 0
+		elif [[ "$DOWNLOADED_PATH_" == *".zip" ]]; then
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.zip$//g'`
 			if [ ! -d "$EXTRACTED_PATH_" ]; then			
 				pushd "$(dirname $DOWNLOADED_PATH_)" > /dev/null
