@@ -414,6 +414,7 @@ function init {
 	}
 
 	function BO_ensurePlugin {
+		BO_log "$VERBOSE" "[BO_ensurePlugin] args: $@"
 		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^([^@]+)@/g'`
 		local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@([^@]+)$/g'`
 		local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
@@ -428,14 +429,18 @@ function init {
 	}
 
 	function BO_callPlugin {
+		BO_log "$VERBOSE" "[BO_callPlugin] args: $@"
 		local PLUGIN_PATH_
 		if [ -e "$BO_SYSTEM_CACHE_DIR/$1" ]; then
 			PLUGIN_PATH_="$BO_SYSTEM_CACHE_DIR/$1"
+			BO_log "$VERBOSE" "[BO_callPlugin] Using BO_SYSTEM_CACHE_DIR based path: $PLUGIN_PATH_"
 		else
 			if [[ "$1" == "/"* ]]; then
 				PLUGIN_PATH_="$1"
+				BO_log "$VERBOSE" "[BO_callPlugin] Using absolute path: $PLUGIN_PATH_"
 			else
 				BO_ensurePlugin "PLUGIN_PATH_" "$1"
+				BO_log "$VERBOSE" "[BO_callPlugin] Using ensured plugin path: $PLUGIN_PATH_"
 			fi
 		fi
 		BO_sourcePrototype "$PLUGIN_PATH_"
