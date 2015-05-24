@@ -18,7 +18,15 @@ function init {
 	# Declare Boot Functions
 	###############################
 
+	function BO_log {
+		if [ "$1" != "1" ]; then
+			return;
+		fi
+		echo ${*:2}
+	}
+
 	function BO_ensure_env_HOME {
+		# Should fail if not set or set to empty string.
 		if [ -n "${!HOME:-}" ]; then
 			echo "[BO] ERROR: 'HOME' environment variable is not set! Used by: $1"
 			exit 1
@@ -58,6 +66,9 @@ function init {
 		# Look for '-v' or '-d' flags.
 		if echo "$@" | grep -q -Ee '($|\s*)-\w*[vd]\w*(\s*|$)'; then
 		    _VERBOSE="1"
+		fi
+		if [ "$_VERBOSE" == "1" ]; then
+			BO_log "$_VERBOSE" "[BO_checkVerbose] Verbose Enabled: $_VERBOSE"
 		fi
 		BO_setResult "$1" "$_VERBOSE"
 	}
@@ -152,13 +163,6 @@ function init {
 	  type "$1" > /dev/null 2>&1
 	}
 
-	function BO_log {
-		if [ "$1" != "1" ]; then
-			return;
-		fi
-		echo ${*:2}
-	}
-
 	function BO_sudo {
 		# TODO: Detect if we even need to ask for sudo. If not just run command.
 		local NEED_TO_ASK="1"
@@ -176,6 +180,7 @@ function init {
 		local __ON_INIT__BO_IS_SOURCING
 		#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
 		BO_IS_SOURCING="1"
+		BO_log "$VERBOSE" "BO_sourcePrototype $1"
 	    . "$1" ${*:2}
 		#while IFS= read -r -d $'\0' line; do
 		#    export "$line"
