@@ -10,7 +10,7 @@
   "config": {
     "pio.pinf.io/0": {
       "on": {
-        "postsync": "./bash.origin BO install -f"
+        "prepostsync": "./bash.origin BO install -f"
       }
     }
   }
