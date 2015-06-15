@@ -185,6 +185,11 @@ Check if `-v` was specified on the command line.
 Run a command using `sudo`.
 
 
+### `BO_realpath`
+
+Return the realpath of a path.
+
+
 ### `BO_ensure_executable`
 
 Make sure a command at a given path is executable.

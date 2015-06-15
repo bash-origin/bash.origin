@@ -67,9 +67,9 @@ function init {
 		if echo "$@" | grep -q -Ee '($|\s*)-\w*[vd]\w*(\s*|$)'; then
 		    _VERBOSE="1"
 		fi
-		if [ "$_VERBOSE" == "1" ]; then
-			BO_log "$_VERBOSE" "[BO_checkVerbose] Verbose Enabled: $_VERBOSE"
-		fi
+#		if [ "$_VERBOSE" == "1" ]; then
+#			BO_log "$_VERBOSE" "[BO_checkVerbose] Verbose Enabled: $_VERBOSE"
+#		fi
 		BO_setResult "$1" "$_VERBOSE"
 	}
 
@@ -185,6 +185,31 @@ function init {
 		#while IFS= read -r -d $'\0' line; do
 		#    export "$line"
 		#done < <(bash -s <<< 'export VARNAME=something; env -0')
+	}
+
+	function BO_realpath {
+		if BO_has "realpath"; then
+			BO_setResult "$1" "$(realpath "$2")"
+		else
+			# @source http://stackoverflow.com/a/19512992/330439
+			function abspath() {
+			    # generate absolute path from relative path
+			    # $1     : relative filename
+			    # return : absolute path
+			    if [ -d "$1" ]; then
+			        # dir
+			        (cd "$1"; pwd)
+			    elif [ -f "$1" ]; then
+			        # file
+			        if [[ $1 == */* ]]; then
+			            echo "$(cd "${1%/*}"; pwd)/${1##*/}"
+			        else
+			            echo "$(pwd)/$1"
+			        fi
+			    fi
+			}
+			BO_setResult "$1" "`abspath "$2"`"
+		fi
 	}
 
 	function BO_isSourced {
