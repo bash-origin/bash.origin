@@ -444,7 +444,8 @@ function init {
 				pushd "$(dirname $DOWNLOADED_PATH_)" > /dev/null
 					unzip -d "$(basename $EXTRACTED_PATH_)" "$(basename $DOWNLOADED_PATH_)"
 					local RESOLVED_PATH=("${EXTRACTED_PATH_}"/*)
-					mv -f "${RESOLVED_PATH}" "$(basename $EXTRACTED_PATH_)"
+					mv -f "${RESOLVED_PATH}"/* "$(basename $EXTRACTED_PATH_)"
+					mv -f "${RESOLVED_PATH}"/.* "$(basename $EXTRACTED_PATH_)"
 					rm -Rf "$RESOLVED_PATH"
 				popd > /dev/null
 			fi
