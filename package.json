@@ -1,6 +1,6 @@
 {
   "name": "bash.origin",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "bin": {
     "bash.origin": "./bash.origin"
   },
