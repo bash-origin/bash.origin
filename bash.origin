@@ -137,7 +137,7 @@ function init {
 
 	BO_VERSION_NVM="0.10.37"
 	BO_VERSION_NVM_NODE="0.10"
-	BO_VERSION_SMI_CLI="0.35.11"
+	BO_VERSION_SMI_CLI="0.35.12"
 
 
 	###############################
