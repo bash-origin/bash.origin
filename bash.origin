@@ -468,13 +468,22 @@ function init {
 		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^([^@]+)@/g'`
 		local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@([^@]+)$/g'`
 		local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
-		local PLUGIN_PATH
-		BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION"
-		if [ "$PLUGIN_PATH" == "" ]; then
-			# TODO: Ask user before installing.
-			echo "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
-			BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
+		local PLUGIN_PATH=""
+		if [ ! -z "$BO_PLUGIN_SEARCH_DIRPATHS" ]; then
+			# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
+			if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME" ]; then
+				PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME"
+			fi
 		fi
+		if [ "$PLUGIN_PATH" == "" ]; then
+			BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION"
+			if [ "$PLUGIN_PATH" == "" ]; then
+				# TODO: Ask user before installing.
+				echo "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
+				BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
+			fi
+		fi
+		BO_log "$VERBOSE" "[BO_ensurePlugin] Found plugin path: $PLUGIN_PATH"
 		BO_setResult $1 "$PLUGIN_PATH/$PLUGIN_NAME"
 	}
 
@@ -493,6 +502,7 @@ function init {
 				BO_log "$VERBOSE" "[BO_callPlugin] Using ensured plugin path: $PLUGIN_PATH_"
 			fi
 		fi
+		BO_log "$VERBOSE" "[BO_ensurePlugin] Call plugin: $PLUGIN_PATH_"
 		BO_sourcePrototype "$PLUGIN_PATH_"
 		"$2" ${*:3}
 	}
