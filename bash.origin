@@ -134,9 +134,11 @@ function init {
 		BO_ensure_env_HOME "Use default .bash.origin.cache"
 		BO_GLOBAL_SYSTEM_CACHE_DIR="$HOME/.bash.origin.cache"
 	fi
+	export BO_GLOBAL_SYSTEM_CACHE_DIR
 	if [ -z "$BO_SYSTEM_CACHE_DIR" ]; then
 		BO_SYSTEM_CACHE_DIR="$BO_GLOBAL_SYSTEM_CACHE_DIR"
 	fi
+	export BO_SYSTEM_CACHE_DIR
 
 	BO_VERSION_NVM="0.10.37"
 	BO_VERSION_NVM_NODE="0.10"
