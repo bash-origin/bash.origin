@@ -130,9 +130,12 @@ function init {
 	fi
 
 	BO_ROOT_SOURCE_URL="https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin"
-	if [ -z "$BO_SYSTEM_CACHE_DIR" ]; then
+	if [ -z "$BO_GLOBAL_SYSTEM_CACHE_DIR" ]; then
 		BO_ensure_env_HOME "Use default .bash.origin.cache"
-		BO_SYSTEM_CACHE_DIR="$HOME/.bash.origin.cache"
+		BO_GLOBAL_SYSTEM_CACHE_DIR="$HOME/.bash.origin.cache"
+	fi
+	if [ -z "$BO_SYSTEM_CACHE_DIR" ]; then
+		BO_SYSTEM_CACHE_DIR="$BO_GLOBAL_SYSTEM_CACHE_DIR"
 	fi
 
 	BO_VERSION_NVM="0.10.37"
