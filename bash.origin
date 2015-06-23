@@ -246,6 +246,13 @@ function init {
 		fi
 	}
 
+	function BO_exit_on_error {
+		if [[ $? -ne 0 ]] ; then
+			echo "FATAL ERROR while running '$*': $1"
+		    exit 1
+		fi
+	}
+
 	function BO_ensure_node {
 		if BO_has "node"; then
 			return
