@@ -1,6 +1,7 @@
 {
   "name": "bash.origin",
   "version": "0.1.23",
+  "repository": "https://github.com/bash-origin/bash.origin.git",
   "bin": {
     "bash.origin": "./bash.origin"
   },
