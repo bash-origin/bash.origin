@@ -551,6 +551,13 @@ function init {
 			rm -f "$BO_ROOT_SCRIPT_PATH" || true
 		fi
 		if [ ! -e "$BO_ROOT_SCRIPT_PATH" ]; then
+			# We may have an old 'BO_ROOT_SCRIPT_PATH' set that no longer exists.
+			# We assue that is the case if the parent path no longer exists.
+			# If you don't want the path to be reset make sure the parent path exists!
+			if [ ! -e "$(dirname $BO_ROOT_SCRIPT_PATH)" ]; then
+				BO_ensure_env_HOME "Use default .bash.origin"
+				BO_ROOT_SCRIPT_PATH="$HOME/.bash.origin"
+			fi
 			BO_log "$VERBOSE" "$BO_LOG_PREFIX""Copying '$1' to '$BO_ROOT_SCRIPT_PATH'"
 			cp -f "$1" "$BO_ROOT_SCRIPT_PATH"
 		else
