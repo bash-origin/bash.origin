@@ -1,18 +1,18 @@
 {
-  "name": "bash.origin",
-  "version": "0.1.23",
-  "repository": "https://github.com/bash-origin/bash.origin.git",
-  "bin": {
-    "bash.origin": "./bash.origin"
-  },
-  "scripts": {
-    "install": "./bash.origin BO install"
-  },
-  "config": {
-    "pio.pinf.io/0": {
-      "on": {
-        "prepostsync": "./bash.origin BO install -f"
-      }
+    "name": "bash.origin",
+    "version": "0.1.24",
+    "repository": "https://github.com/bash-origin/bash.origin.git",
+    "bin": {
+        "bash.origin": "./bash.origin"
+    },
+    "scripts": {
+        "install": "./bash.origin BO install"
+    },
+    "config": {
+        "pio.pinf.io/0": {
+            "on": {
+                "prepostsync": "./bash.origin BO install -f"
+            }
+        }
     }
-  }
 }
