@@ -358,6 +358,26 @@ function init {
 		fi
 	}
 
+	function BO_globalSystemCachePath {
+		local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
+		local URI_MAJOR_VERSION_=`echo "$3" | perl -wnE 'say for /^\d+/g'`
+		local DOWNLOAD_PATH_="$BO_GLOBAL_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/installed/master"
+		BO_log "$VERBOSE" "[BO_systemCachePath] Check path (1): $DOWNLOAD_PATH_"
+		if [ -d "$DOWNLOAD_PATH_" ]; then
+			BO_setResult $1 "$DOWNLOAD_PATH_"
+		else
+			DOWNLOAD_PATH_="$BO_GLOBAL_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/snapshot/$3"
+			BO_log "$VERBOSE" "[BO_systemCachePath] Check path (2): $DOWNLOAD_PATH_"
+		  	local DOWNLOAD_DIR_="$( dirname "$DOWNLOAD_PATH_")"
+		  	if [ "$4" != "nocreate" ]; then
+			  	if [ ! -d "$DOWNLOAD_DIR_" ]; then
+					mkdir -p "$DOWNLOAD_DIR_"
+			  	fi
+			fi
+			BO_setResult $1 "$DOWNLOAD_PATH_"
+		fi
+	}
+
 	function BO_isInSystemCache {
 		local CACHE_PATH__
 		BO_systemCachePath CACHE_PATH__ "$2" "$3" "nocreate"
