@@ -224,7 +224,7 @@ Ensure [nvm](https://github.com/creationix/nvm) is installed.
 
 ### `BO_ensure_node`
 
-Ensure the latest stable version of [node](http://nodejs.org) is installed using [nvm](https://github.com/creationix/nvm).
+Ensure the latest stable version of [node.js](http://nodejs.org) is installed using [nvm](https://github.com/creationix/nvm).
 
 
 ### `BO_run_node`
@@ -233,6 +233,16 @@ Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file
 
 
 ### `BO_run_npm`
+
+
+### `BO_ensure_iojs`
+
+Ensure the latest stable version of [io.js](http://iojs.org) is installed using [nvm](https://github.com/creationix/nvm).
+
+
+### `BO_run_iojs`
+
+Run a [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) file using [io.js](http://iojs.org).
 
 
 ### `BO_link_*`

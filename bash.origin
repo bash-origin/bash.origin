@@ -140,9 +140,10 @@ function init {
 	fi
 	export BO_SYSTEM_CACHE_DIR
 
-	BO_VERSION_NVM="0.10.37"
+	BO_VERSION_NVM="0.25.4"
 	BO_VERSION_NVM_NODE="0.10"
-	BO_VERSION_SMI_CLI="0.35.12"
+	BO_VERSION_NVM_IOJS="iojs-v3.0.0"
+	BO_VERSION_SMI_CLI="0.35.14"
 
 
 	###############################
@@ -254,13 +255,14 @@ function init {
 	}
 
 	function BO_ensure_node {
-		if BO_has "node"; then
-			return
-		fi
+# TODO: Check if 'node' command corresponds to our version		
+#		if BO_has "node"; then
+#			return
+#		fi
 		BO_sourceProfile
-		if BO_has "node"; then
-			return
-		fi
+#		if BO_has "node"; then
+#			return
+#		fi
 		BO_ensure_nvm
 		BO_log "$VERBOSE" "Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 		nvm use "$BO_VERSION_NVM_NODE" > /dev/null 2>&1
@@ -270,9 +272,27 @@ function init {
 		fi
 	}
 
+	function BO_ensure_iojs {
+# TODO: Check if 'node' command corresponds to our version		
+#		if BO_has "node"; then
+#			return
+#		fi
+		BO_sourceProfile
+#		if BO_has "node"; then
+#			return
+#		fi
+		BO_ensure_nvm
+		BO_log "$VERBOSE" "Activating IO.JS version $BO_VERSION_NVM_IOJS using nvm."
+		nvm use "$BO_VERSION_NVM_IOJS" > /dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			nvm install "$BO_VERSION_NVM_IOJS"
+			nvm use "$BO_VERSION_NVM_IOJS"
+		fi
+	}
+
 	function BO_ensure_nvm {
 		# @see https://github.com/creationix/nvm
-		BO_ensureInSystemCache "NVM_PATH_" "github.com/creationix/nvm" "0.24.2" "https://github.com/creationix/nvm/archive/v0.24.2.tar.gz"
+		BO_ensureInSystemCache "NVM_PATH_" "github.com/creationix/nvm" "$BO_VERSION_NVM" "https://github.com/creationix/nvm/archive/v$BO_VERSION_NVM.tar.gz"
 		pushd "$NVM_PATH_" > /dev/null
 			. "$NVM_PATH_/nvm.sh"
 		popd > /dev/null
@@ -290,7 +310,7 @@ function init {
 		ln -s "$NVM_BIN/node" "$1/node"
 	}
 
-	function BO_link_npm {		
+	function BO_link_npm {
 		rm -f "$1/npm" > /dev/null 2>&1 || true
 		BO_ensure_node
 		ln -s "$NVM_BIN/npm" "$1/npm"
@@ -298,6 +318,11 @@ function init {
 
 	function BO_run_node {
 		BO_ensure_node
+		node $@
+	}
+
+	function BO_run_iojs {
+		BO_ensure_iojs
 		node $@
 	}
 
