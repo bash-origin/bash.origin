@@ -63,8 +63,11 @@ function init {
 
 	function BO_checkVerbose {
 		local _VERBOSE="$VERBOSE"
-		# Look for '-v' or '-d' flags.
-		if echo "$@" | grep -q -Ee '($|\s*)-\w*[vd]\w*(\s*|$)'; then
+		# Look for '-v', '--verbose', '-d' or '--debug' flags.
+		if echo "$@" | grep -q -Ee '($|\s*)--?(\w*[vd]\w*|verbose|debug)(\s*|$)'; then
+		    _VERBOSE="1"
+		fi
+		if echo "$npm_config_argv" | grep -q -Ee '"--?(\w*[vd]\w*|verbose|debug)"'; then
 		    _VERBOSE="1"
 		fi
 #		if [ "$_VERBOSE" == "1" ]; then
