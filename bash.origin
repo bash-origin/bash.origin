@@ -196,6 +196,34 @@ function init {
 		#done < <(bash -s <<< 'export VARNAME=something; env -0')
 	}
 
+	function BO_followPointer {
+		BO_log "$VERBOSE" "BO_followPointer($1, $2, $3)"
+
+		_POINTER_RESULT_VAR="$1"
+		_POINTER_LOOKUP_FILENAME="$3"
+		_POINTER_RESOLVED="0"
+
+		function checkPath {
+			BO_log "$VERBOSE" "BO_followPointer:checkPath($1)"
+			if [ -d "$1/$_POINTER_LOOKUP_FILENAME" ]; then
+				checkPath "$1/$_POINTER_LOOKUP_FILENAME"
+			elif [ -e "$1/$_POINTER_LOOKUP_FILENAME" ]; then
+				POINTER_VALUE=`cat $1/$_POINTER_LOOKUP_FILENAME`
+				if [ "$POINTER_VALUE" == "." ]; then
+					BO_realpath "$_POINTER_RESULT_VAR" "$1"
+					_POINTER_RESOLVED="1"
+				else
+					checkPath "$1/$POINTER_VALUE"
+				fi
+			fi
+		}
+		checkPath "$2"
+		if [ "$_POINTER_RESOLVED" == "0" ]; then
+			echo "ERROR: Could not resolve pointer '$_POINTER_LOOKUP_FILENAME' for path '$2'"
+			exit 1;
+		fi
+	}
+
 	function BO_realpath {
 		if BO_has "realpath"; then
 			BO_setResult "$1" "$(realpath "$2")"

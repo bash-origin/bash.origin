@@ -175,6 +175,13 @@ Use a *local* variable in the `init` function to keep the scope local to the mod
 Load the bash profile from `$HOME/*` to init the environment.
 
 
+### `BO_followPointer`
+
+Follow a pointer file which may be a symlink to anotehr repo with a pointer file or a file containing a filepath.
+
+	BO_followPointer "Z0_ROOT" "$PWD" ".0"
+
+
 ### `BO_checkVerbose`
 
 Check if `-v` was specified on the command line.
