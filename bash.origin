@@ -205,7 +205,7 @@ function init {
 
 		function checkPath {
 			BO_log "$VERBOSE" "BO_followPointer:checkPath($1)"
-			if [ -d "$1/$_POINTER_LOOKUP_FILENAME" ]; then
+			if [ -d "$1/$_POINTER_LOOKUP_FILENAME" ] || [ -h "$1/$_POINTER_LOOKUP_FILENAME" ]; then
 				checkPath "$1/$_POINTER_LOOKUP_FILENAME"
 			elif [ -e "$1/$_POINTER_LOOKUP_FILENAME" ]; then
 				POINTER_VALUE=`cat $1/$_POINTER_LOOKUP_FILENAME`
