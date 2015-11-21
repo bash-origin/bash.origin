@@ -64,10 +64,10 @@ function init {
 	function BO_checkVerbose {
 		local _VERBOSE="$VERBOSE"
 		# Look for '-v', '--verbose', '-d' or '--debug' flags.
-		if echo "$@" | grep -q -Ee '($|\s*)--?(\w*[vd]\w*|verbose|debug)(\s*|$)'; then
+		if echo "$@" | grep -q -Ee '($|\s*)--?([vd]|verbose|debug)(\s*|$)'; then
 		    _VERBOSE="1"
 		fi
-		if echo "$npm_config_argv" | grep -q -Ee '"--?(\w*[vd]\w*|verbose|debug)"'; then
+		if echo "$npm_config_argv" | grep -q -Ee '"--?([vd]|verbose|debug)"'; then
 		    _VERBOSE="1"
 		fi
 #		if [ "$_VERBOSE" == "1" ]; then
@@ -631,7 +631,7 @@ function init {
 			# TODO: Copy if version has changed.
 			BO_log "$VERBOSE" "$BO_LOG_PREFIX""Skip copy of '$1' as '$BO_ROOT_SCRIPT_PATH' already exists."
 		fi
-		BO_log "$VERBOSE" "$BO_LOG_PREFIX""boot.origin installed!"
+		BO_log "$VERBOSE" "$BO_LOG_PREFIX""bash.origin installed!"
 	}
 
 	function BO_self_update {
@@ -647,7 +647,7 @@ exit 1
 		if [ "$FOUND_PREVIOUS_CACHE" == "0" ]; then
 			rm -Rf "$BO_SYSTEM_CACHE_DIR"
 		fi
-		echo "$BO_LOG_PREFIX""boot.origin updated!"
+		echo "$BO_LOG_PREFIX""bash.origin updated!"
 	}
 
 	if [ "$1" == "BO" ]; then
