@@ -603,7 +603,10 @@ function init {
 		fi
 		BO_log "$VERBOSE" "[BO_ensurePlugin] Call plugin: $PLUGIN_PATH_"
 		BO_sourcePrototype "$PLUGIN_PATH_"
-		"$2" ${*:3}
+		local func="$2"
+		shift
+		shift
+		"$func" "$@"
 	}
 
 
