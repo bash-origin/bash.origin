@@ -517,15 +517,15 @@ function init {
 			return 1
 	  	fi
 	  	if [ -e "$ARCHIVE_DOWNLOAD_PATH__" ]; then
-			echo "$BO_LOG_PREFIX""Download path '$ARCHIVE_DOWNLOAD_PATH__' exists. Removing."
+			BO_log "$VERBOSE" "${BO_LOG_PREFIX}Download path '$ARCHIVE_DOWNLOAD_PATH__' exists. Removing."
 			rm -Rf "$ARCHIVE_DOWNLOAD_PATH__"
 	  	fi
-		echo "$BO_LOG_PREFIX""Downloading '$DOWNLOAD_URL_' to '$ARCHIVE_DOWNLOAD_PATH__'"
+		BO_log "$VERBOSE" "${BO_LOG_PREFIX}Downloading '$DOWNLOAD_URL_' to '$ARCHIVE_DOWNLOAD_PATH__'"
 		download -s "$DOWNLOAD_URL_" -o "$ARCHIVE_DOWNLOAD_PATH__" || {
 			echo >&2 "$BO_LOG_PREFIX""Failed to download '$ARCHIVE_DOWNLOAD_PATH__'"
 			return 1
 		}
-		echo "$BO_LOG_PREFIX""Extracting '$ARCHIVE_DOWNLOAD_PATH__' to '$DOWNLOAD_PATH__'"
+		BO_log "$VERBOSE" "${BO_LOG_PREFIX}Extracting '$ARCHIVE_DOWNLOAD_PATH__' to '$DOWNLOAD_PATH__'"
 		BO_ensureExtracted "EXTRACTED_PATH__" "$ARCHIVE_DOWNLOAD_PATH__" || {
 			echo >&2 "$BO_LOG_PREFIX""Failed to extract '$ARCHIVE_DOWNLOAD_PATH__'"
 			return 1
