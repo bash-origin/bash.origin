@@ -217,6 +217,20 @@ Remove a path from the `PATH` environment variable.
 Prepend a path to the `PATH` environment variable.
 
 
+### `BO_if_os`
+
+Test for `linux`, `darwin` and others against `$OSTYPE`
+
+Example: `BO_if_os linux && ...`
+
+
+### `BO_if_nix`
+
+Test for `gnu`, `bsd` and `sun`.
+
+Example: `BO_if_nix gnu && ...`
+
+
 ### `BO_log`
 
 Log a message respecting *verbose* flag:
