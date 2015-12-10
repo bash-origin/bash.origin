@@ -143,10 +143,19 @@ function init {
 	fi
 	export BO_SYSTEM_CACHE_DIR
 
-	BO_VERSION_NVM="0.25.4"
-	BO_VERSION_NVM_NODE="0.10"
-	BO_VERSION_NVM_IOJS="iojs-v3.0.0"
-	BO_VERSION_SMI_CLI="0.35.14"
+	if [ -z "$BO_VERSION_NVM" ]; then
+		BO_VERSION_NVM="0.29.0"
+	fi
+	if [ -z "$BO_VERSION_NVM_NODE" ]; then
+		BO_VERSION_NVM_NODE="4"
+	fi
+	if [ -z "$BO_VERSION_NVM_IOJS" ]; then
+		# DEPRECATED
+		BO_VERSION_NVM_IOJS="iojs-v3.0.0"
+	fi
+	if [ -z "$BO_VERSION_SMI_CLI" ]; then
+		BO_VERSION_SMI_CLI="0.35.14"
+	fi
 
 
 	###############################
@@ -303,6 +312,7 @@ function init {
 		fi
 	}
 
+	# DEPRECATED
 	function BO_ensure_iojs {
 # TODO: Check if 'node' command corresponds to our version		
 #		if BO_has "node"; then
@@ -352,6 +362,7 @@ function init {
 		node $@
 	}
 
+	# DEPRECATED
 	function BO_run_iojs {
 		BO_ensure_iojs
 		node $@
