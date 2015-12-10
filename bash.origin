@@ -566,11 +566,17 @@ function init {
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.zip$//g'`
 			if [ ! -d "$EXTRACTED_PATH_" ]; then			
 				pushd "$(dirname $DOWNLOADED_PATH_)" > /dev/null
-					unzip -d "$(basename $EXTRACTED_PATH_)" "$(basename $DOWNLOADED_PATH_)"
-					local RESOLVED_PATH=("${EXTRACTED_PATH_}"/*)
-					mv -f "${RESOLVED_PATH}"/* "$(basename $EXTRACTED_PATH_)"
-					mv -f "${RESOLVED_PATH}"/.* "$(basename $EXTRACTED_PATH_)"
-					rm -Rf "$RESOLVED_PATH"
+					rm -Rf "__$(basename $EXTRACTED_PATH_)" > /dev/null || true
+					mkdir "__$(basename $EXTRACTED_PATH_)"
+					unzip -q -d "__$(basename $EXTRACTED_PATH_)" "$(basename $DOWNLOADED_PATH_)"
+					local RESOLVED_PATH=("__$(basename $EXTRACTED_PATH_)"/*)
+					if [ -d "$RESOLVED_PATH" ]; then
+						mv -f "$RESOLVED_PATH" "$(basename $EXTRACTED_PATH_)"
+					else
+						mv -f "$RESOLVED_PATH"/* "$(basename $EXTRACTED_PATH_)"
+						mv -f "$RESOLVED_PATH"/.* "$(basename $EXTRACTED_PATH_)"
+					fi
+					rm -Rf "__$(basename $EXTRACTED_PATH_)" > /dev/null || true
 				popd > /dev/null
 			fi
 			BO_setResult $1 "$EXTRACTED_PATH_"
