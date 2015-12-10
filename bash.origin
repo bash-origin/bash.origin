@@ -541,9 +541,12 @@ function init {
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.tar\.gz$//g'`
 			if [ ! -d "$EXTRACTED_PATH_" ]; then
 				pushd "$(dirname $DOWNLOADED_PATH_)" > /dev/null
-					tar -xzf "$(basename $DOWNLOADED_PATH_)"
-					local RESOLVED_PATH=("$(pwd)"/*/*)
+					rm -Rf "__$(basename $EXTRACTED_PATH_)" > /dev/null || true
+					mkdir "__$(basename $EXTRACTED_PATH_)"
+					tar -xzf "$(basename $DOWNLOADED_PATH_)" -C "__$(basename $EXTRACTED_PATH_)"
+					local RESOLVED_PATH=("$(pwd)"/__"$(basename $EXTRACTED_PATH_)"/*/*)
 					mv -f "$(dirname "$RESOLVED_PATH")" "$(basename $EXTRACTED_PATH_)"
+					rm -Rf "__$(basename $EXTRACTED_PATH_)" > /dev/null || true
 				popd > /dev/null
 			fi
 			BO_setResult $1 "$EXTRACTED_PATH_"
