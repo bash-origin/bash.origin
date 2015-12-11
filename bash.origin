@@ -316,11 +316,12 @@ function init {
 #		fi
 		BO_ensure_nvm
 		BO_log "$VERBOSE" "Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
-		nvm use "$BO_VERSION_NVM_NODE" > /dev/null 2>&1
-		if [ $? -ne 0 ]; then
+		function installAndUse {
+			BO_log "$VERBOSE" "Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 			nvm install "$BO_VERSION_NVM_NODE"
 			nvm use "$BO_VERSION_NVM_NODE"
-		fi
+		}
+		nvm use "$BO_VERSION_NVM_NODE" > /dev/null 2>&1 || installAndUse
 	}
 
 	# DEPRECATED
