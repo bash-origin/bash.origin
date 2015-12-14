@@ -315,13 +315,16 @@ function init {
 #			return
 #		fi
 		BO_ensure_nvm
-		BO_log "$VERBOSE" "Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 		function installAndUse {
 			BO_log "$VERBOSE" "Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 			nvm install "$BO_VERSION_NVM_NODE"
-			nvm use "$BO_VERSION_NVM_NODE"
+			nvm use "$BO_VERSION_NVM_NODE" > /dev/null 2>&1
 		}
-		nvm use "$BO_VERSION_NVM_NODE" > /dev/null 2>&1 || installAndUse
+		# If major version matches we do not activate.
+		if ! BO_has node || [ "$(echo "$(node --version)" | perl -pe 's/^v(\d+)\..+$/$1/')" != "$BO_VERSION_NVM_NODE" ] ; then
+			BO_log "$VERBOSE" "Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
+			nvm use "$BO_VERSION_NVM_NODE" > /dev/null 2>&1 || installAndUse
+		fi
 	}
 
 	# DEPRECATED
