@@ -90,6 +90,7 @@ function init {
 	BO_checkVerbose "VERBOSE" "$@"
 	export VERBOSE
 
+	export BO_LOADED=1
 
 	###############################
 	# Delegate if requested
