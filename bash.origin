@@ -307,14 +307,13 @@ function init {
 	}
 
 	function BO_ensure_node {
-# TODO: Check if 'node' command corresponds to our version		
-#		if BO_has "node"; then
-#			return
-#		fi
+		if [[ "$(node --version)" == "v${BO_VERSION_NVM_NODE}."* ]]; then
+			return
+		fi
 		BO_sourceProfile
-#		if BO_has "node"; then
-#			return
-#		fi
+		if [[ "$(node --version)" == "v${BO_VERSION_NVM_NODE}."* ]]; then
+			return
+		fi
 		BO_ensure_nvm
 		function installAndUse {
 			BO_log "$VERBOSE" "Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
