@@ -353,6 +353,13 @@ Taken from the [examples/06-ModifyPromptWithPlugin](https://github.com/cadorn/ba
 Instead of using a named plugin an absolute path may be specified. i.e. `/path/to/bash.origin.prompt`.
 
 
+### `BO_cecho`
+
+Write coloured output:
+
+	echo "Hello $(BO_cecho "World" YELLOW)"
+
+
 Use-Cases
 =========
 

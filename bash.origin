@@ -647,6 +647,64 @@ function init {
 		"$func" "$@"
 	}
 
+	function BO_cecho {
+		# Escape sequence and resets
+		ESC_SEQ="\033["
+		RESET_ALL="${ESC_SEQ}0m"
+		RESET_BOLD="${ESC_SEQ}21m"
+		RESET_UL="${ESC_SEQ}24m"
+		NONE=""
+		# Foreground colours
+		FG_BLACK="30"
+		FG_RED="31"
+		FG_GREEN="32"
+		FG_YELLOW="33"
+		FG_BLUE="34"
+		FG_MAGENTA="35"
+		FG_CYAN="36"
+		FG_WHITE="37"
+		FG_BR_BLACK="90"
+		FG_BR_RED="91"
+		FG_BR_GREEN="92"
+		FG_BR_YELLOW="93"
+		FG_BR_BLUE="94"
+		FG_BR_MAGENTA="95"
+		FG_BR_CYAN="96"
+		FG_BR_WHITE="97"
+		# Background colours (optional)
+		BG_BLACK="40"
+		BG_RED="41"
+		BG_GREEN="42"
+		BG_YELLOW="43"
+		BG_BLUE="44"
+		BG_MAGENTA="45"
+		BG_CYAN="46"
+		BG_WHITE="47"
+		# Font styles
+		FS_REG="0"
+		FS_BOLD="1"
+		FS_UL="4"
+
+		# TODO: Make this more flexible
+		message=${1}
+		foreground="NONE"
+		style="FS_REG"
+		background="NONE"
+
+		if [ ! -z "${2}" ]; then
+			foreground="FG_${2}"
+		fi
+		if [ ! -z "${3}" ]; then
+			style="FS_${3}"
+		fi
+		if [ ! -z "${4}" ]; then
+			background="BG_${4}"
+		fi
+
+		# TODO: Include background
+		echo -e "${ESC_SEQ}${!style};${!foreground}m${message}${RESET_ALL}"
+	}
+
 
 	###############################
 	# Act
