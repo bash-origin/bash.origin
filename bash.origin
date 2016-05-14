@@ -685,7 +685,6 @@ function init {
 		FS_BOLD="1"
 		FS_UL="4"
 
-		# TODO: Make this more flexible
 		message=${1}
 		foreground="NONE"
 		style="FS_REG"
@@ -700,9 +699,12 @@ function init {
 		if [ ! -z "${4}" ]; then
 			background="BG_${4}"
 		fi
+		background="${!background}"
+		if [ "${background}" != "" ]; then
+			background=";${background}"
+		fi
 
-		# TODO: Include background
-		echo -e "${ESC_SEQ}${!style};${!foreground}m${message}${RESET_ALL}"
+		echo -e "${ESC_SEQ}${!style};${!foreground}${background}m${message}${RESET_ALL}"
 	}
 
 
