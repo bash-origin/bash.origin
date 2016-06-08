@@ -145,7 +145,7 @@ function init {
 	export BO_SYSTEM_CACHE_DIR
 
 	if [ -z "$BO_VERSION_NVM" ]; then
-		BO_VERSION_NVM="0.29.0"
+		BO_VERSION_NVM="0.31.1"
 	fi
 	if [ -z "$BO_VERSION_NVM_NODE" ]; then
 		BO_VERSION_NVM_NODE="4"
@@ -324,12 +324,24 @@ function init {
 		function installAndUse {
 			#BO_log "$VERBOSE" "Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 			nvm install "$BO_VERSION_NVM_NODE"
-			nvm use "$BO_VERSION_NVM_NODE" > /dev/null 2>&1
+			nvm use --delete-prefix "${BO_VERSION_NVM_NODE}" > /dev/null 2>&1
 		}
 		# If major version matches we do not activate.
 		if ! BO_has node || [ "$(echo "$(node --version)" | perl -pe 's/^v(\d+)\..+$/$1/')" != "$BO_VERSION_NVM_NODE" ] ; then
 			#BO_log "$VERBOSE" "Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
-			nvm use "$BO_VERSION_NVM_NODE" > /dev/null 2>&1 || installAndUse
+
+			nvm use --delete-prefix "${BO_VERSION_NVM_NODE}" > /dev/null 2>&1 || installAndUse
+			#result=$((nvm use --delete-prefix "${BO_VERSION_NVM_NODE}") 2>&1)
+			#echo "RESULT: $result"
+			#echo "CODE: $?"
+			#if [[ ${result} == *"npm config delete prefix"* ]]; then
+			#	cmd=$(echo "${result}" | grep "nvm use --delete-prefix ${BO_VERSION_NVM_NODE}" | perl -pe 's/^.*(nvm use --delete-prefix [^`]+)`.*$/$1/')
+			#	if [ ! -z "${cmd}" ]; then
+			#		$cmd
+			#	    npm --prefix="" set prefix ""
+			#		npm config set prefix ""
+			#	fi
+			#fi
 		fi
 		if [ "${1}" == "default" ]; then
 	        nvm alias default node
