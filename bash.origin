@@ -327,14 +327,16 @@ function init {
 			# @see http://mywiki.wooledge.org/BashFAQ/105
 			set +e
 			nvm install "$BO_VERSION_NVM_NODE"
-			set -e
 			nvm use --delete-prefix "${BO_VERSION_NVM_NODE}" > /dev/null 2>&1
+			set -e
 		}
 		# If major version matches we do not activate.
 		if ! BO_has node || [ "$(echo "$(node --version)" | perl -pe 's/^v(\d+)\..+$/$1/')" != "$BO_VERSION_NVM_NODE" ] ; then
 			BO_log "$BO_VERBOSE" "Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 
+			set +e
 			nvm use --delete-prefix "${BO_VERSION_NVM_NODE}" > /dev/null 2>&1 || installAndUse
+			set -e
 			#result=$((nvm use --delete-prefix "${BO_VERSION_NVM_NODE}") 2>&1)
 			#echo "RESULT: $result"
 			#echo "CODE: $?"
@@ -347,6 +349,7 @@ function init {
 			#	fi
 			#fi
 		fi
+		# TODO: Do not set default if already set.
 		if [ "${1}" == "default" ]; then
 	        nvm alias default node
 	    fi
