@@ -26,9 +26,15 @@ Install
 Use in bash to copy the `bash.origin` script to `~/.bash.origin`:
 
 	#!/bin/bash
-	if [ ! -f "$HOME/.bash.origin" ]; then
-		# TODO: Alternatively use `wget`
-		curl "https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin?t=$(date +%s)" | BO="install" sh
+	# Source https://github.com/bash-origin/bash.origin
+	if [ -z "${BO_LOADED}" ]; then
+		if [ ! -f "$HOME/.bash.origin" ]; then
+		    curl -s -o ".bash.origin" "https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin?t=$(date +%s)"
+		    chmod u+x ./.bash.origin
+		    export BO_VERBOSE=1
+		    ./.bash.origin BO install
+		fi
+	    . "$HOME/.bash.origin"
 	fi
 
 Use [npm](http://npmjs.org) to copy the `bash.origin` script to `~/.bash.origin`:
