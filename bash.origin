@@ -200,7 +200,13 @@ function init {
 		#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
 		BO_IS_SOURCING="1"
 		#BO_log "$VERBOSE" "BO_sourcePrototype $1"
-	    . "$1" ${*:2}
+		if [ "${*:2}" == "" ]; then
+			# NOTE: If no arguments specified the source path becomes part of the arguments
+			#       so we provide an empty one which fixes this for bash.
+		    . "$1" ""
+		else
+		    . "$1" ${*:2}
+		fi
 		#while IFS= read -r -d $'\0' line; do
 		#    export "$line"
 		#done < <(bash -s <<< 'export VARNAME=something; env -0')
