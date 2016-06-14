@@ -118,8 +118,14 @@ function init {
 			fi
 		fi
 	else
-		BO_ensure_env_HOME "Use default .bash.origin"
-		BO_ROOT_SCRIPT_PATH="$HOME/.bash.origin"
+		if [ -e "$BO_DIR/bash.origin" ]; then
+			BO_ROOT_SCRIPT_PATH="$BO_DIR/bash.origin"
+		elif [ -e "$BO_DIR/.bash.origin" ]; then
+			BO_ROOT_SCRIPT_PATH="$BO_DIR/.bash.origin"
+		else
+			BO_ensure_env_HOME "Use default .bash.origin"
+			BO_ROOT_SCRIPT_PATH="$HOME/.bash.origin"
+		fi
 	fi
 
 
@@ -198,8 +204,12 @@ function init {
 		fi
 		local __ON_INIT__BO_IS_SOURCING
 		#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
+		local __PREVIOUS_BO_IS_SOURCING="$BO_IS_SOURCING"
+		local __PREVIOUS_BO_LOADED="$BO_LOADED"
+		# TODO: Reset all relevant variables.
 		BO_IS_SOURCING="1"
-		BO_log "$BO_VERBOSE" "BO_sourcePrototype $1"
+		BO_LOADED=1
+		BO_log "$BO_VERBOSE" "[BO_sourcePrototype] $1"
 		if [ "${*:2}" == "" ]; then
 			# NOTE: If no arguments specified the source path becomes part of the arguments
 			#       so we provide an empty one which fixes this for bash.
@@ -207,6 +217,9 @@ function init {
 		else
 		    . "$1" ${*:2}
 		fi
+		# TODO: Restore all relevant variables.
+		BO_IS_SOURCING="$__PREVIOUS_BO_IS_SOURCING"
+		BO_LOADED="$__PREVIOUS_BO_LOADED"
 		#while IFS= read -r -d $'\0' line; do
 		#    export "$line"
 		#done < <(bash -s <<< 'export VARNAME=something; env -0')
