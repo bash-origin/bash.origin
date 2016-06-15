@@ -6,6 +6,12 @@ function init {
 	local ORIGINAL_BO_ROOT_SCRIPT_PATH="$BO_ROOT_SCRIPT_PATH"
 
 
+	if [ "$(ps -p $$ | tail -1 | awk '{ print $4 }' | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
+			echo "[BO] ERROR: You must be using the 'bash' shell! ZSH support is planned."
+			exit 1
+	fi
+
+
 	###############################
 	# Declare Boot Globals
 	###############################
