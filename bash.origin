@@ -302,7 +302,7 @@ function init {
 
 	# @see http://stackoverflow.com/a/29239609/330439
 	function BO_if_os { [[ $OSTYPE == *$1* ]]; }
-	function BO_if_nix { 
+	function BO_if_nix {
 	    case "$OSTYPE" in
 	        *linux*|*hurd*|*msys*|*cygwin*|*sua*|*interix*) sys="gnu";;
 	        *bsd*|*darwin*) sys="bsd";;
@@ -370,7 +370,7 @@ function init {
 
 	# DEPRECATED
 	function BO_ensure_iojs {
-# TODO: Check if 'node' command corresponds to our version		
+# TODO: Check if 'node' command corresponds to our version
 #		if BO_has "node"; then
 #			return
 #		fi
@@ -611,7 +611,7 @@ function init {
 			return 0
 		elif [[ "$DOWNLOADED_PATH_" == *".zip" ]]; then
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.zip$//g'`
-			if [ ! -d "$EXTRACTED_PATH_" ]; then			
+			if [ ! -d "$EXTRACTED_PATH_" ]; then
 				pushd "$(dirname $DOWNLOADED_PATH_)" > /dev/null
 					rm -Rf "__$(basename $EXTRACTED_PATH_)" > /dev/null || true
 					mkdir "__$(basename $EXTRACTED_PATH_)"
@@ -635,7 +635,7 @@ function init {
 			BO_setResult $1 "$EXTRACTED_PATH_"
 			return 0
 		else
-			echo >&2 "$BO_LOG_PREFIX""ERROR: Unable to extract path '$DOWNLOADED_PATH_'!"			
+			echo >&2 "$BO_LOG_PREFIX""ERROR: Unable to extract path '$DOWNLOADED_PATH_'!"
 			return 1
 		fi
 	}
@@ -776,7 +776,7 @@ function init {
 	}
 
 	function BO_self_update {
-echo "TODO: BO_self_update"		
+echo "TODO: BO_self_update"
 exit 1
 		local BASH_ORIGIN_PATH
 		local FOUND_PREVIOUS_CACHE="0"
