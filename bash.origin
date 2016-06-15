@@ -760,25 +760,38 @@ function init {
 
 	function BO_self_install {
 		BO_checkVerbose "VERBOSE" "$@"
-		if [ "$2" == "-f" ]; then
-			BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Removing '$BO_ROOT_SCRIPT_PATH' due to forced-install (BO install -f)"
-			rm -f "$BO_ROOT_SCRIPT_PATH" || true
-		fi
-		if [ ! -e "$BO_ROOT_SCRIPT_PATH" ]; then
+
+		# TODO: Introduce external variable to set target install path
+		local installTargetPath="$ORIGINAL_BO_ROOT_SCRIPT_PATH"
+		if [ -z "$installTargetPath" ]; then
+				# Target path not set so we use the default one
+				BO_ensure_env_HOME "Use default .bash.origin"
+				installTargetPath="$HOME/.bash.origin"
+		elif [ ! -e "$installTargetPath" ]; then
 			# We may have an old 'BO_ROOT_SCRIPT_PATH' set that no longer exists.
 			# We assue that is the case if the parent path no longer exists.
 			# If you don't want the path to be reset make sure the parent path exists!
-			if [ ! -e "$(dirname $BO_ROOT_SCRIPT_PATH)" ]; then
+			if [ ! -e "$(dirname $installTargetPath)" ]; then
 				BO_ensure_env_HOME "Use default .bash.origin"
-				BO_ROOT_SCRIPT_PATH="$HOME/.bash.origin"
+				installTargetPath="$HOME/.bash.origin"
 			fi
-			BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Copying '$1' to '$BO_ROOT_SCRIPT_PATH'"
-			cp -f "$1" "$BO_ROOT_SCRIPT_PATH"
-		else
-			# TODO: Copy if version has changed.
-			BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Skip copy of '$1' as '$BO_ROOT_SCRIPT_PATH' already exists."
 		fi
-		BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""bash.origin installed!"
+		if [ "$installTargetPath" == "$1" ]; then
+				BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Skip copy of '$1' to '$installTargetPath' as path is the same."
+		else
+				if [ "$2" == "-f" ]; then
+					BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Removing '$installTargetPath' due to forced-install (BO install -f)"
+					rm -f "$installTargetPath" || true
+				fi
+				if [ ! -e "$installTargetPath" ]; then
+					BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Copying '$1' to '$installTargetPath'"
+					cp -f "$1" "$installTargetPath"
+				else
+					# TODO: Copy if version has changed.
+					BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Skip copy of '$1' as '$installTargetPath' already exists."
+				fi
+				BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""bash.origin installed!"
+		fi
 	}
 
 	function BO_self_update {
