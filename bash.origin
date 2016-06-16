@@ -73,11 +73,15 @@ function init {
 	}
 
 	function BO_sourceProfile {
-		BO_ensure_env_HOME "BO_sourceProfile"
-		if [ -f "$HOME/.profile" ]; then
-			. "$HOME/.profile"
-		elif [ -f "$HOME/.bash_profile" ]; then
-			. "$HOME/.bash_profile"
+		# TODO: Allow sourcing multiple times if 'force' argument provided.
+		if [ -z "$BO_sourceProfile__sourced" ]; then
+			export BO_sourceProfile__sourced=1
+			BO_ensure_env_HOME "BO_sourceProfile"
+			if [ -f "$HOME/.profile" ]; then
+				. "$HOME/.profile"
+			elif [ -f "$HOME/.bash_profile" ]; then
+				. "$HOME/.bash_profile"
+			fi
 		fi
 	}
 
