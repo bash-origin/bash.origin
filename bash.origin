@@ -413,7 +413,9 @@ function init {
 		pushd "$NVM_PATH_" > /dev/null
 			BO_log "$BO_VERBOSE" "Loading nvm from '$NVM_PATH_/nvm.sh'"
 			export NVM_EXEC_PATH="$NVM_PATH_/nvm-exec"
+			set +e
 			. "$NVM_PATH_/nvm.sh"
+			set -e
 		popd > /dev/null
 #		curl \
 #		    -H "Pragma: no-cache, must-revalidate" \
