@@ -3,7 +3,7 @@ bash.origin
 
 The original spark for this project came from needing an easy way to get the **path of the current Bast script** which is [way harder than it should be](http://stackoverflow.com/a/246128/330439).
 
-It has turned into a set of Bash conventions and utilities to bootstrap a system.
+It has turned into a set of [Bash](https://www.gnu.org/software/bash/) conventions and utilities to bootstrap a system.
 
 I needed a consistent starting point for Bash scripts so I don't have to re-write the same code over and over when writing scripts to bootstrap `node` and other programs.
 
@@ -404,4 +404,3 @@ License
 Original Author: [Christoph Dorn](http://christophdorn.com)
 
 [UNLICENSE](http://unlicense.org/)
-
