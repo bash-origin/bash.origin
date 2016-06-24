@@ -16,7 +16,7 @@ function init {
 			return 1
 	fi
 	if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
-			echo "[BO] ERROR: You must be using the 'bash' shell! ZSH support is planned.\n"
+			echo "[BO] ERROR: You must be using the 'bash' shell! Your 'SHELL' environment variable is set to '$SHELL' while it should be set to '**/bash'\n"
 			echo -e "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
 			echo -e "             SHELL=\"/bin/bash\" /bin/bash\n"
 			echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
