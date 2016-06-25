@@ -6,8 +6,12 @@ function init {
 	local ORIGINAL_BO_ROOT_SCRIPT_PATH="$BO_ROOT_SCRIPT_PATH"
 
 
-	if [ "$(ps -p $$ | tail -1 | awk '{ print $4 }' | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
-			echo "[BO] ERROR: You must be using the 'bash' interpreter! ZSH support is planned.\n"
+	set +e
+	local __BO_SHELL="$(ps | perl -pe "s/^\s*$$\s+.*?(bash).*?$/\$1/" | grep '^bash$')"
+	set -e
+	#if [ "$(ps -p $$ | tail -1 | awk '{ print $4 }' | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
+	if [ "$__BO_SHELL" != "bash" ]; then
+			echo "[BO] ERROR: You must be using the 'bash' shell interpreter!\n"
 			echo -e "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
 			echo -e "             SHELL=\"/bin/bash\" /bin/bash\n"
 			echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
