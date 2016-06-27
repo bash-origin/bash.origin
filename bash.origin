@@ -3,31 +3,34 @@
 # License: http://unlicense.org/
 function init {
 
-	local ORIGINAL_BO_ROOT_SCRIPT_PATH="$BO_ROOT_SCRIPT_PATH"
-
-
-	set +e
-	local __BO_SHELL="$(ps | perl -pe "s/^\s*$$\s+.*?(bash).*?$/\$1/" | grep '^bash$')"
-	set -e
-	#if [ "$(ps -p $$ | tail -1 | awk '{ print $4 }' | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
-	if [ "$__BO_SHELL" != "bash" ]; then
-			echo "[BO] ERROR: You must be using the 'bash' shell interpreter!\n"
-			echo -e "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
-			echo -e "             SHELL=\"/bin/bash\" /bin/bash\n"
-			echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
-			echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
-			echo -e "             # Now open a new terminal\n"
-			return 1
+	if [ ! -z "$BO_LOADED" ]; then
+			# If we loaded before we do not load again.
+			return;
 	fi
+
+	# If 'SHELL' is set to 'bash$' that is good enough for us.
 	if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
-			echo "[BO] ERROR: You must be using the 'bash' shell! Your 'SHELL' environment variable is set to '$SHELL' while it should be set to '**/bash'\n"
-			echo -e "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
-			echo -e "             SHELL=\"/bin/bash\" /bin/bash\n"
-			echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
-			echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
-			echo -e "             # Now open a new terminal\n"
-			return 1
+			# 'SHELL' is not what we need so we try and verify that we are running in `bash`
+			# by looking for `bash` in the process description.
+			# TODO: Use additional ways to detect if we are running in bash.
+			set +e
+			local __BO_SHELL="$(ps | perl -pe "s/^\s*$$\s+.*?(bash).*?$/\$1/" | grep '^bash$')"
+			set -e
+			#if [ "$(ps -p $$ | tail -1 | awk '{ print $4 }' | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
+			if [ "$__BO_SHELL" != "bash" ]; then
+					echo -e "[BO] WARNING: Your 'SHELL' environment variable is set to '$SHELL' while it should be set to '**/bash'\n"
+					echo -e "[BO] ERROR: You must be using the 'bash' shell interpreter!\n"
+					echo -e "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
+					echo -e "             SHELL=\"/bin/bash\" /bin/bash\n"
+					echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
+					echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
+					echo -e "             # Now open a new terminal\n"
+					return 1
+			fi
 	fi
+
+
+	local ORIGINAL_BO_ROOT_SCRIPT_PATH="$BO_ROOT_SCRIPT_PATH"
 
 
 	###############################
