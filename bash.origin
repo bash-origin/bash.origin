@@ -651,6 +651,7 @@ function init {
 	}
 
 	function BO_ensureExtracted {
+		BO_log "$BO_VERBOSE" "[BO_ensureExtracted] args: $@"
 		local DOWNLOADED_PATH_="$2"
 		if [[ "$DOWNLOADED_PATH_" == *".tar.gz" ]]; then
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.tar\.gz$//g'`
@@ -665,6 +666,7 @@ function init {
 				popd > /dev/null
 			fi
 			BO_setResult $1 "$EXTRACTED_PATH_"
+			BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:1"
 			return 0
 		elif [[ "$DOWNLOADED_PATH_" == *".zip" ]]; then
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.zip$//g'`
@@ -672,27 +674,31 @@ function init {
 				pushd "$(dirname $DOWNLOADED_PATH_)" > /dev/null
 					rm -Rf "__$(basename $EXTRACTED_PATH_)" > /dev/null || true
 					mkdir "__$(basename $EXTRACTED_PATH_)"
+					BO_log "$BO_VERBOSE" "[BO_ensureExtracted] Extract '$(basename $DOWNLOADED_PATH_)' to '__$(basename $EXTRACTED_PATH_)' (pwd: '$(pwd)')"
 					unzip -q -d "__$(basename $EXTRACTED_PATH_)" "$(basename $DOWNLOADED_PATH_)"
 					local RESOLVED_PATH=("__$(basename $EXTRACTED_PATH_)"/*)
 					if [ -d "$RESOLVED_PATH" ]; then
 						mv -f "$RESOLVED_PATH" "$(basename $EXTRACTED_PATH_)"
 					else
-						mv -f "$RESOLVED_PATH"/* "$(basename $EXTRACTED_PATH_)"
-						mv -f "$RESOLVED_PATH"/.* "$(basename $EXTRACTED_PATH_)"
+						mkdir "$(basename $EXTRACTED_PATH_)"
+						mv -f "$RESOLVED_PATH" "$(basename $EXTRACTED_PATH_)/$(basename $RESOLVED_PATH)"
 					fi
 					rm -Rf "__$(basename $EXTRACTED_PATH_)" > /dev/null || true
 				popd > /dev/null
 			fi
 			BO_setResult $1 "$EXTRACTED_PATH_"
+			BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:2"
 			return 0
 		elif [[ "$DOWNLOADED_PATH_" == *".phar" ]]; then
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.phar$//g'`
 			ln -s "$(basename "$DOWNLOADED_PATH_")" "$EXTRACTED_PATH_"
 			# No need to extract.
 			BO_setResult $1 "$EXTRACTED_PATH_"
+			BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:3"
 			return 0
 		else
 			echo >&2 "$BO_LOG_PREFIX""ERROR: Unable to extract path '$DOWNLOADED_PATH_'!"
+			BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:4"
 			return 1
 		fi
 	}
