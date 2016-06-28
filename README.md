@@ -143,6 +143,11 @@ The whole point is that these **paths are predictable** and can be assumed as pr
 Utilities
 =========
 
+### `BO_resetLoaded`
+
+Reset various environment variables so that BO can be sourced into the current shell again.
+
+
 ### `BO_format`
 
 Log wrapped data or other templates:

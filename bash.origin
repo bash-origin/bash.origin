@@ -115,6 +115,12 @@ function init {
 		BO_setResult "$1" "$_VERBOSE"
 	}
 
+	function BO_resetLoaded {
+			BO_log "$BO_VERBOSE" "[BO_resetLoaded]"
+			export BO_LOADED=
+			export BO_IS_SOURCING=
+			export BO_sourceProfile__sourced=
+	}
 
 	###############################
 	# Boot self
