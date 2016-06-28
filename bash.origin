@@ -88,12 +88,20 @@ function init {
 			if [ -f "$HOME/.bash_profile" ]; then
 				BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.bash_profile'"
 				set +e
-				. "$HOME/.bash_profile"
+				if [ -z "$BO_VERBOSE" ]; then
+						. "$HOME/.bash_profile" >/dev/null 2>&1
+				else
+						. "$HOME/.bash_profile"
+				fi
 				set -e
 			elif [ -f "$HOME/.profile" ]; then
 				BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.profile'"
 				set +e
-				. "$HOME/.profile"
+				if [ -z "$BO_VERBOSE" ]; then
+						. "$HOME/.profile" >/dev/null 2>&1
+				else
+						. "$HOME/.profile"
+				fi
 				set -e
 			fi
 		fi
@@ -379,12 +387,12 @@ function init {
 
 	function BO_ensure_node {
 		BO_log "$BO_VERBOSE" "[BO_ensure_node] args: $@"
-		if [[ "$(node --version || true)" == "v${BO_VERSION_NVM_NODE}."* ]]; then
+		if [[ "$(node --version > /dev/null 2>&1 || true)" == "v${BO_VERSION_NVM_NODE}."* ]]; then
 			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:1"
 			return
 		fi
 		BO_sourceProfile
-		if [[ "$(node --version || true)" == "v${BO_VERSION_NVM_NODE}."* ]]; then
+		if [[ "$(node --version > /dev/null 2>&1 || true)" == "v${BO_VERSION_NVM_NODE}."* ]]; then
 			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:2"
 			return
 		fi
@@ -454,7 +462,11 @@ function init {
 			BO_log "$BO_VERBOSE" "Loading nvm from '$NVM_PATH_/nvm.sh'"
 			export NVM_EXEC_PATH="$NVM_PATH_/nvm-exec"
 			set +e
-			. "$NVM_PATH_/nvm.sh"
+			if [ -z "$BO_VERBOSE" ]; then
+					. "$NVM_PATH_/nvm.sh" >/dev/null 2>&1
+			else
+					. "$NVM_PATH_/nvm.sh"
+			fi
 			set -e
 		popd > /dev/null
 		BO_log "$BO_VERBOSE" "[BO_ensure_nvm] DONE"
