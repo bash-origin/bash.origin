@@ -429,7 +429,11 @@ function init {
 		# TODO: Do not set default if already set.
 		if [ "${1}" == "default" ]; then
 					BO_log "$BO_VERBOSE" "[BO_ensure_node] Setting NodeJS version $BO_VERSION_NVM_NODE as default."
-	        nvm alias default node
+					if [ -z "$BO_VERBOSE" ]; then
+							nvm alias default node > /dev/null 2>&1
+					else
+							nvm alias default node
+					fi
 					BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Setting NodeJS version $BO_VERSION_NVM_NODE as default."
 	    fi
 			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE"
