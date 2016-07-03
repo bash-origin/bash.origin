@@ -252,10 +252,14 @@ function init {
 
 	function BO_sourcePrototype {
 		BO_log "$BO_VERBOSE" "[BO_sourcePrototype] args: $@"
-		if [ ! -e "$1" ]; then
-			echo "$BO_LOG_PREFIX""ERROR: Cannot source '$1'. File not found!"
-			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE:1"
-			return 1
+		local _proto_source_path="$1"
+		if [ ! -e "${_proto_source_path}" ]; then
+				_proto_source_path="${_proto_source_path}.sh"
+				if [ ! -e "${_proto_source_path}" ]; then
+						echo "$BO_LOG_PREFIX""ERROR: Cannot source '${1}' nor '${_proto_source_path}'. File not found!"
+						BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE:1"
+						return 1
+				fi
 		fi
 		local __ON_INIT__BO_IS_SOURCING
 		#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
@@ -264,17 +268,17 @@ function init {
 		# TODO: Reset all relevant variables.
 		BO_IS_SOURCING="1"
 		BO_LOADED=1
-		BO_log "$BO_VERBOSE" "[BO_sourcePrototype] $1"
+		BO_log "$BO_VERBOSE" "[BO_sourcePrototype] ${_proto_source_path}"
 		if [ "${*:2}" == "" ]; then
-			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '$1' using call mthod 1"
+			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call mthod 1"
 			# NOTE: If no arguments specified the source path becomes part of the arguments
 			#       so we provide an empty one which fixes this for bash.
-		    . "$1" ""
-			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '$1' using call mthod 1"
+		    . "${_proto_source_path}" ""
+			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call mthod 1"
 		else
-				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '$1' using call mthod 2"
-		    . "$1" ${*:2}
-				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '$1' using call mthod 2"
+				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call mthod 2"
+		    . "${_proto_source_path}" ${*:2}
+				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call mthod 2"
 		fi
 		# TODO: Restore all relevant variables.
 		BO_IS_SOURCING="$__PREVIOUS_BO_IS_SOURCING"
