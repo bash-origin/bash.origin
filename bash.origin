@@ -222,6 +222,10 @@ function init {
 	# Declare Utility Functions
 	###############################
 
+	function BO_now {
+			BO_setResult "$1" "$(date +%s)"
+	}
+
 	function BO_format {
 		if [ "$1" != "1" ]; then
 			return;

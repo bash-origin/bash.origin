@@ -147,6 +147,11 @@ Utilities
 
 Reset various environment variables so that BO can be sourced into the current shell again.
 
+### `BO_now`
+
+Assign the current unix timestamp to a variable.
+
+		BO_now "ts"
 
 ### `BO_format`
 
