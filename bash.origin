@@ -361,7 +361,13 @@ function init {
 	}
 
 	# @see http://stackoverflow.com/a/29239609/330439
-	function BO_if_os { [[ $OSTYPE == *$1* ]]; }
+	function BO_if_os {
+			local os="$1"
+			if [ "$os" == "osx" ]; then
+					os="darwin"
+			fi
+			[[ $OSTYPE == *$os* ]];
+	}
 	function BO_if_nix {
 	    case "$OSTYPE" in
 	        *linux*|*hurd*|*msys*|*cygwin*|*sua*|*interix*) sys="gnu";;
