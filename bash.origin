@@ -509,8 +509,10 @@ function init {
 	}
 
 	function BO_run_node {
+		BO_log "$BO_VERBOSE" "[BO_run_node] args: $@"
 		BO_ensure_node
 		node $@
+		BO_log "$BO_VERBOSE" "[BO_run_node] END"
 	}
 
 	# DEPRECATED
