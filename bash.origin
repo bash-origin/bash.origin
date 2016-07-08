@@ -410,6 +410,7 @@ function init {
 			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:2"
 			return
 		fi
+		BO_log "$BO_VERBOSE" "[BO_ensure_node] NodeJS version: $(node --version)"
 		BO_ensure_nvm
 		function installAndUse {
 			BO_log "$BO_VERBOSE" "[BO_ensure_node] Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
@@ -511,6 +512,7 @@ function init {
 	function BO_run_node {
 		BO_log "$BO_VERBOSE" "[BO_run_node] args: $@"
 		BO_ensure_node
+		BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
 		node $@
 		BO_log "$BO_VERBOSE" "[BO_run_node] END"
 	}
@@ -522,8 +524,12 @@ function init {
 	}
 
 	function BO_run_npm {
+		BO_log "$BO_VERBOSE" "[BO_run_npm] args: $@"
 		BO_ensure_node
+		BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
+		BO_log "$BO_VERBOSE" "[BO_run_npm] npm version: $(npm --version)"
 		npm $@
+		BO_log "$BO_VERBOSE" "[BO_run_npm] END"
 	}
 
 	function BO_ensure_smi {
