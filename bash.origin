@@ -778,7 +778,7 @@ function init {
 	function BO_ensurePlugin {
 		BO_log "$BO_VERBOSE" "[BO_ensurePlugin] args: $@"
 		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^([^@]+)@/g'`
-		local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@v([^@]+)$/g'`
+		local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@[v]{1}([^@]+)$/g'`
 		if [ ! -z "${PLUGIN_VERSION}" ]; then
 				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		else
