@@ -743,6 +743,10 @@ function init {
 					rm -Rf "__$(basename $EXTRACTED_PATH_)" > /dev/null || true
 					mkdir "__$(basename $EXTRACTED_PATH_)"
 					BO_log "$BO_VERBOSE" "[BO_ensureExtracted] Extract '$(basename $DOWNLOADED_PATH_)' to '__$(basename $EXTRACTED_PATH_)' (pwd: '$(pwd)')"
+					if ! which unzip > /dev/null; then
+							echo >&2 "$BO_LOG_PREFIX""ERROR: You must have 'unzip' installed!"
+							return 1
+					fi
 					unzip -q -d "__$(basename $EXTRACTED_PATH_)" "$(basename $DOWNLOADED_PATH_)"
 					local RESOLVED_PATH=("__$(basename $EXTRACTED_PATH_)"/*)
 					if [ -d "$RESOLVED_PATH" ]; then
