@@ -1,3 +1,4 @@
 /.pio.cache/
 /.deps/
 /.installed.*
+.tmp~*
