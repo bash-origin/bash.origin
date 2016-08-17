@@ -8,6 +8,11 @@ function init {
 			return;
 	fi
 
+	if ! which perl > /dev/null; then
+			echo -e "[BO] ERROR: You must have 'perl' installed!\n"
+			return 1
+	fi
+
 	# If 'SHELL' is set to 'bash$' that is good enough for us.
 	if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
 			# 'SHELL' is not what we need so we try and verify that we are running in `bash`
