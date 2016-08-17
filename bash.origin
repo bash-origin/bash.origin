@@ -401,16 +401,29 @@ function init {
 
 	function BO_ensure_node {
 		BO_log "$BO_VERBOSE" "[BO_ensure_node] args: $@"
-		if [[ "$(node --version > /dev/null 2>&1 || true)" == "v${BO_VERSION_NVM_NODE}."* ]]; then
+		set +e
+		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
+			set -e
 			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:1"
 			return
 		fi
+		set -e
 		BO_sourceProfile
-		if [[ "$(node --version > /dev/null 2>&1 || true)" == "v${BO_VERSION_NVM_NODE}."* ]]; then
+		set +e
+		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
+			set -e
 			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:2"
 			return
 		fi
-		BO_log "$BO_VERBOSE" "[BO_ensure_node] NodeJS version: $(node --version)"
+		set -e
+		BO_log "$BO_VERBOSE" "[BO_ensure_node] PATH: ${PATH}"
+		if [ -e "/usr/bin" ]; then
+				BO_log "$BO_VERBOSE" "[BO_ensure_node] 'ls /usr/bin': $(ls /usr/bin)"
+		fi
+		if [ ! -z "${BO_VERBOSE}" ]; then
+				BO_log "$BO_VERBOSE" "[BO_ensure_node] Existing NodeJS version: $(node --version || true) ($(which node))"
+		fi
+		BO_log "$BO_VERBOSE" "[BO_ensure_node] Desired NodeJS version: v${BO_VERSION_NVM_NODE}"
 		BO_ensure_nvm
 		function installAndUse {
 			BO_log "$BO_VERBOSE" "[BO_ensure_node] Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
@@ -444,11 +457,13 @@ function init {
 		# TODO: Do not set default if already set.
 		if [ "${1}" == "default" ]; then
 					BO_log "$BO_VERBOSE" "[BO_ensure_node] Setting NodeJS version $BO_VERSION_NVM_NODE as default."
+					set +e
 					if [ -z "$BO_VERBOSE" ]; then
 							nvm alias default node > /dev/null 2>&1
 					else
 							nvm alias default node
 					fi
+					set -e
 					BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Setting NodeJS version $BO_VERSION_NVM_NODE as default."
 	    fi
 			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE"
@@ -466,10 +481,14 @@ function init {
 #		fi
 		BO_ensure_nvm
 		BO_log "$BO_VERBOSE" "Activating IO.JS version $BO_VERSION_NVM_IOJS using nvm."
-		nvm use "$BO_VERSION_NVM_IOJS" > /dev/null 2>&1
+		if [ -z "$BO_VERBOSE" ]; then
+				nvm use "$BO_VERSION_NVM_IOJS" > /dev/null 2>&1
+		else
+				nvm use "$BO_VERSION_NVM_IOJS"
+		fi
 		if [ $? -ne 0 ]; then
-			nvm install "$BO_VERSION_NVM_IOJS"
-			nvm use "$BO_VERSION_NVM_IOJS"
+				nvm install "$BO_VERSION_NVM_IOJS"
+				nvm use "$BO_VERSION_NVM_IOJS"
 		fi
 	}
 
