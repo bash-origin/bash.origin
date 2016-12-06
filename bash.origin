@@ -90,8 +90,9 @@ function init {
 		if [ -z "$BO_sourceProfile__sourced" ]; then
 			export BO_sourceProfile__sourced="1"
 			BO_ensure_env_HOME "BO_sourceProfile"
+			local currentDirectory="$(pwd)"
 			if [ -f "$HOME/.bash_profile" ]; then
-				BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.bash_profile'"
+				BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.bash_profile' (pwd: ${currentDirectory})"
 				set +e
 				if [ -z "$BO_VERBOSE" ]; then
 						. "$HOME/.bash_profile" >/dev/null 2>&1
@@ -100,7 +101,7 @@ function init {
 				fi
 				set -e
 			elif [ -f "$HOME/.profile" ]; then
-				BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.profile'"
+				BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.profile' (pwd: ${currentDirectory})"
 				set +e
 				if [ -z "$BO_VERBOSE" ]; then
 						. "$HOME/.profile" >/dev/null 2>&1
@@ -108,6 +109,10 @@ function init {
 						. "$HOME/.profile"
 				fi
 				set -e
+			fi
+			if [ "$(pwd)" != "${currentDirectory}" ]; then
+					BO_log "$BO_VERBOSE" "[BO_sourceProfile] Changing directory back to '${currentDirectory}' (pwd: $(pwd))"
+					cd "${currentDirectory}"
 			fi
 		fi
 		BO_log "$BO_VERBOSE" "[BO_sourceProfile] DONE"
