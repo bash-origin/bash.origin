@@ -91,6 +91,7 @@ function init {
 			export BO_sourceProfile__sourced="1"
 			BO_ensure_env_HOME "BO_sourceProfile"
 			local currentDirectory="$(pwd)"
+			local currentPATH="$PATH"
 			if [ -f "$HOME/.bash_profile" ]; then
 				BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.bash_profile' (pwd: ${currentDirectory})"
 				set +e
@@ -114,6 +115,7 @@ function init {
 					BO_log "$BO_VERBOSE" "[BO_sourceProfile] Changing directory back to '${currentDirectory}' (pwd: $(pwd))"
 					cd "${currentDirectory}"
 			fi
+			export PATH="${currentPATH}"
 		fi
 		BO_log "$BO_VERBOSE" "[BO_sourceProfile] DONE"
 	}
