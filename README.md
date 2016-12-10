@@ -408,6 +408,27 @@ NodeJS Install Script
 	init $@
 
 
+Bootstrapping
+=============
+
+Ensure with `curl`
+------------------
+
+````sh
+if [ ! -z "$VERBOSE" ]; then echo "[ensureBashOrigin] download from: https://raw.githubusercontent.com/bash-origin/bash.origin/d96910b21f2bfd3fc886bde1935efa944c63fc5b/bash.origin"; fi
+curl -s -o ".bash.origin" "https://raw.githubusercontent.com/bash-origin/bash.origin/d96910b21f2bfd3fc886bde1935efa944c63fc5b/bash.origin?t=$(date +%s)"
+if [ ! -e ".bash.origin" ]; then
+    echo -e "\nERROR: Could not download/store bash.origin at '$(pwd)/.bash.origin'!\n"
+    echo -e "ACTION: Ensure your current user can write to '$(pwd)/.bash.origin'."
+    echo -e "        Ensure 'whoami' gives you the username that matches your '\$HOME' directory! If they do not match, reboot your system and try again.\n"
+    exit 1
+fi
+chmod u+x ./.bash.origin
+if [ ! -z "$VERBOSE" ]; then echo "[ensureBashOrigin] source from: ./.bash.origin"; fi
+./.bash.origin BO install -f
+````
+
+
 License
 =======
 

@@ -1,0 +1,16 @@
+#!/bin/bash
+# Source https://github.com/cadorn/bash.origin
+. "../../bash.origin"
+function init {
+		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+		local __BO_DIR__="$___TMP___"
+
+
+		pushd "$__BO_DIR__" > /dev/null
+
+				BO_sourceModule "module.bo.sh"
+
+		popd > /dev/null
+}
+init "$@"

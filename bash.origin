@@ -157,6 +157,17 @@ function init {
 
 	export BO_LOADED=1
 
+	# NOTE: Variables starting with '_BO_' are for primarily internal use
+	#       and should not be set externally other than to force a specific
+	#       internal state for debugging purposes.
+	if [ -z "$_BO_OPTIMIZED" ]; then
+			if [ -z "$BO_VERBOSE" ]; then
+					export _BO_OPTIMIZED=1
+			else
+					export _BO_OPTIMIZED=0
+			fi
+	fi
+
 	###############################
 	# Delegate if requested
 	###############################
@@ -266,13 +277,40 @@ function init {
 		sudo $1
 	}
 
+	function BO_compileModule {
+			BO_log "$BO_VERBOSE" "[BO_compileModule] args: $@"
+			local _raw_module_source_path="$2"
+			local _compiled_module_source_path="$2~.compiled.bash"
+			# If source file is newer than compiled file
+			# TODO: Compile if 'bash.origin.modules' plugin implementation directory is newer than compiled module.
+			if [ $_BO_OPTIMIZED == 0 ] || [ ${_raw_module_source_path} -nt ${_compiled_module_source_path} ]; then
+					BO_log "${BO_VERBOSE}" "[BO_compileModule] Compile source '${_raw_module_source_path}' to '${_compiled_module_source_path}' (pwd: $(pwd))"
+    			BO_callPlugin "bash.origin.modules" compile ${_raw_module_source_path} ${_compiled_module_source_path}
+			fi
+			BO_setResult "$1" "${_compiled_module_source_path}"
+			BO_log "$BO_VERBOSE" "[BO_compileModule] DONE"
+	}
+
+	function BO_sourceModule {
+			BO_log "$BO_VERBOSE" "[BO_sourceModule] args: $@"
+			local _raw_source_path="$1"
+			BO_compileModule "_raw_source_path" "${_raw_source_path}"
+			BO_sourcePrototype "${_raw_source_path}" ${*:2}
+	}
+
 	function BO_sourcePrototype {
 		BO_log "$BO_VERBOSE" "[BO_sourcePrototype] args: $@"
-		local _proto_source_path="$1"
+		local _raw_source_path="$1"
+		# Check if we have a module extension and if we do compile the module first.
+		if [[ "${_raw_source_path}" == *".bo.sh" ]]; then
+				BO_compileModule "_raw_source_path" "${_raw_source_path}"
+		fi
+		# Now load the module
+		local _proto_source_path="${_raw_source_path}"
 		if [ ! -e "${_proto_source_path}" ]; then
 				_proto_source_path="${_proto_source_path}.sh"
 				if [ ! -e "${_proto_source_path}" ]; then
-						echo "$BO_LOG_PREFIX""ERROR: Cannot source '${1}' nor '${_proto_source_path}'. File not found!"
+						echo "$BO_LOG_PREFIX""ERROR: Cannot source '${_raw_source_path}' nor '${_proto_source_path}'. File not found!"
 						BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE:1"
 						return 1
 				fi
@@ -286,15 +324,15 @@ function init {
 		BO_LOADED=1
 		BO_log "$BO_VERBOSE" "[BO_sourcePrototype] ${_proto_source_path}"
 		if [ "${*:2}" == "" ]; then
-			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call mthod 1"
+			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call method 1"
 			# NOTE: If no arguments specified the source path becomes part of the arguments
 			#       so we provide an empty one which fixes this for bash.
 		    . "${_proto_source_path}" ""
-			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call mthod 1"
+			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call method 1"
 		else
-				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call mthod 2"
+				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call method 2"
 		    . "${_proto_source_path}" ${*:2}
-				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call mthod 2"
+				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call method 2"
 		fi
 		# TODO: Restore all relevant variables.
 		BO_IS_SOURCING="$__PREVIOUS_BO_IS_SOURCING"
@@ -430,7 +468,7 @@ function init {
 		set -e
 		BO_log "$BO_VERBOSE" "[BO_ensure_node] PATH: ${PATH}"
 		if [ -e "/usr/bin" ]; then
-				BO_log "$BO_VERBOSE" "[BO_ensure_node] 'ls /usr/bin': $(ls /usr/bin)"
+				BO_log "$BO_VERBOSE" "[BO_ensure_node] 'ls /usr/bin': $(ls /usr/bin | grep node)"
 		fi
 		if [ ! -z "${BO_VERBOSE}" ]; then
 				BO_log "$BO_VERBOSE" "[BO_ensure_node] Existing NodeJS version: $(node --version || true) ($(which node))"
@@ -596,6 +634,7 @@ function init {
 	}
 
 	function BO_systemCachePath {
+		BO_log "$BO_VERBOSE" "[BO_systemCachePath] args: $@"
 		local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
 		local URI_MAJOR_VERSION_=`echo "$3" | perl -wnE 'say for /^\d+/g'`
 		local DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/installed/master"
@@ -784,7 +823,7 @@ function init {
 
 	function BO_ensurePlugin {
 		BO_log "$BO_VERBOSE" "[BO_ensurePlugin] args: $@"
-		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^([^@]+)@/g'`
+		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^([^@]+)@?/g'`
 		local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@[v]{1}([^@]+)$/g'`
 		if [ ! -z "${PLUGIN_VERSION}" ]; then
 				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
@@ -793,11 +832,24 @@ function init {
 				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
 		fi
 		local PLUGIN_PATH=""
+		BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_PLUGIN_SEARCH_DIRPATHS'"
 		if [ ! -z "$BO_PLUGIN_SEARCH_DIRPATHS" ]; then
 			# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
 			if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME" ]; then
-				PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME"
+					PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME"
 			fi
+			if [ "$PLUGIN_PATH" == "" ]; then
+					if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/github.com~bash-origin~$PLUGIN_NAME" ]; then
+						PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/github.com~bash-origin~$PLUGIN_NAME"
+					fi
+			fi
+		fi
+		if [ "$PLUGIN_PATH" == "" ] && [ "$PLUGIN_VERSION" == "" ]; then
+				local __latestVersionLookupUri="https://api.github.com/repos/bash-origin/$PLUGIN_NAME/tags"
+				BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Fetching latest version for 'github.com/bash-origin/$PLUGIN_NAME' from '$__latestVersionLookupUri'"
+curl -s "$__latestVersionLookupUri" | grep '"name": "v'
+echo "TODO: Finish implementing"
+exit 1
 		fi
 		if [ "$PLUGIN_PATH" == "" ]; then
 			BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION"
