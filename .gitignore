@@ -2,3 +2,4 @@
 /.deps/
 /.installed.*
 .tmp~*
+*~.compiled.bash
