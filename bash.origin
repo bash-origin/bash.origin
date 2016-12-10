@@ -85,7 +85,7 @@ function init {
 	}
 
 	function BO_sourceProfile {
-		BO_log "$BO_VERBOSE" "[BO_sourceProfile] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] args: $@"
 		# TODO: Allow sourcing multiple times if 'force' argument provided.
 		if [ -z "$BO_sourceProfile__sourced" ]; then
 			export BO_sourceProfile__sourced="1"
@@ -93,7 +93,7 @@ function init {
 			local currentDirectory="$(pwd)"
 			local currentPATH="$PATH"
 			if [ -f "$HOME/.bash_profile" ]; then
-				BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.bash_profile' (pwd: ${currentDirectory})"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.bash_profile' (pwd: ${currentDirectory})"
 				set +e
 				if [ -z "$BO_VERBOSE" ]; then
 						. "$HOME/.bash_profile" >/dev/null 2>&1
@@ -102,7 +102,7 @@ function init {
 				fi
 				set -e
 			elif [ -f "$HOME/.profile" ]; then
-				BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.profile' (pwd: ${currentDirectory})"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] Source from '$HOME/.profile' (pwd: ${currentDirectory})"
 				set +e
 				if [ -z "$BO_VERBOSE" ]; then
 						. "$HOME/.profile" >/dev/null 2>&1
@@ -112,12 +112,12 @@ function init {
 				set -e
 			fi
 			if [ "$(pwd)" != "${currentDirectory}" ]; then
-					BO_log "$BO_VERBOSE" "[BO_sourceProfile] Changing directory back to '${currentDirectory}' (pwd: $(pwd))"
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] Changing directory back to '${currentDirectory}' (pwd: $(pwd))"
 					cd "${currentDirectory}"
 			fi
 			export PATH="${currentPATH}"
 		fi
-		BO_log "$BO_VERBOSE" "[BO_sourceProfile] DONE"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] DONE"
 	}
 
 	function BO_checkVerbose {
@@ -136,7 +136,7 @@ function init {
 	}
 
 	function BO_resetLoaded {
-			BO_log "$BO_VERBOSE" "[BO_resetLoaded]"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_resetLoaded]"
 			export BO_LOADED=
 			export BO_IS_SOURCING=
 			export BO_sourceProfile__sourced=
@@ -278,28 +278,28 @@ function init {
 	}
 
 	function BO_compileModule {
-			BO_log "$BO_VERBOSE" "[BO_compileModule] args: $@"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] args: $@"
 			local _raw_module_source_path="$2"
 			local _compiled_module_source_path="$2~.compiled.bash"
 			# If source file is newer than compiled file
 			# TODO: Compile if 'bash.origin.modules' plugin implementation directory is newer than compiled module.
 			if [ $_BO_OPTIMIZED == 0 ] || [ ${_raw_module_source_path} -nt ${_compiled_module_source_path} ]; then
-					BO_log "${BO_VERBOSE}" "[BO_compileModule] Compile source '${_raw_module_source_path}' to '${_compiled_module_source_path}' (pwd: $(pwd))"
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] Compile source '${_raw_module_source_path}' to '${_compiled_module_source_path}' (pwd: $(pwd))"
     			BO_callPlugin "bash.origin.modules" compile ${_raw_module_source_path} ${_compiled_module_source_path}
 			fi
 			BO_setResult "$1" "${_compiled_module_source_path}"
-			BO_log "$BO_VERBOSE" "[BO_compileModule] DONE"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] DONE"
 	}
 
 	function BO_sourceModule {
-			BO_log "$BO_VERBOSE" "[BO_sourceModule] args: $@"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceModule] args: $@"
 			local _raw_source_path="$1"
 			BO_compileModule "_raw_source_path" "${_raw_source_path}"
 			BO_sourcePrototype "${_raw_source_path}" ${*:2}
 	}
 
 	function BO_sourcePrototype {
-		BO_log "$BO_VERBOSE" "[BO_sourcePrototype] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] args: $@"
 		local _raw_source_path="$1"
 		# Check if we have a module extension and if we do compile the module first.
 		if [[ "${_raw_source_path}" == *".bo.sh" ]]; then
@@ -311,7 +311,7 @@ function init {
 				_proto_source_path="${_proto_source_path}.sh"
 				if [ ! -e "${_proto_source_path}" ]; then
 						echo "$BO_LOG_PREFIX""ERROR: Cannot source '${_raw_source_path}' nor '${_proto_source_path}'. File not found!"
-						BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE:1"
+						[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE:1"
 						return 1
 				fi
 		fi
@@ -322,17 +322,17 @@ function init {
 		# TODO: Reset all relevant variables.
 		BO_IS_SOURCING="1"
 		BO_LOADED=1
-		BO_log "$BO_VERBOSE" "[BO_sourcePrototype] ${_proto_source_path}"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] ${_proto_source_path}"
 		if [ "${*:2}" == "" ]; then
-			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call method 1"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call method 1"
 			# NOTE: If no arguments specified the source path becomes part of the arguments
 			#       so we provide an empty one which fixes this for bash.
 		    . "${_proto_source_path}" ""
-			BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call method 1"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call method 1"
 		else
-				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call method 2"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call method 2"
 		    . "${_proto_source_path}" ${*:2}
-				BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call method 2"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call method 2"
 		fi
 		# TODO: Restore all relevant variables.
 		BO_IS_SOURCING="$__PREVIOUS_BO_IS_SOURCING"
@@ -340,18 +340,18 @@ function init {
 		#while IFS= read -r -d $'\0' line; do
 		#    export "$line"
 		#done < <(bash -s <<< 'export VARNAME=something; env -0')
-		BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE"
 	}
 
 	function BO_followPointer {
-		BO_log "$BO_VERBOSE" "BO_followPointer($1, $2, $3)"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "BO_followPointer($1, $2, $3)"
 
 		_POINTER_RESULT_VAR="$1"
 		_POINTER_LOOKUP_FILENAME="$3"
 		_POINTER_RESOLVED="0"
 
 		function checkPath {
-			BO_log "$BO_VERBOSE" "BO_followPointer:checkPath($1)"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "BO_followPointer:checkPath($1)"
 			if [ -d "$1/$_POINTER_LOOKUP_FILENAME" ] || [ -h "$1/$_POINTER_LOOKUP_FILENAME" ]; then
 				checkPath "$1/$_POINTER_LOOKUP_FILENAME"
 			elif [ -e "$1/$_POINTER_LOOKUP_FILENAME" ]; then
@@ -437,7 +437,7 @@ function init {
 
 	function BO_ensure_executable {
 		if [[ ! -x "$1" ]]; then
-			BO_log "$BO_VERBOSE" "Making path '$1' executable."
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "Making path '$1' executable."
 			chmod ug+x "$1"
 		fi
 	}
@@ -450,11 +450,11 @@ function init {
 	}
 
 	function BO_ensure_node {
-		BO_log "$BO_VERBOSE" "[BO_ensure_node] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] args: $@"
 		set +e
 		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
-			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:1"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:1"
 			return
 		fi
 		set -e
@@ -462,32 +462,32 @@ function init {
 		set +e
 		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
-			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:2"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:2"
 			return
 		fi
 		set -e
-		BO_log "$BO_VERBOSE" "[BO_ensure_node] PATH: ${PATH}"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] PATH: ${PATH}"
 		if [ -e "/usr/bin" ]; then
-				BO_log "$BO_VERBOSE" "[BO_ensure_node] 'ls /usr/bin': $(ls /usr/bin | grep node)"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] 'ls /usr/bin': $(ls /usr/bin | grep node)"
 		fi
 		if [ ! -z "${BO_VERBOSE}" ]; then
-				BO_log "$BO_VERBOSE" "[BO_ensure_node] Existing NodeJS version: $(node --version || true) ($(which node))"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Existing NodeJS version: $(node --version || true) ($(which node))"
 		fi
-		BO_log "$BO_VERBOSE" "[BO_ensure_node] Desired NodeJS version: v${BO_VERSION_NVM_NODE}"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Desired NodeJS version: v${BO_VERSION_NVM_NODE}"
 		BO_ensure_nvm
 		function installAndUse {
-			BO_log "$BO_VERBOSE" "[BO_ensure_node] Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 			# TODO: Detect if error checking was enabled before disabeling
 			# @see http://mywiki.wooledge.org/BashFAQ/105
 			set +e
 			nvm install "$BO_VERSION_NVM_NODE"
 			nvm use --delete-prefix "${BO_VERSION_NVM_NODE}" > /dev/null 2>&1
 			set -e
-			BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 		}
 		# If major version matches we do not activate.
 		if ! BO_has node || [ "$(echo "$(node --version)" | perl -pe 's/^v(\d+)\..+$/$1/')" != "$BO_VERSION_NVM_NODE" ] ; then
-			BO_log "$BO_VERBOSE" "[BO_ensure_node] Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 			set +e
 			nvm use --delete-prefix "${BO_VERSION_NVM_NODE}" > /dev/null 2>&1 || installAndUse
 			set -e
@@ -502,11 +502,11 @@ function init {
 			#		npm config set prefix ""
 			#	fi
 			#fi
-			BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
 		fi
 		# TODO: Do not set default if already set.
 		if [ "${1}" == "default" ]; then
-					BO_log "$BO_VERBOSE" "[BO_ensure_node] Setting NodeJS version $BO_VERSION_NVM_NODE as default."
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Setting NodeJS version $BO_VERSION_NVM_NODE as default."
 					set +e
 					if [ -z "$BO_VERBOSE" ]; then
 							nvm alias default node > /dev/null 2>&1
@@ -514,9 +514,9 @@ function init {
 							nvm alias default node
 					fi
 					set -e
-					BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Setting NodeJS version $BO_VERSION_NVM_NODE as default."
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Setting NodeJS version $BO_VERSION_NVM_NODE as default."
 	    fi
-			BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE"
 	}
 
 	# DEPRECATED
@@ -530,7 +530,7 @@ function init {
 #			return
 #		fi
 		BO_ensure_nvm
-		BO_log "$BO_VERBOSE" "Activating IO.JS version $BO_VERSION_NVM_IOJS using nvm."
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "Activating IO.JS version $BO_VERSION_NVM_IOJS using nvm."
 		if [ -z "$BO_VERBOSE" ]; then
 				nvm use "$BO_VERSION_NVM_IOJS" > /dev/null 2>&1
 		else
@@ -543,11 +543,11 @@ function init {
 	}
 
 	function BO_ensure_nvm {
-		BO_log "$BO_VERBOSE" "[BO_ensure_nvm] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_nvm] args: $@"
 		# @see https://github.com/creationix/nvm
 		BO_ensureInSystemCache "NVM_PATH_" "github.com/creationix/nvm" "$BO_VERSION_NVM" "https://github.com/creationix/nvm/archive/v$BO_VERSION_NVM.tar.gz"
 		pushd "$NVM_PATH_" > /dev/null
-			BO_log "$BO_VERBOSE" "Loading nvm from '$NVM_PATH_/nvm.sh'"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "Loading nvm from '$NVM_PATH_/nvm.sh'"
 			export NVM_EXEC_PATH="$NVM_PATH_/nvm-exec"
 			set +e
 			if [ -z "$BO_VERBOSE" ]; then
@@ -557,7 +557,7 @@ function init {
 			fi
 			set -e
 		popd > /dev/null
-		BO_log "$BO_VERBOSE" "[BO_ensure_nvm] DONE"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_nvm] DONE"
 #		curl \
 #		    -H "Pragma: no-cache, must-revalidate" \
 #		    -H "Cache-Control: no-cache, must revalidate" \
@@ -579,11 +579,11 @@ function init {
 	}
 
 	function BO_run_node {
-		BO_log "$BO_VERBOSE" "[BO_run_node] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] args: $@"
 		BO_ensure_node
-		BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
 		node $@
-		BO_log "$BO_VERBOSE" "[BO_run_node] END"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] END"
 	}
 
 	# DEPRECATED
@@ -593,12 +593,12 @@ function init {
 	}
 
 	function BO_run_npm {
-		BO_log "$BO_VERBOSE" "[BO_run_npm] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_npm] args: $@"
 		BO_ensure_node
-		BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
-		BO_log "$BO_VERBOSE" "[BO_run_npm] npm version: $(npm --version)"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_npm] npm version: $(npm --version)"
 		npm $@
-		BO_log "$BO_VERBOSE" "[BO_run_npm] END"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_npm] END"
 	}
 
 	function BO_ensure_smi {
@@ -634,16 +634,16 @@ function init {
 	}
 
 	function BO_systemCachePath {
-		BO_log "$BO_VERBOSE" "[BO_systemCachePath] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] args: $@"
 		local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
 		local URI_MAJOR_VERSION_=`echo "$3" | perl -wnE 'say for /^\d+/g'`
 		local DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/installed/master"
-		BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (1): $DOWNLOAD_PATH_"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (1): $DOWNLOAD_PATH_"
 		if [ -d "$DOWNLOAD_PATH_" ]; then
 			BO_setResult $1 "$DOWNLOAD_PATH_"
 		else
 			DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/snapshot/$3"
-			BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (2): $DOWNLOAD_PATH_"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (2): $DOWNLOAD_PATH_"
 		  	local DOWNLOAD_DIR_="$( dirname "$DOWNLOAD_PATH_")"
 		  	if [ "$4" != "nocreate" ]; then
 			  	if [ ! -d "$DOWNLOAD_DIR_" ]; then
@@ -658,12 +658,12 @@ function init {
 		local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
 		local URI_MAJOR_VERSION_=`echo "$3" | perl -wnE 'say for /^\d+/g'`
 		local DOWNLOAD_PATH_="$BO_GLOBAL_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/installed/master"
-		BO_log "$BO_VERBOSE" "[BO_globalSystemCachePath] Check path (1): $DOWNLOAD_PATH_"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_globalSystemCachePath] Check path (1): $DOWNLOAD_PATH_"
 		if [ -d "$DOWNLOAD_PATH_" ]; then
 			BO_setResult $1 "$DOWNLOAD_PATH_"
 		else
 			DOWNLOAD_PATH_="$BO_GLOBAL_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/snapshot/$3"
-			BO_log "$BO_VERBOSE" "[BO_globalSystemCachePath] Check path (2): $DOWNLOAD_PATH_"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_globalSystemCachePath] Check path (2): $DOWNLOAD_PATH_"
 		  	local DOWNLOAD_DIR_="$( dirname "$DOWNLOAD_PATH_")"
 		  	if [ "$4" != "nocreate" ]; then
 			  	if [ ! -d "$DOWNLOAD_DIR_" ]; then
@@ -677,7 +677,7 @@ function init {
 	function BO_isInSystemCache {
 		local CACHE_PATH__
 		BO_systemCachePath CACHE_PATH__ "$2" "$3" "nocreate"
-		BO_log "$BO_VERBOSE" "[BO_isInSystemCache] for uri '$2' at revision '$3': $CACHE_PATH__"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_isInSystemCache] for uri '$2' at revision '$3': $CACHE_PATH__"
 		if [ -e "$CACHE_PATH__" ]; then
 			BO_setResult $1 "$CACHE_PATH__"
 		else
@@ -688,7 +688,7 @@ function init {
 	function BO_isInGlobalSystemCachePath {
 		local CACHE_PATH__
 		BO_globalSystemCachePath CACHE_PATH__ "$2" "$3" "nocreate"
-		BO_log "$BO_VERBOSE" "[BO_isInGlobalSystemCachePath] for uri '$2' at revision '$3': $CACHE_PATH__"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_isInGlobalSystemCachePath] for uri '$2' at revision '$3': $CACHE_PATH__"
 		if [ -e "$CACHE_PATH__" ]; then
 			BO_setResult $1 "$CACHE_PATH__"
 		else
@@ -735,15 +735,15 @@ function init {
 			return 1
 	  	fi
 	  	if [ -e "$ARCHIVE_DOWNLOAD_PATH__" ]; then
-			BO_log "$BO_VERBOSE" "${BO_LOG_PREFIX}Download path '$ARCHIVE_DOWNLOAD_PATH__' exists. Removing."
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "${BO_LOG_PREFIX}Download path '$ARCHIVE_DOWNLOAD_PATH__' exists. Removing."
 			rm -Rf "$ARCHIVE_DOWNLOAD_PATH__"
 	  	fi
-		BO_log "$BO_VERBOSE" "${BO_LOG_PREFIX}Downloading '$DOWNLOAD_URL_' to '$ARCHIVE_DOWNLOAD_PATH__'"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "${BO_LOG_PREFIX}Downloading '$DOWNLOAD_URL_' to '$ARCHIVE_DOWNLOAD_PATH__'"
 		download -s "$DOWNLOAD_URL_" -o "$ARCHIVE_DOWNLOAD_PATH__" || {
 			echo >&2 "$BO_LOG_PREFIX""Failed to download '$ARCHIVE_DOWNLOAD_PATH__'"
 			return 1
 		}
-		BO_log "$BO_VERBOSE" "${BO_LOG_PREFIX}Extracting '$ARCHIVE_DOWNLOAD_PATH__' to '$DOWNLOAD_PATH__'"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "${BO_LOG_PREFIX}Extracting '$ARCHIVE_DOWNLOAD_PATH__' to '$DOWNLOAD_PATH__'"
 		BO_ensureExtracted "EXTRACTED_PATH__" "$ARCHIVE_DOWNLOAD_PATH__" || {
 			echo >&2 "$BO_LOG_PREFIX""Failed to extract '$ARCHIVE_DOWNLOAD_PATH__'"
 			return 1
@@ -765,7 +765,7 @@ function init {
 	}
 
 	function BO_ensureExtracted {
-		BO_log "$BO_VERBOSE" "[BO_ensureExtracted] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensureExtracted] args: $@"
 		local DOWNLOADED_PATH_="$2"
 		if [[ "$DOWNLOADED_PATH_" == *".tar.gz" ]]; then
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.tar\.gz$//g'`
@@ -780,7 +780,7 @@ function init {
 				popd > /dev/null
 			fi
 			BO_setResult $1 "$EXTRACTED_PATH_"
-			BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:1"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:1"
 			return 0
 		elif [[ "$DOWNLOADED_PATH_" == *".zip" ]]; then
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.zip$//g'`
@@ -788,7 +788,7 @@ function init {
 				pushd "$(dirname $DOWNLOADED_PATH_)" > /dev/null
 					rm -Rf "__$(basename $EXTRACTED_PATH_)" > /dev/null || true
 					mkdir "__$(basename $EXTRACTED_PATH_)"
-					BO_log "$BO_VERBOSE" "[BO_ensureExtracted] Extract '$(basename $DOWNLOADED_PATH_)' to '__$(basename $EXTRACTED_PATH_)' (pwd: '$(pwd)')"
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensureExtracted] Extract '$(basename $DOWNLOADED_PATH_)' to '__$(basename $EXTRACTED_PATH_)' (pwd: '$(pwd)')"
 					if ! which unzip > /dev/null; then
 							echo >&2 "$BO_LOG_PREFIX""ERROR: You must have 'unzip' installed!"
 							return 1
@@ -805,24 +805,24 @@ function init {
 				popd > /dev/null
 			fi
 			BO_setResult $1 "$EXTRACTED_PATH_"
-			BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:2"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:2"
 			return 0
 		elif [[ "$DOWNLOADED_PATH_" == *".phar" ]]; then
 			local EXTRACTED_PATH_=`echo "$DOWNLOADED_PATH_" | sed 's/\.phar$//g'`
 			ln -s "$(basename "$DOWNLOADED_PATH_")" "$EXTRACTED_PATH_"
 			# No need to extract.
 			BO_setResult $1 "$EXTRACTED_PATH_"
-			BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:3"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:3"
 			return 0
 		else
 			echo >&2 "$BO_LOG_PREFIX""ERROR: Unable to extract path '$DOWNLOADED_PATH_'!"
-			BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:4"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensureExtracted] END:4"
 			return 1
 		fi
 	}
 
 	function BO_ensurePlugin {
-		BO_log "$BO_VERBOSE" "[BO_ensurePlugin] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] args: $@"
 		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^([^@]+)@?/g'`
 		local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@[v]{1}([^@]+)$/g'`
 		if [ ! -z "${PLUGIN_VERSION}" ]; then
@@ -832,7 +832,7 @@ function init {
 				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
 		fi
 		local PLUGIN_PATH=""
-		BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_PLUGIN_SEARCH_DIRPATHS'"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_PLUGIN_SEARCH_DIRPATHS'"
 		if [ ! -z "$BO_PLUGIN_SEARCH_DIRPATHS" ]; then
 			# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
 			if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME" ]; then
@@ -846,7 +846,7 @@ function init {
 		fi
 		if [ "$PLUGIN_PATH" == "" ] && [ "$PLUGIN_VERSION" == "" ]; then
 				local __latestVersionLookupUri="https://api.github.com/repos/bash-origin/$PLUGIN_NAME/tags"
-				BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Fetching latest version for 'github.com/bash-origin/$PLUGIN_NAME' from '$__latestVersionLookupUri'"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Fetching latest version for 'github.com/bash-origin/$PLUGIN_NAME' from '$__latestVersionLookupUri'"
 curl -s "$__latestVersionLookupUri" | grep '"name": "v'
 echo "TODO: Finish implementing"
 exit 1
@@ -859,26 +859,26 @@ exit 1
 				BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
 			fi
 		fi
-		BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Found plugin path: $PLUGIN_PATH"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Found plugin path: $PLUGIN_PATH"
 		BO_setResult $1 "$PLUGIN_PATH/$PLUGIN_NAME"
 	}
 
 	function BO_callPlugin {
-		BO_log "$BO_VERBOSE" "[BO_callPlugin] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] args: $@"
 		local PLUGIN_PATH_
 		if [ -e "$BO_SYSTEM_CACHE_DIR/$1" ]; then
 			PLUGIN_PATH_="$BO_SYSTEM_CACHE_DIR/$1"
-			BO_log "$BO_VERBOSE" "[BO_callPlugin] Using BO_SYSTEM_CACHE_DIR based path: $PLUGIN_PATH_"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] Using BO_SYSTEM_CACHE_DIR based path: $PLUGIN_PATH_"
 		else
 			if [[ "$1" == "/"* ]]; then
 				PLUGIN_PATH_="$1"
 				BO_log "$VERBOSE" "[BO_callPlugin] Using absolute path: $PLUGIN_PATH_"
 			else
 				BO_ensurePlugin "PLUGIN_PATH_" "$1"
-				BO_log "$BO_VERBOSE" "[BO_callPlugin] Using ensured plugin path: $PLUGIN_PATH_"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] Using ensured plugin path: $PLUGIN_PATH_"
 			fi
 		fi
-		BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Call plugin: $PLUGIN_PATH_"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Call plugin: $PLUGIN_PATH_"
 		BO_sourcePrototype "$PLUGIN_PATH_"
 		local func="$2"
 		shift
@@ -970,20 +970,20 @@ exit 1
 			fi
 		fi
 		if [ "$installTargetPath" == "$1" ]; then
-				BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Skip copy of '$1' to '$installTargetPath' as path is the same."
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Skip copy of '$1' to '$installTargetPath' as path is the same."
 		else
 				if [ "$2" == "-f" ]; then
-					BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Removing '$installTargetPath' due to forced-install (BO install -f)"
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Removing '$installTargetPath' due to forced-install (BO install -f)"
 					rm -f "$installTargetPath" || true
 				fi
 				if [ ! -e "$installTargetPath" ]; then
-					BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Copying '$1' to '$installTargetPath'"
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Copying '$1' to '$installTargetPath'"
 					cp -f "$1" "$installTargetPath"
 				else
 					# TODO: Copy if version has changed.
-					BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Skip copy of '$1' as '$installTargetPath' already exists."
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Skip copy of '$1' as '$installTargetPath' already exists."
 				fi
-				BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""bash.origin installed!"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""bash.origin installed!"
 		fi
 	}
 
