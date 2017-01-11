@@ -59,7 +59,7 @@ function init {
 
 	function BO_ensure_env_HOME {
 		# Should fail if not set or set to empty string.
-		if [ -n "${!HOME:-}" ]; then
+		if [ ! -n "${HOME}" ] || [ "${HOME}" == "" ]; then
 			echo "[BO] ERROR: 'HOME' environment variable is not set! Used by: $1"
 			exit 1
 		fi
@@ -161,11 +161,15 @@ function init {
 	#       and should not be set externally other than to force a specific
 	#       internal state for debugging purposes.
 	if [ -z "$_BO_OPTIMIZED" ]; then
+			# If not set we set it based on BO_VERBOSE.
 			if [ -z "$BO_VERBOSE" ]; then
 					export _BO_OPTIMIZED=1
 			else
 					export _BO_OPTIMIZED=0
 			fi
+	elif [ ! -z "$BO_VERBOSE" ]; then
+			# If set we downgrade it if BO_VERBOSE is set.
+			export _BO_OPTIMIZED=0
 	fi
 
 	###############################
@@ -272,23 +276,51 @@ function init {
 		# TODO: Detect if we even need to ask for sudo. If not just run command.
 		local NEED_TO_ASK="1"
 		if [ "$NEED_TO_ASK" == "1" ]; then
-			echo "WARNING: Asking for sudo access to run: $1"
+			echo "$BO_LOG_PREFIX""WARNING: Asking for sudo access to run: $1"
 		fi
 		sudo $1
 	}
 
 	function BO_compileModule {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] args: $@"
+			# TODO: Resolve './' and aliased paths based on mappings.
 			local _raw_module_source_path="$2"
 			local _compiled_module_source_path="$2~.compiled.bash"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] _raw_module_source_path: $(stat -f "%m%t%Sm %N" $_raw_module_source_path)"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] _compiled_module_source_path: $(stat -f "%m%t%Sm %N" $_compiled_module_source_path)"
 			# If source file is newer than compiled file
 			# TODO: Compile if 'bash.origin.modules' plugin implementation directory is newer than compiled module.
 			if [ $_BO_OPTIMIZED == 0 ] || [ ${_raw_module_source_path} -nt ${_compiled_module_source_path} ]; then
 					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] Compile source '${_raw_module_source_path}' to '${_compiled_module_source_path}' (pwd: $(pwd))"
     			BO_callPlugin "bash.origin.modules" compile ${_raw_module_source_path} ${_compiled_module_source_path}
+			else
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] Skip compile as source has not changed."
 			fi
 			BO_setResult "$1" "${_compiled_module_source_path}"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] DONE"
+	}
+
+	function BO_requireModule {
+			if [[ "${BASH_VERSION}" != "4."* ]]; then
+					echo "$BO_LOG_PREFIX""ERROR: You must be using bash version 4 or newer to use 'BO_requireModule'! Put this '#!/usr/bin/env bash' shebang at the top of the script file you are executing to get the 'bash' command from your PATH instead of default for your shell."
+					exit 1
+			fi
+			if [ "$2" != "as" ]; then
+						echo "$BO_LOG_PREFIX""ERROR: Second argument to BO_requireModule should be 'as'!"
+						exit 1
+			fi
+			if [[ "${1}" == "."* ]]; then
+					# Relative include based on PWD is used from outside a module
+					# and based on path of parent module if used from inside module.
+					BO_sourceModule "$(pwd)/$1"
+			else
+					echo "TODO: Alias-based includes that should resolve via mappings"
+					exit 1
+			fi
+			local func="$2"
+			shift
+			shift
+			"$func" "$@"
 	}
 
 	function BO_sourceModule {
@@ -1004,6 +1036,9 @@ exit 1
 	}
 
 	if [ "$1" == "BO" ]; then
+		if [ ! -z "$VERBOSE" ]; then
+				export BO_VERBOSE=1
+		fi
 		## Usage: `bash.origin BO install [-f]
 		if [ "$2" == "install" ]; then
 			# TODO: Instead of using '$BO_DIR' use '$BO_FILE' which should

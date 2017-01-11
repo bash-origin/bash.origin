@@ -1,6 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Source https://github.com/cadorn/bash.origin
-. "../../bash.origin"
+if [ -z "${BO_LOADED}" ]; then
+		. "../../bash.origin"
+fi
 function init {
 		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
@@ -9,7 +11,30 @@ function init {
 
 		pushd "$__BO_DIR__" > /dev/null
 
-				BO_sourceModule "module.bo.sh"
+				# NOTE: For full test suite see 'bash.origin.modules'
+
+				BO_requireModule "./module.bo.sh" as "moduleInstance1" "initArg1"
+
+				moduleInstance1 list -a
+				moduleInstance1 setVar "foo" "bar"
+
+				BO_requireModule "./module.bo.sh" as "moduleInstance2" "initArg2"
+
+				moduleInstance2 list -a
+				moduleInstance2 setVar "foo" "baz"
+
+
+				moduleInstance1 printVar "foo"
+				moduleInstance2 printVar "foo"
+
+				moduleInstance1 printLastInstanceVarValue
+				moduleInstance2 printLastInstanceVarValue
+
+				moduleInstance1 printFirstGlobalVarValue
+				moduleInstance2 printFirstGlobalVarValue
+
+				moduleInstance1 printLastGlobalVarValue
+				moduleInstance2 printLastGlobalVarValue
 
 		popd > /dev/null
 }

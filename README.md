@@ -140,6 +140,7 @@ if found, or if not:
 The whole point is that these **paths are predictable** and can be assumed as provisioned by programs booted using `bash.origin` *by the time the program boots*.
 
 
+
 Utilities
 =========
 
@@ -303,6 +304,15 @@ Determine if the current script is being sourced using `BO_sourcePrototype`.
 Allows scripts to inherit from other scripts.
 
 For a nested example see [examples/02-SourceMultiplePrototypes](https://github.com/cadorn/bash.origin/tree/master/examples/02-SourceMultiplePrototypes).
+
+
+### `BO_requireModule`
+
+Allows scripts to reference CommonJS style(ish) modules with locally scoped functions and variables.
+
+Internal module variables leak to the global scope so this is not a security solution! Just a very handy scope abstraction.
+
+For a nested example see [examples/08-ModuleSyntax](https://github.com/cadorn/bash.origin/tree/master/examples/08-ModuleSyntax).
 
 
 ### `BO_systemCachePath`
