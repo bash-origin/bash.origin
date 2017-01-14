@@ -4,7 +4,9 @@ BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 local __BO_DIR__="$___TMP___"
 
 
+echo "TEST_MATCH_IGNORE>>>"
 BO_callPlugin "bash.origin.provision@master" BO_Provision_ensureGitWorkingRepositoryAt ".tmp~io.pinf.proxy" "git@github.com:pinf-io/io.pinf.proxy.git"
+echo "<<<TEST_MATCH_IGNORE"
 
 # TODO: Assertions
 

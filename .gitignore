@@ -4,3 +4,4 @@
 .tmp~*
 *~.compiled.bash
 /examples/*/.actual.log
+/examples/.deps/

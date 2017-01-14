@@ -57,13 +57,16 @@ function init {
 
 				pushd "$testName" > /dev/null
 
+		        local rawResultPath=".actual.raw.log"
 		        local actualResultPath=".actual.log"
 		        local expectedResultPath=".expected.log"
 
 
 		        BO_resetLoaded
 		        # Run test and record actual result
-		        ./main | tee "$actualResultPath"
+		        ./main | tee "$rawResultPath"
+
+						cp -f "$rawResultPath" "$actualResultPath"
 
 						# Remove sections to be ignored
 						sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
