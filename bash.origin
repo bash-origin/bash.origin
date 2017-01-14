@@ -986,6 +986,12 @@ exit 1
 		"$func" "$@"
 	}
 
+	function BO_trim_file_end {
+			# Remove training space to ensure comparisons work across OSes
+			# @see http://unix.stackexchange.com/a/81689/92833
+			a=$(<$1); printf '%s\n' "$a" > $1
+	}
+
 	function BO_cecho {
 		# Escape sequence and resets
 		ESC_SEQ="\033["

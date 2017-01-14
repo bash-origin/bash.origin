@@ -36,21 +36,12 @@ function init {
 		        # Run test and record actual result
 		        ./main | tee "$actualResultPath"
 
-						# Remove training space to ensure comparisons work across OSes
-						# @see http://unix.stackexchange.com/a/81689/92833
-						a=$(<$actualResultPath); printf '%s\n' "$a" > $actualResultPath
-
-						ls -al "$expectedResultPath"
-						ls -al "$actualResultPath"
 
 						# Make paths in result relative
 						basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
 						sed -i -e "s/$basePath//g" "$actualResultPath"
-						ls -al "$actualResultPath"
-
 						homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
 						sed -i -e "s/$homePath//g" "$actualResultPath"
-						ls -al "$actualResultPath"
 
 						if [ -e "$actualResultPath-e" ]; then
 								rm "$actualResultPath-e"
@@ -64,16 +55,22 @@ function init {
 		                echo "ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result."
 		                exit 1
 		            fi
-		            if [ "$(cat $actualResultPath)" != "$(cat $expectedResultPath)" ]; then
-		                echo "ERROR: Actual result does not match expected result for test '$testName'!"
-		                echo "  actual: $actualResultPath"
-		                echo "  -----"
-										cat "$actualResultPath"
-		                echo "  -----"
-		                echo "  expected: $expectedResultPath"
-		                echo "  -----"
+								if ! diff -q "$expectedResultPath" "$actualResultPath" > /dev/null 2>&1; then
+		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+		                echo "$(BO_cecho "| # ERROR: Actual result does not match expected result for test '$testName'!" RED BOLD)"
+		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+		                echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
+		                echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
+		                echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
 										cat "$expectedResultPath"
-		                echo "  -----"
+		                echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
+										cat "$expectedResultPath"
+		                echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
+										set +e
+										diff -U 4 "$expectedResultPath" "$actualResultPath"
+										set -e
+		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+										# TODO: Optionally do not exit.
 		                exit 1
 		            fi
 		  		      echo "$(BO_cecho "OK" GREEN BOLD)"
@@ -91,6 +88,9 @@ function init {
 
 
 		pushd "$__BO_DIR__" > /dev/null
+
+#        git clean -d -x -f
+
         for mainpath in */main ; do
             runTest "$(echo "$mainpath" | sed 's/\/main$//')"
         done
