@@ -63,6 +63,8 @@ function init {
 		        # Run test and record actual result
 		        ./main | tee "$actualResultPath"
 
+						# Remove sections to be ignored
+						sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
 
 						# Make paths in result relative
 						basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
@@ -94,7 +96,7 @@ function init {
 										cat "$expectedResultPath"
 		                echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
 										set +e
-										diff -U 4 "$expectedResultPath" "$actualResultPath"
+										diff -c "$expectedResultPath" "$actualResultPath"
 										set -e
 		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
 										if ! is_working_tree_clean; then
