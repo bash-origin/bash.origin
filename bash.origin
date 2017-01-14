@@ -287,6 +287,7 @@ function init {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] args: $@"
 			# TODO: Resolve './' and aliased paths based on mappings.
 			local _raw_module_source_path="$2"
+			# TODO: Optionally use '/.c/$2~.compiled.bash'
 			local _compiled_module_source_path="$2~.compiled.bash"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] _raw_module_source_path: $(stat -f "%m%t%Sm %N" $_raw_module_source_path)"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] _compiled_module_source_path: $(stat -f "%m%t%Sm %N" $_compiled_module_source_path)"
