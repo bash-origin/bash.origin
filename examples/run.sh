@@ -38,7 +38,9 @@ function init {
 						sed -i'' -e "s/$basePath//g" "$actualResultPath"
 						cachePath=`echo "$BO_SYSTEM_CACHE_DIR" | sed 's/\\//\\\\\\//g'`
 						sed -i'' -e "s/$cachePath//g" "$actualResultPath"
-						rm "$actualResultPath-e" || true
+						if [ -e "$actualResultPath-e" ]; then
+								rm "$actualResultPath-e"
+						fi
 
 
 		        if [ $RECORD == 0 ]; then
