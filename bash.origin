@@ -625,7 +625,7 @@ function init {
 		else
 				nvm use "$BO_VERSION_NVM_IOJS"
 		fi
-		if [ $? -ne 0 ]; then
+		if [[ $? -ne 0 ]]; then
 				nvm install "$BO_VERSION_NVM_IOJS"
 				nvm use "$BO_VERSION_NVM_IOJS"
 		fi
@@ -936,7 +936,7 @@ function init {
 				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		fi
 		local PLUGIN_PATH=""
-		if [ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]; then
+		if [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
 				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_PLUGIN_SEARCH_DIRPATHS'"
 				if [ ! -z "$BO_PLUGIN_SEARCH_DIRPATHS" ]; then
 					# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
@@ -981,7 +981,7 @@ exit 1
 	function BO_callPlugin {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] args: $@"
 		local PLUGIN_PATH_
-		if [ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ] && [ -e "$BO_SYSTEM_CACHE_DIR/$1" ]; then
+		if [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]] && [ -e "$BO_SYSTEM_CACHE_DIR/$1" ]; then
 			PLUGIN_PATH_="$BO_SYSTEM_CACHE_DIR/$1"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] Using BO_SYSTEM_CACHE_DIR based path: $PLUGIN_PATH_"
 		else
