@@ -110,7 +110,7 @@ function init {
 								echo >&2 "$(BO_cecho "ERROR: Cannot remove all temporary test assets before recording test run because git is not clean!" RED BOLD)"
 								exit 1
 						fi
-		        git clean -d -x -f
+		        git clean -d -x -f > /dev/null
 				fi
 
         for mainpath in */main ; do
