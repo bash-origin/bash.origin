@@ -8,12 +8,5 @@
     "scripts": {
         "install": "./bash.origin BO install",
         "test": "examples/run.sh"
-    },
-    "config": {
-        "pio.pinf.io/0": {
-            "on": {
-                "prepostsync": "./bash.origin BO install -f"
-            }
-        }
     }
 }

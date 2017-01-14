@@ -1,3 +1,5 @@
+**Status: ALPHA**
+
 bash.origin
 ===========
 
@@ -64,7 +66,7 @@ if [ -z "$BO_ROOT_SCRIPT_PATH" ]; then . "$HOME/.bash.origin"; else . "$BO_ROOT_
 Demo/Tests
 ----------
 
-	./run-examples
+	./examples/run.sh
 
 
 Examples
@@ -441,9 +443,7 @@ if [ ! -z "$VERBOSE" ]; then echo "[ensureBashOrigin] source from: ./.bash.origi
 ````
 
 
-License
-=======
+Provenance
+==========
 
-Original Author: [Christoph Dorn](http://christophdorn.com)
-
-[UNLICENSE](http://unlicense.org/)
+Original source logic under [Free Public License](https://opensource.org/licenses/FPL-1.0.0) by [Christoph Dorn](http://christophdorn.com)
