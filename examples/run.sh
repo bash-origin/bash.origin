@@ -35,6 +35,7 @@ function init {
 		        BO_resetLoaded
 		        # Run test and record actual result
 		        ./main | tee "$actualResultPath"
+						ls -al "$actualResultPath"
 
 						# Remove training space to ensure comparisons work across OSes
 						# @see http://unix.stackexchange.com/a/81687/92833
