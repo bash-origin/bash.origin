@@ -1,4 +1,11 @@
 /examples/07-ProvisionWithSMI /examples/07-ProvisionWithSMI
 [36m[1m[smi] ensure CODE[22m ./_packages/bash.origin [aspect=null] <- v0.1.4.tar.gz[39m
+[36m[1m[smi] get CODE[22m github.com // v0.1.4.tar.gz[39m
+cached 302 https://github.com/bash-origin/bash.origin/archive/v0.1.4.tar.gz(/.smi/cache/https/github.com/bash-origin/bash.origin/archive/v0.1.4.tar.gz~~meta)
+cached 304 https://codeload.github.com/bash-origin/bash.origin/tar.gz/v0.1.4(/.smi/cache/https/codeload.github.com/bash-origin/bash.origin/tar.gz/v0.1.4~~meta)
+[36m[1m[smi] ensure INSTALL[22m /examples/07-ProvisionWithSMI/_packages/bash.origin-7be146b [aspect=][39m
+[BO] Removing '/bash.origin' due to forced-install (BO install -f)
+[BO] Copying '/examples/07-ProvisionWithSMI/_packages/bash.origin-7be146b/bash.origin' to '/bash.origin'
+[BO] boot.origin installed!
 OK
 /examples/07-ProvisionWithSMI
