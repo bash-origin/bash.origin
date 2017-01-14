@@ -11,8 +11,11 @@ function init {
 
     local RECORD=0
 
+
 		if echo "$@" | grep -q -Ee '(\$|\s*)--record(\s*|\$)'; then
         RECORD=1
+		elif echo "$npm_config_argv" | grep -q -Ee '"--record"'; then
+		    RECORD=1
 		fi
 
 
@@ -33,17 +36,22 @@ function init {
 		        # Run test and record actual result
 		        ./main | tee "$actualResultPath"
 
+						# Remove training space to ensure comparisons work across OSes
+						# @see http://unix.stackexchange.com/a/81687/92833
+						sed -i '' -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "$actualResultPath"
+
 						# Make paths in result relative
 						basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
-						sed -i'' -e "s/$basePath//g" "$actualResultPath"
+						sed -i '' -e "s/$basePath//g" "$actualResultPath"
 						cachePath=`echo "$BO_SYSTEM_CACHE_DIR" | sed 's/\\//\\\\\\//g'`
-						sed -i'' -e "s/$cachePath//g" "$actualResultPath"
+						sed -i '' -e "s/$cachePath//g" "$actualResultPath"
 						if [ -e "$actualResultPath-e" ]; then
 								rm "$actualResultPath-e"
 						fi
 
 
 		        if [ $RECORD == 0 ]; then
+
 		            # Compare actual result with expected result
 		            if [ ! -e "$expectedResultPath" ]; then
 		                echo "ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result."
@@ -63,6 +71,9 @@ function init {
 		            fi
 		  		      echo "$(BO_cecho "OK" GREEN BOLD)"
 		        else
+
+								echo "Recording test session in '.expected.log' files."
+
 		            # Keep actual result as expected result
 		            cp -f "$actualResultPath" "$expectedResultPath"
 		        fi
