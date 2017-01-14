@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
-		. bash.origin
+		if [ -e "../bash.origin" ]; then
+				# Invoked from this directory.
+				. "../bash.origin"
+		elif [ -e "./bash.origin" ]; then
+				# Invoked from root directory (usually via 'npm test')
+				. "./bash.origin"
+		fi
 fi
 function init {
 		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
@@ -25,7 +31,7 @@ function init {
 
 
 		# @source http://stackoverflow.com/a/3879077/330439
-		function require_clean_work_tree {
+		function is_working_tree_clean {
 		    # Update the index
 		    git update-index -q --ignore-submodules --refresh
 		    # Disallow unstaged changes in the working tree
@@ -91,6 +97,9 @@ function init {
 										diff -U 4 "$expectedResultPath" "$actualResultPath"
 										set -e
 		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+										if ! is_working_tree_clean; then
+		                echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
+										fi
 										# TODO: Optionally do not exit.
 		                exit 1
 		            fi
@@ -111,11 +120,15 @@ function init {
 		pushd "$__BO_DIR__" > /dev/null
 
 				if [ $RECORD == 1 ]; then
-						if ! require_clean_work_tree; then
+						if ! is_working_tree_clean; then
 								echo >&2 "$(BO_cecho "ERROR: Cannot remove all temporary test assets before recording test run because git is not clean!" RED BOLD)"
 								exit 1
 						fi
 		        git clean -d -x -f > /dev/null
+				else
+						if is_working_tree_clean; then
+		        		git clean -d -x -f > /dev/null
+						fi
 				fi
 
         for mainpath in */main ; do
