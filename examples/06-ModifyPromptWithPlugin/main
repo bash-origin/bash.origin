@@ -4,6 +4,8 @@ BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 local __BO_DIR__="$___TMP___"
 
 
+BO_VERBOSE=1
+
 echo "TEST_MATCH_IGNORE>>>"
 BO_callPlugin "bash.origin.prompt@0.1.1" setPrompt "workspace" "$__BO_DIR__"
 echo "<<<TEST_MATCH_IGNORE"
