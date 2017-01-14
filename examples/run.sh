@@ -45,9 +45,13 @@ function init {
 
 						# Make paths in result relative
 						basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
-						sed -i '' -e "s/$basePath//g" "$actualResultPath"
+						sed -i -e "s/$basePath//g" "$actualResultPath"
+						ls -al "$actualResultPath"
+
 						homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
-						sed -i '' -e "s/$homePath//g" "$actualResultPath"
+						sed -i -e "s/$homePath//g" "$actualResultPath"
+						ls -al "$actualResultPath"
+
 						if [ -e "$actualResultPath-e" ]; then
 								rm "$actualResultPath-e"
 						fi
