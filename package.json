@@ -6,7 +6,8 @@
         "bash.origin": "./bash.origin"
     },
     "scripts": {
-        "install": "./bash.origin BO install"
+        "install": "./bash.origin BO install",
+        "test": "examples/run.sh"
     },
     "config": {
         "pio.pinf.io/0": {
