@@ -40,14 +40,13 @@ function init {
 						ls -al "$actualResultPath"
 
 						# Remove training space to ensure comparisons work across OSes
-						# @see http://unix.stackexchange.com/a/81687/92833
-						printf '%s\n' "`cat $actualResultPath`" > '$actualResultPath'
+						a=$(<$actualResultPath); printf '%s\n' "$a" > $actualResultPath
 
 						# Make paths in result relative
 						basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
 						sed -i '' -e "s/$basePath//g" "$actualResultPath"
-						cachePath=`echo "$BO_SYSTEM_CACHE_DIR" | sed 's/\\//\\\\\\//g'`
-						sed -i '' -e "s/$cachePath//g" "$actualResultPath"
+						homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
+						sed -i '' -e "s/$homePath//g" "$actualResultPath"
 						if [ -e "$actualResultPath-e" ]; then
 								rm "$actualResultPath-e"
 						fi
