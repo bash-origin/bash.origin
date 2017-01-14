@@ -35,11 +35,13 @@ function init {
 		        BO_resetLoaded
 		        # Run test and record actual result
 		        ./main | tee "$actualResultPath"
+
+						ls -al "$expectedResultPath"
 						ls -al "$actualResultPath"
 
 						# Remove training space to ensure comparisons work across OSes
 						# @see http://unix.stackexchange.com/a/81687/92833
-						sed -i '' -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "$actualResultPath"
+						printf '%s\n' "`cat $actualResultPath`" > '$actualResultPath'
 
 						# Make paths in result relative
 						basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
