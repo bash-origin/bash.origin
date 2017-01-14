@@ -52,7 +52,13 @@ function init {
 		            if [ "$(cat $actualResultPath)" != "$(cat $expectedResultPath)" ]; then
 		                echo "ERROR: Actual result does not match expected result for test '$testName'!"
 		                echo "  actual: $actualResultPath"
+		                echo "  -----"
+										cat "$actualResultPath"
+		                echo "  -----"
 		                echo "  expected: $expectedResultPath"
+		                echo "  -----"
+										cat "$expectedResultPath"
+		                echo "  -----"
 		                exit 1
 		            fi
 		  		      echo "$(BO_cecho "OK" GREEN BOLD)"
