@@ -956,9 +956,16 @@ function init {
 		if [ "$PLUGIN_PATH" == "" ] && [ "$PLUGIN_VERSION" == "" ]; then
 				local __latestVersionLookupUri="https://api.github.com/repos/bash-origin/$PLUGIN_NAME/tags"
 				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Fetching latest version for 'github.com/bash-origin/$PLUGIN_NAME' from '$__latestVersionLookupUri'"
-curl -s "$__latestVersionLookupUri" | grep '"name": "v'
-echo "TODO: Finish implementing"
+				set +e
+				versions=`curl -s "$__latestVersionLookupUri" | grep '"name": "v'`
+				set -e
+				if [ "$versions" == "" ]; then
+						PLUGIN_VERSION="master"
+						PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
+				else
+echo "TODO: Grap latest tag"
 exit 1
+				fi
 		fi
 		if [ "$PLUGIN_PATH" == "" ]; then
 			BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION"
