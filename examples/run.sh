@@ -19,6 +19,8 @@ function init {
 		# TODO: Ensure 'bash.origin' bin using own helper.
 		BO_ensure_nvm
 
+		export BO_PACKAGES_DIR="$__BO_DIR__/.deps"
+		export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
 
     local RECORD=0
 
@@ -91,7 +93,7 @@ function init {
 		                echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
 		                echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
 		                echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
-										cat "$expectedResultPath"
+										cat "$actualResultPath"
 		                echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
 										cat "$expectedResultPath"
 		                echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
@@ -100,7 +102,7 @@ function init {
 										set -e
 		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
 										if ! is_working_tree_clean; then
-		                echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
+		                		echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
 										fi
 										# TODO: Optionally do not exit.
 		                exit 1
