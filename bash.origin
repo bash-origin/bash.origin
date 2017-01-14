@@ -933,23 +933,25 @@ function init {
 				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		else
 				local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@([^@]+)$/g'`
-				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
+				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		fi
 		local PLUGIN_PATH=""
-		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_PLUGIN_SEARCH_DIRPATHS'"
-		if [ ! -z "$BO_PLUGIN_SEARCH_DIRPATHS" ]; then
-			# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
-			if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME" ]; then
-					PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME"
-			fi
-			if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID" ]; then
-					PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID"
-			fi
-			if [ "$PLUGIN_PATH" == "" ]; then
-					if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/github.com~bash-origin~$PLUGIN_NAME" ]; then
-						PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/github.com~bash-origin~$PLUGIN_NAME"
+		if [ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]; then
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_PLUGIN_SEARCH_DIRPATHS'"
+				if [ ! -z "$BO_PLUGIN_SEARCH_DIRPATHS" ]; then
+					# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
+					if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME" ]; then
+							PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME"
 					fi
-			fi
+					if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID" ]; then
+							PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID"
+					fi
+					if [ "$PLUGIN_PATH" == "" ]; then
+							if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/github.com~bash-origin~$PLUGIN_NAME" ]; then
+								PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/github.com~bash-origin~$PLUGIN_NAME"
+							fi
+					fi
+				fi
 		fi
 		if [ "$PLUGIN_PATH" == "" ] && [ "$PLUGIN_VERSION" == "" ]; then
 				local __latestVersionLookupUri="https://api.github.com/repos/bash-origin/$PLUGIN_NAME/tags"
@@ -970,10 +972,16 @@ exit 1
 		BO_setResult $1 "$PLUGIN_PATH/$PLUGIN_NAME"
 	}
 
+	function BO_callDownloadedPlugin {
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callDownloadedPlugin] args: $@"
+			_BO_ensurePlugin__onlyDownloadedLocations=1
+			BO_callPlugin "$@"
+	}
+
 	function BO_callPlugin {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] args: $@"
 		local PLUGIN_PATH_
-		if [ -e "$BO_SYSTEM_CACHE_DIR/$1" ]; then
+		if [ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ] && [ -e "$BO_SYSTEM_CACHE_DIR/$1" ]; then
 			PLUGIN_PATH_="$BO_SYSTEM_CACHE_DIR/$1"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] Using BO_SYSTEM_CACHE_DIR based path: $PLUGIN_PATH_"
 		else

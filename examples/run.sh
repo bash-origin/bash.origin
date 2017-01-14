@@ -138,9 +138,21 @@ function init {
 						fi
 				fi
 
-        for mainpath in */main ; do
-            runTest "$(echo "$mainpath" | sed 's/\/main$//')"
-        done
+				if [ -z "$1" ]; then
+		        for mainpath in */main ; do
+		            runTest "$(echo "$mainpath" | sed 's/\/main$//')"
+		        done
+				else
+						if [ ! -d "$1-"* ]; then
+								echo >&2 "$(BO_cecho "ERROR: Cannot find test with prefix '$1-'" RED BOLD)"
+								exit 1
+						fi
+						pushd "$1-"* > /dev/null
+
+		            runTest "$(echo "$mainpath" | sed 's/\/main$//')"
+
+						popd > /dev/null
+				fi
 		popd > /dev/null
 }
 init "$@"
