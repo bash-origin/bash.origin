@@ -304,6 +304,7 @@ function init {
 	}
 
 	function BO_requireModule {
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] args: $@"
 			if [[ "${BASH_VERSION}" != "4."* ]]; then
 					echo "$BO_LOG_PREFIX""ERROR: You must be using bash version 4 or newer to use 'BO_requireModule'! Put this '#!/usr/bin/env bash' shebang at the top of the script file you are executing to get the 'bash' command from your PATH instead of default for your shell."
 					exit 1
@@ -316,6 +317,36 @@ function init {
 					# Relative include based on PWD is used from outside a module
 					# and based on path of parent module if used from inside module.
 					BO_sourceModule "$(pwd)/$1"
+			elif [[ "${1}" == "@"* ]]; then
+
+					if [[ "${1}" == "@com.github/"* ]]; then
+							local PLUGIN_URI_=`BO_run_silent_node --eval '
+									var uriParts = process.argv[1].match(/^@([^\/]+)\/(.+)#(?:.+\/)?(.+)$/);
+									uriParts[1] = uriParts[1].split(".");
+									uriParts[1].reverse();
+									uriParts[1] = uriParts[1].join(".");
+									process.stdout.write(uriParts[1] + "/" + uriParts[2]);
+							' "${1}"`
+							local PLUGIN_VERSION_=`BO_run_silent_node --eval '
+									var uriParts = process.argv[1].match(/^@([^\/]+)\/(.+)#(?:.+\/)?(.+)$/);
+									process.stdout.write(uriParts[3]);
+							' "${1}"`
+							local PLUGIN_PATH_
+							BO_ensurePlugin "PLUGIN_PATH_" "$PLUGIN_URI_"
+							PLUGIN_PATH_="$(dirname "${PLUGIN_PATH_}")"
+							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Using ensured plugin path: $PLUGIN_PATH_"
+							local PLUGIN_MODULE_NAME_="org.bashorigin-${PLUGIN_VERSION_}.sh"
+							local PLUGIN_MODULE_PATH_="${PLUGIN_PATH_}/${PLUGIN_MODULE_NAME_}"
+							if [ ! -e "$PLUGIN_MODULE_PATH_" ]; then
+									echo "$BO_LOG_PREFIX""ERROR: Module '$PLUGIN_MODULE_NAME_' does not exist in plugin at path '$PLUGIN_MODULE_PATH_'!"
+									exit 1
+							fi
+							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Load module from plugin: $PLUGIN_MODULE_PATH_"
+							BO_sourceModule "$PLUGIN_MODULE_PATH_"
+					else
+							echo "TODO: Non-github repository URLs"
+							exit 1
+					fi
 			else
 					echo "TODO: Alias-based includes that should resolve via mappings"
 					exit 1
@@ -484,12 +515,27 @@ function init {
 		fi
 	}
 
+	function BO_ensure_bo_script_bin {
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_bo_script_bin] args: $@"
+			# TODO: Store the 'bash.origin.script' file on other bin paths as well.
+			if [ ! -z "$NVM_BIN" ]; then
+					# Ensure 'bash.origin.script' is at '$NVM_BIN/bash.origin.script'
+					if [ ! -e "$NVM_BIN/bash.origin.script" ]; then
+							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "Placing wrapper script for '$BO_ROOT_SCRIPT_PATH' at '$NVM_BIN/bash.origin.script'"
+							# TODO: Dynamically feed based on 'BO_resetLoaded'
+							echo -e "#!/usr/bin/env bash\nBO_LOADED=\nBO_IS_SOURCING=\nBO_sourceProfile__sourced=\n. $BO_ROOT_SCRIPT_PATH BOS $""@" > "$NVM_BIN/bash.origin.script"
+							chmod u+x "$NVM_BIN/bash.origin.script"
+					fi
+			fi
+	}
+
 	function BO_ensure_node {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] args: $@"
 		set +e
 		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:1"
+			BO_ensure_bo_script_bin
 			return
 		fi
 		set -e
@@ -498,6 +544,7 @@ function init {
 		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:2"
+			BO_ensure_bo_script_bin
 			return
 		fi
 		set -e
@@ -592,6 +639,7 @@ function init {
 			fi
 			set -e
 		popd > /dev/null
+		BO_ensure_bo_script_bin
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_nvm] DONE"
 #		curl \
 #		    -H "Pragma: no-cache, must-revalidate" \
@@ -613,11 +661,21 @@ function init {
 		ln -s "$NVM_BIN/npm" "$1/npm"
 	}
 
+	function BO_run_silent_node {
+			local __OLD_BO_VERBOSE="${BO_VERBOSE}"
+			local __OLD_VERBOSE="${VERBOSE}"
+			BO_VERBOSE=
+			VERBOSE=
+			BO_run_node "$@"
+			BO_VERBOSE="${__OLD_BO_VERBOSE}"
+			VERBOSE="${__OLD_VERBOSE}"
+	}
+
 	function BO_run_node {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] args: $@"
 		BO_ensure_node
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
-		node $@
+		node "$@"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] END"
 	}
 
@@ -858,8 +916,12 @@ function init {
 
 	function BO_ensurePlugin {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] args: $@"
-		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^([^@]+)@?/g'`
+		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^(?:.+\/)?([^@\/]+)@?/g'`
+		local PLUGIN_ID=`echo "$2" | sed 's/\//~/g'`
 		local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@[v]{1}([^@]+)$/g'`
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_NAME: $PLUGIN_NAME"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_ID: $PLUGIN_ID"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_VERSION: $PLUGIN_VERSION"
 		if [ ! -z "${PLUGIN_VERSION}" ]; then
 				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		else
@@ -872,6 +934,9 @@ function init {
 			# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
 			if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME" ]; then
 					PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME"
+			fi
+			if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID" ]; then
+					PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID"
 			fi
 			if [ "$PLUGIN_PATH" == "" ]; then
 					if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/github.com~bash-origin~$PLUGIN_NAME" ]; then
@@ -1038,7 +1103,15 @@ exit 1
 		echo "$BO_LOG_PREFIX""bash.origin updated!"
 	}
 
-	if [ "$1" == "BO" ]; then
+	if [ "$1" == "BOS" ]; then
+			local ___old_BO_OPTIMIZED="$_BO_OPTIMIZED"
+			if [ "$3" == "-c" ]; then
+					_BO_OPTIMIZED=0
+			fi
+			# Load provided URI as bash.origin.script module
+			BO_requireModule "${2}" as "module" ${*:3}
+			_BO_OPTIMIZED="$___old_BO_OPTIMIZED"
+	elif [ "$1" == "BO" ]; then
 		if [ ! -z "$VERBOSE" ]; then
 				export BO_VERBOSE=1
 		fi
