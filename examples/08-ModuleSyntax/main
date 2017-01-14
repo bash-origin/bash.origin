@@ -1,23 +1,17 @@
-#!/usr/bin/env bash
-# Source https://github.com/cadorn/bash.origin
-if [ -z "${BO_LOADED}" ]; then
-		. "../../bash.origin"
-fi
-function init {
-		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
-		local __BO_DIR__="$___TMP___"
+#!/usr/bin/env bash.origin
+eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+local __BO_DIR__="$___TMP___"
 
-		pushd "$__BO_DIR__" > /dev/null
 
-				# NOTE: For full test suite see 'bash.origin.modules'
+pushd "$__BO_DIR__" > /dev/null
 
-				BO_requireModule "./module.bo.sh" as "module"
+		# NOTE: For full test suite see 'bash.origin.modules'
 
-				module run "from main"
+		BO_requireModule "./module.bo.sh" as "module"
 
-				./script.bo.sh
+		module run "from main"
 
-		popd > /dev/null
-}
-init "$@"
+		./script.bo.sh
+
+popd > /dev/null

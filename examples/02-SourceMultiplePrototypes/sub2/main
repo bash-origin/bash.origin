@@ -1,23 +1,16 @@
-#!/usr/bin/env bash
-# Source https://github.com/cadorn/bash.origin
-if [ -z "${BO_LOADED}" ]; then
-		. "../../../bash.origin"
-fi
-function init {
-		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
-		local __BO_DIR__="$___TMP___"
+#!/usr/bin/env bash.origin
+eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+local __BO_DIR__="$___TMP___"
 
 
-		local PREFIX="$1"
+local PREFIX="$1"
 
-		function hello {
-			echo "$1 Hello from SUB2"
-		}
-
-		echo "$PREFIX>-- SUB2 - $__BO_DIR__"
-		BO_isSourced ___TMP___
-		echo "$PREFIX| (sub2) BO_isSourced: $___TMP___"
-		echo "$PREFIX<-- SUB2 - $__BO_DIR__"
+function hello {
+	echo "$1 Hello from SUB2"
 }
-init "$1"
+
+echo "$PREFIX>-- SUB2 - $__BO_DIR__"
+BO_isSourced ___TMP___
+echo "$PREFIX| (sub2) BO_isSourced: $___TMP___"
+echo "$PREFIX<-- SUB2 - $__BO_DIR__"

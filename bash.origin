@@ -526,6 +526,13 @@ function init {
 							echo -e "#!/usr/bin/env bash\nBO_LOADED=\nBO_IS_SOURCING=\nBO_sourceProfile__sourced=\n. $BO_ROOT_SCRIPT_PATH BOS $""@" > "$NVM_BIN/bash.origin.script"
 							chmod u+x "$NVM_BIN/bash.origin.script"
 					fi
+					# Ensure 'bash.origin' is at '$NVM_BIN/bash.origin'
+					if [ ! -e "$NVM_BIN/bash.origin" ]; then
+							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "Placing wrapper script for '$BO_ROOT_SCRIPT_PATH' at '$NVM_BIN/bash.origin'"
+							# TODO: Dynamically feed based on 'BO_resetLoaded'
+							echo -e "#!/usr/bin/env bash\nBO_LOADED=\nBO_IS_SOURCING=\nBO_sourceProfile__sourced=\n. $BO_ROOT_SCRIPT_PATH BOB $""@" > "$NVM_BIN/bash.origin"
+							chmod u+x "$NVM_BIN/bash.origin"
+					fi
 			fi
 	}
 
@@ -1109,7 +1116,20 @@ exit 1
 		echo "$BO_LOG_PREFIX""bash.origin updated!"
 	}
 
-	if [ "$1" == "BOS" ]; then
+	# Bash Origin Bin invocation
+	if [ "$1" == "BOB" ]; then
+
+			# TODO: Do any other init work?
+
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Loaded 'bash.origin' environment."
+
+			func="$2"
+			shift
+			shift
+			. "$func" "$@"
+
+	# Bash Origin Script invocation
+  elif [ "$1" == "BOS" ]; then
 			local ___old_BO_OPTIMIZED="$_BO_OPTIMIZED"
 			if [ "$3" == "-c" ]; then
 					_BO_OPTIMIZED=0
@@ -1117,6 +1137,8 @@ exit 1
 			# Load provided URI as bash.origin.script module
 			BO_requireModule "${2}" as "module" ${*:3}
 			_BO_OPTIMIZED="$___old_BO_OPTIMIZED"
+
+	# Bash Origin Internal Util invocation
 	elif [ "$1" == "BO" ]; then
 		if [ ! -z "$VERBOSE" ]; then
 				export BO_VERBOSE=1

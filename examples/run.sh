@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
-		. "$HOME/.bash.origin"
+		. bash.origin
 fi
 function init {
 		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 		local __BO_DIR__="$___TMP___"
+
+
+		# Ensure 'bash.origin' is on path (will be place in NVM bin dir`)
+		# TODO: Ensure 'bash.origin' bin using own helper.
+		BO_ensure_nvm
 
 
     local RECORD=0
