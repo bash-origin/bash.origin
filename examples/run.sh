@@ -19,6 +19,22 @@ function init {
 		fi
 
 
+		# @source http://stackoverflow.com/a/3879077/330439
+		function require_clean_work_tree {
+		    # Update the index
+		    git update-index -q --ignore-submodules --refresh
+		    # Disallow unstaged changes in the working tree
+		    if ! git diff-files --quiet --ignore-submodules --; then
+						return 1
+		    fi
+		    # Disallow uncommitted changes in the index
+		    if ! git diff-index --cached --quiet HEAD --ignore-submodules --; then
+						return 1
+		    fi
+				return 0
+		}
+
+
     function runTest {
         local testName="$1"
 
@@ -89,7 +105,13 @@ function init {
 
 		pushd "$__BO_DIR__" > /dev/null
 
-#        git clean -d -x -f
+				if [ $RECORD == 1 ]; then
+						if ! require_clean_work_tree; then
+								echo >&2 "$(BO_cecho "ERROR: Cannot remove all temporary test assets before recording test run because git is not clean!" RED BOLD)"
+								exit 1
+						fi
+		        git clean -d -x -f
+				fi
 
         for mainpath in */main ; do
             runTest "$(echo "$mainpath" | sed 's/\/main$//')"
