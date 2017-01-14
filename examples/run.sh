@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
-		if [ -e "../bash.origin" ]; then
-				# Invoked from this directory.
-				. "../bash.origin"
-		elif [ -e "./bash.origin" ]; then
+		if [ -f "./bash.origin" ]; then
 				# Invoked from root directory (usually via 'npm test')
 				. "./bash.origin"
+		elif [ -f "../bash.origin" ]; then
+				# Invoked from this directory.
+				. "../bash.origin"
 		fi
 fi
 function init {
