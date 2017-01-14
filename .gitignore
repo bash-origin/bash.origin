@@ -3,3 +3,4 @@
 /.installed.*
 .tmp~*
 *~.compiled.bash
+/examples/*/.actual.log

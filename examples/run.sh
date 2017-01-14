@@ -36,6 +36,9 @@ function init {
 						# Make paths in result relative
 						basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
 						sed -i'' -e "s/$basePath//g" "$actualResultPath"
+						cachePath=`echo "$BO_SYSTEM_CACHE_DIR" | sed 's/\\//\\\\\\//g'`
+						sed -i'' -e "s/$cachePath//g" "$actualResultPath"
+						rm "$actualResultPath-e"
 
 
 		        if [ $RECORD == 0 ]; then

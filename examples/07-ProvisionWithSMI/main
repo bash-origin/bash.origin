@@ -8,7 +8,11 @@ function init {
 
 
 	pushd "$__BO_DIR__"
-		BO_run_smi install
+			BO_run_smi install
+
+    # TODO: Assertions
+
+    echo "OK"
 	popd
 }
 init

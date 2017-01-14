@@ -1,14 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Source https://github.com/cadorn/bash.origin
-. "$HOME/.bash.origin"
+if [ -z "${BO_LOADED}" ]; then
+		. "../../../bash.origin"
+fi
 function init {
-	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
-	local __BO_DIR__="$___TMP___"
+		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+		local __BO_DIR__="$___TMP___"
 
 
-	BO_sourcePrototype "$__BO_DIR__/../node_modules/cli-framework/bin/common.prototype"
+		BO_sourcePrototype "$__BO_DIR__/../node_modules/cli-framework/bin/common.prototype"
 
-	runPlugin "$__BO_DIR__/../plugin.js" $@
+		runPlugin "$__BO_DIR__/../plugin.js" $@
 }
 init $@

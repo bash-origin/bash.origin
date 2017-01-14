@@ -13,5 +13,9 @@ function init {
 
 	BO_ensureInSystemCache "DOWNLOADED_PATH" "github.com/bash-origin/bash.origin.prompt" "0.1.1" "https://github.com/bash-origin/bash.origin.prompt/archive/v0.1.1.zip"
 	BO_callPlugin "$DOWNLOADED_PATH/bash.origin.prompt" setPrompt "workspace" "$__BO_DIR__"
+
+  # TODO: Assertions
+
+  echo "OK"
 }
 init

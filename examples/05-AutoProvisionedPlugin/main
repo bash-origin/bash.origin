@@ -9,5 +9,8 @@ function init {
 
     BO_callPlugin "bash.origin.provision@master" BO_Provision_ensureGitWorkingRepositoryAt ".tmp~io.pinf.proxy" "git@github.com:pinf-io/io.pinf.proxy.git"
 
+    # TODO: Assertions
+
+    echo "OK"
 }
 init "$@"

@@ -8,33 +8,15 @@ function init {
 		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 		local __BO_DIR__="$___TMP___"
 
-
 		pushd "$__BO_DIR__" > /dev/null
 
 				# NOTE: For full test suite see 'bash.origin.modules'
 
-				BO_requireModule "./module.bo.sh" as "moduleInstance1" "initArg1"
+				BO_requireModule "./module.bo.sh" as "module"
 
-				moduleInstance1 list -a
-				moduleInstance1 setVar "foo" "bar"
+				module run "from main"
 
-				BO_requireModule "./module.bo.sh" as "moduleInstance2" "initArg2"
-
-				moduleInstance2 list -a
-				moduleInstance2 setVar "foo" "baz"
-
-
-				moduleInstance1 printVar "foo"
-				moduleInstance2 printVar "foo"
-
-				moduleInstance1 printLastInstanceVarValue
-				moduleInstance2 printLastInstanceVarValue
-
-				moduleInstance1 printFirstGlobalVarValue
-				moduleInstance2 printFirstGlobalVarValue
-
-				moduleInstance1 printLastGlobalVarValue
-				moduleInstance2 printLastGlobalVarValue
+				./script.bo.sh
 
 		popd > /dev/null
 }

@@ -1,0 +1,4 @@
+/examples/07-ProvisionWithSMI /examples/07-ProvisionWithSMI
+[36m[1m[smi] ensure CODE[22m ./_packages/bash.origin [aspect=null] <- v0.1.4.tar.gz[39m
+OK
+/examples/07-ProvisionWithSMI
