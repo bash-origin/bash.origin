@@ -959,6 +959,10 @@ function init {
 				set +e
 				versions=`curl -s "$__latestVersionLookupUri" | grep '"name": "v'`
 				set -e
+				# TODO: If repository not found emit *insight* formatted message to indicate this so that
+				#       tooling can auto-provision repository and then download accordingly.
+				#       We can add a rest call here that can hold execution until the repository is
+				#       provisioned and we can try again.
 				if [ "$versions" == "" ]; then
 						PLUGIN_VERSION="master"
 						PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
@@ -1136,12 +1140,16 @@ exit 1
 
 			# TODO: Do any other init work?
 
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Loaded 'bash.origin' environment."
-
-			func="$2"
-			shift
-			shift
-			. "$func" "$@"
+			if [ "$2" == "BOE" ]; then
+					# When used via '. bash.origin BOE'
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Sourced 'bash.origin' environment."
+			else
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Loaded 'bash.origin' environment."
+					func="$2"
+					shift
+					shift
+					. "$func" "$@"
+			fi
 
 	# Bash Origin Script invocation
   elif [ "$1" == "BOS" ]; then
