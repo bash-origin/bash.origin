@@ -12,6 +12,18 @@ pushd "$__BO_DIR__" > /dev/null
 
 		module run "from main"
 
+printenv
+
+echo "SHELL: $SHELL"
+
+echo "---1-"
+
+		bash ./script.bo.sh
+
+echo "---11-"
+
 		./script.bo.sh
+
+echo "---111-"
 
 popd > /dev/null
