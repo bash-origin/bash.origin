@@ -1,43 +1,43 @@
->-- ROOT - /02-SourceMultiplePrototypes
+>-- ROOT - 
 | (root) BO_isSourced: 0
 | Source ...
-|--->-- SUB1 - /02-SourceMultiplePrototypes/sub1
+|--->-- SUB1 - /sub1
 |---| (sub1) BO_isSourced: 
 |---| Source ...
-|---|--->-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---|--->-- SUB2 - /sub2
 |---|---| (sub2) BO_isSourced: 
-|---|---<-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---|---<-- SUB2 - /sub2
 |---| Hello from SUB2
 |---| (sub1) BO_isSourced: 
 |---| Run ...
-|---|--->-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---|--->-- SUB2 - /sub2
 |---|---| (sub2) BO_isSourced: 0
-|---|---<-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---|---<-- SUB2 - /sub2
 |---| (sub1) BO_isSourced: 
-|---<-- SUB1 - /02-SourceMultiplePrototypes/sub1
+|---<-- SUB1 - /sub1
 | Hello from SUB1
-|--->-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|--->-- SUB2 - /sub2
 |---| (sub2) BO_isSourced: 
-|---<-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---<-- SUB2 - /sub2
 | Hello from SUB2
 | (root) BO_isSourced: 0
 | Run ...
-|--->-- SUB1 - /02-SourceMultiplePrototypes/sub1
+|--->-- SUB1 - /sub1
 |---| (sub1) BO_isSourced: 0
 |---| Source ...
-|---|--->-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---|--->-- SUB2 - /sub2
 |---|---| (sub2) BO_isSourced: 
-|---|---<-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---|---<-- SUB2 - /sub2
 |---| Hello from SUB2
 |---| (sub1) BO_isSourced: 0
 |---| Run ...
-|---|--->-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---|--->-- SUB2 - /sub2
 |---|---| (sub2) BO_isSourced: 0
-|---|---<-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---|---<-- SUB2 - /sub2
 |---| (sub1) BO_isSourced: 0
-|---<-- SUB1 - /02-SourceMultiplePrototypes/sub1
-|--->-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---<-- SUB1 - /sub1
+|--->-- SUB2 - /sub2
 |---| (sub2) BO_isSourced: 0
-|---<-- SUB2 - /02-SourceMultiplePrototypes/sub2
+|---<-- SUB2 - /sub2
 | (root) BO_isSourced: 0
-<-- ROOT - /02-SourceMultiplePrototypes
+<-- ROOT - 
