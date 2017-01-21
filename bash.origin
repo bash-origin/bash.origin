@@ -89,6 +89,11 @@ function init {
 
 	function BO_sourceProfile {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] args: $@"
+		if [ ! -z "$CIRCLE_SHA1" ]; then
+			# On circleci we do not load the profile again
+			# TODO: Make this generic or add a new variable used to flag a skip
+			return 0
+		fi
 		# TODO: Allow sourcing multiple times if 'force' argument provided.
 		if [ -z "$BO_sourceProfile__sourced" ]; then
 			export BO_sourceProfile__sourced="1"
@@ -362,6 +367,8 @@ function init {
 	function BO_sourceModule {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceModule] args: $@"
 			local _raw_source_path="$1"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceModule] _raw_source_path: $_raw_source_path"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceModule] pwd: $(pwd)"
 			BO_compileModule "_raw_source_path" "${_raw_source_path}"
 			BO_sourcePrototype "${_raw_source_path}" ${*:2}
 	}
@@ -938,7 +945,7 @@ function init {
 				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		fi
 		local PLUGIN_PATH=""
-		if [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
+		if [ "$BO_PLUGIN_SEARCH_DIRPATHS" != "" ] && [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
 				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_PLUGIN_SEARCH_DIRPATHS'"
 				if [ ! -z "$BO_PLUGIN_SEARCH_DIRPATHS" ]; then
 					# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
@@ -969,8 +976,13 @@ function init {
 						PLUGIN_VERSION="master"
 						PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
 				else
-echo "TODO: Grap latest tag"
-exit 1
+						latestTag=`echo "$versions" | head -n 1 | perl -pe 's/^.+?"(v?[^"]+)",$/$1/'`
+						if [ "$latestTag" == "" ]; then
+								echo >&2 "$BO_LOG_PREFIX""ERROR: Latest tag could not be determined for plugin name '$PLUGIN_NAME'!"
+								exit 1
+						fi
+						PLUGIN_VERSION="$latestTag"
+						PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
 				fi
 		fi
 		if [ "$PLUGIN_PATH" == "" ]; then
@@ -994,6 +1006,7 @@ exit 1
 	function BO_callPlugin {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] args: $@"
 		local PLUGIN_PATH_
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
 		if [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]] && [ -e "$BO_SYSTEM_CACHE_DIR/$1" ]; then
 			PLUGIN_PATH_="$BO_SYSTEM_CACHE_DIR/$1"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callPlugin] Using BO_SYSTEM_CACHE_DIR based path: $PLUGIN_PATH_"
@@ -1144,12 +1157,13 @@ exit 1
 
 			if [ "$2" == "BOE" ]; then
 					# When used via '. bash.origin BOE'
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Sourced 'bash.origin' environment."
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Sourced 'bash.origin' environment. (args: $@)"
 			else
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Loaded 'bash.origin' environment."
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Loaded 'bash.origin' environment. (args: $@)"
 					func="$2"
 					shift
 					shift
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""func: $func"
 					. "$func" "$@"
 			fi
 
