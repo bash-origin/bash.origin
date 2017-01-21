@@ -15,7 +15,6 @@ I also needed a way to share common scripts between projects. I use these script
 
 Running everything through a central script allows me to inject tooling logic and monitor the system from outside of the process.
 
-
 Overview
 --------
 
