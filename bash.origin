@@ -3,6 +3,9 @@
 # License: http://unlicense.org/
 function init {
 
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] which bash: $(which bash)"
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] bash --version: $(bash --version)"
+
 	if [ ! -z "$BO_LOADED" ]; then
 			# If we loaded before we do not load again.
 			return;
@@ -287,13 +290,12 @@ function init {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] args: $@"
 			# TODO: Resolve './' and aliased paths based on mappings.
 			local _raw_module_source_path="$2"
-			# TODO: Optionally use '/.c/$2~.compiled.bash'
 			local _compiled_module_source_path="$2~.compiled.bash"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] _raw_module_source_path: $(stat -f "%m%t%Sm %N" $_raw_module_source_path)"
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] _compiled_module_source_path: $(stat -f "%m%t%Sm %N" $_compiled_module_source_path)"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] _compiled_module_source_path: $(stat -f "%m%t%Sm %N" $_compiled_module_source_path) 2> /dev/null"
 			# If source file is newer than compiled file
 			# TODO: Compile if 'bash.origin.modules' plugin implementation directory is newer than compiled module.
-			if [ $_BO_OPTIMIZED == 0 ] || [ ${_raw_module_source_path} -nt ${_compiled_module_source_path} ]; then
+			if [ ! -e "${_compiled_module_source_path}" ] || [ $_BO_OPTIMIZED == 0 ] || [ ${_raw_module_source_path} -nt ${_compiled_module_source_path} ]; then
 					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] Compile source '${_raw_module_source_path}' to '${_compiled_module_source_path}' (pwd: $(pwd))"
     			BO_callPlugin "bash.origin.modules" compile ${_raw_module_source_path} ${_compiled_module_source_path}
 			else
