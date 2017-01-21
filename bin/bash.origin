@@ -3,6 +3,4 @@
 # Source https://github.com/bash-origin/bash.origin
 . "${HOME}/.bash.origin"
 
-BO_resetLoaded
-
 . $BO_ROOT_SCRIPT_PATH BOB "$@"
