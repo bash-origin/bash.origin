@@ -8,7 +8,9 @@ pushd "$__BO_DIR__" > /dev/null
 
 		# NOTE: For full test suite see 'bash.origin.modules'
 
+		echo "TEST_MATCH_IGNORE>>>"
 		BO_requireModule "./module.bo.sh" as "module"
+		echo "<<<TEST_MATCH_IGNORE"
 
 		module run "from main"
 
