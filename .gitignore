@@ -5,3 +5,4 @@
 *~.compiled.bash
 /examples/*/.actual.*
 /examples/.deps/
+/node_modules/

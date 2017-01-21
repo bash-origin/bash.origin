@@ -5,8 +5,11 @@
     "bin": {
         "bash.origin": "./bash.origin"
     },
+    "dependencies": {
+      "bash.origin.test": "0.1.x"
+    },
     "scripts": {
         "install": "./bash.origin BO install",
-        "test": "examples/run.sh"
+        "test": "bash.origin.test examples"
     }
 }
