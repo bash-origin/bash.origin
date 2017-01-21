@@ -6,7 +6,7 @@
         "bash.origin": "./bash.origin"
     },
     "dependencies": {
-        "bash.origin.test": "0.1.x"
+        "bash.origin.test": "^0.1.5"
     },
     "scripts": {
         "install": "./bash.origin BO install",
