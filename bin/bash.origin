@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
 # Source https://github.com/bash-origin/bash.origin
+
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] ls -al ${HOME}/.bash.origin: $(ls -al ${HOME}/.bash.origin)"
+
+# TODO: Use own source?
 . "${HOME}/.bash.origin"
+
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
+
+BO_resetLoaded
 
 . $BO_ROOT_SCRIPT_PATH BOB "$@"
