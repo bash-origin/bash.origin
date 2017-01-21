@@ -182,6 +182,13 @@ function init {
 			export _BO_OPTIMIZED=0
 	fi
 
+	if echo "$@" | grep -q -Ee '(\$|\s*)--compile(\s*|\$)'; then
+			export _BO_OPTIMIZED=0
+	elif echo "$npm_config_argv" | grep -q -Ee '"--compile"'; then
+			export _BO_OPTIMIZED=0
+	fi
+
+
 	###############################
 	# Delegate if requested
 	###############################
@@ -989,7 +996,7 @@ function init {
 			BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION"
 			if [ "$PLUGIN_PATH" == "" ]; then
 				# TODO: Ask user before installing.
-				echo "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
+				[ -z "$BO_VERBOSE" ] || echo "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
 				BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
 			fi
 		fi
