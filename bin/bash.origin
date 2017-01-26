@@ -1,11 +1,35 @@
 #!/usr/bin/env bash
-
 # Source https://github.com/bash-origin/bash.origin
 
-[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] ls -al ${HOME}/.bash.origin: $(ls -al ${HOME}/.bash.origin)"
+BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
+eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+function BO_setResult {
+		local  __resultvar=$1
+    eval $__resultvar="'$2'"
+		return 0
+}
+function BO_deriveSelfDir {
+		# @source http://stackoverflow.com/a/246128/330439
+		local SOURCE="$2"
+		local DIR=""
+		while [ -h "$SOURCE" ]; do
+			  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+			  SOURCE="$(readlink "$SOURCE")"
+			  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+		done
+		BO_setResult $1 "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+		return 0
+}
+BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
-# TODO: Use own source?
-. "${HOME}/.bash.origin"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] ls -al ${HOME}/.bash.origin: $(ls -al ${HOME}/.bash.origin)"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] __BO_DIR__: $__BO_DIR__"
+
+export BO_ROOT_SCRIPT_PATH="${__BO_DIR__}/../bash.origin"
+
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
+
+. "$BO_ROOT_SCRIPT_PATH"
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 

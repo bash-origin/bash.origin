@@ -162,6 +162,8 @@ function init {
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 	local BO_DIR="$___TMP___"
 
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_DIR: $BO_DIR"
+
 	BO_checkVerbose "VERBOSE" "$@"
 	export VERBOSE
 
@@ -225,6 +227,7 @@ function init {
 		fi
 	fi
 
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
 	###############################
 	# Declare Globals
@@ -260,6 +263,8 @@ function init {
 	if [ -z "$BO_VERSION_SMI_CLI" ]; then
 		BO_VERSION_SMI_CLI="0.35.14"
 	fi
+
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_GLOBAL_SYSTEM_CACHE_DIR: $BO_GLOBAL_SYSTEM_CACHE_DIR"
 
 
 	###############################
