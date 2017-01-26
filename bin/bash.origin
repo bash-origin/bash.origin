@@ -25,7 +25,9 @@ BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] ls -al ${HOME}/.bash.origin: $(ls -al ${HOME}/.bash.origin)"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] __BO_DIR__: $__BO_DIR__"
 
-export BO_ROOT_SCRIPT_PATH="${__BO_DIR__}/../bash.origin"
+if [ -z "$BO_ROOT_SCRIPT_PATH" ]; then
+		export BO_ROOT_SCRIPT_PATH="${__BO_DIR__}/../bash.origin"
+fi
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 

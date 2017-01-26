@@ -202,8 +202,10 @@ function init {
 					local ORIGINAL_BO_ROOT_SCRIPT_DIR
 					BO_deriveSelfDir ORIGINAL_BO_ROOT_SCRIPT_DIR "$BO_ROOT_SCRIPT_PATH"
 					if [ "$BO_DIR" != "$ORIGINAL_BO_ROOT_SCRIPT_DIR" ]; then
+						[ -z "$BO_VERBOSE" ] || echo "[bash.origin] Delegate to BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 						# Delegate to the Bash.Origin script at 'BO_ROOT_SCRIPT_PATH'
 						# which was set before calling us.
+						BO_LOADED=0
 						. "$BO_ROOT_SCRIPT_PATH"
 						return;
 					fi
@@ -227,6 +229,7 @@ function init {
 		fi
 	fi
 
+	export BO_ROOT_SCRIPT_PATH
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
 	###############################
@@ -354,11 +357,19 @@ function init {
 							BO_ensurePlugin "PLUGIN_PATH_" "$PLUGIN_URI_"
 							PLUGIN_PATH_="$(dirname "${PLUGIN_PATH_}")"
 							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Using ensured plugin path: $PLUGIN_PATH_"
-							local PLUGIN_MODULE_NAME_="org.bashorigin-${PLUGIN_VERSION_}.sh"
+							local PLUGIN_MODULE_NAME_="_#_org.bashorigin_#_${PLUGIN_VERSION_}.sh"
 							local PLUGIN_MODULE_PATH_="${PLUGIN_PATH_}/${PLUGIN_MODULE_NAME_}"
 							if [ ! -e "$PLUGIN_MODULE_PATH_" ]; then
 									echo "$BO_LOG_PREFIX""ERROR: Module '$PLUGIN_MODULE_NAME_' does not exist in plugin at path '$PLUGIN_MODULE_PATH_'!"
-									exit 1
+
+									# DEPRECATED
+									PLUGIN_MODULE_NAME_="org.bashorigin-${PLUGIN_VERSION_}.sh"
+									PLUGIN_MODULE_PATH_="${PLUGIN_PATH_}/${PLUGIN_MODULE_NAME_}"
+									if [ ! -e "$PLUGIN_MODULE_PATH_" ]; then
+											echo "$BO_LOG_PREFIX""ERROR: Module '$PLUGIN_MODULE_NAME_' does not exist in plugin at path '$PLUGIN_MODULE_PATH_'!"
+
+											exit 1
+									fi
 							fi
 							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Load module from plugin: $PLUGIN_MODULE_PATH_"
 							BO_sourceModule "$PLUGIN_MODULE_PATH_"
@@ -366,6 +377,11 @@ function init {
 							echo "TODO: Non-github repository URLs"
 							exit 1
 					fi
+			elif [[ "${1}" == "/"* ]]; then
+
+					local PLUGIN_MODULE_PATH_="${1}"
+					BO_sourceModule "$PLUGIN_MODULE_PATH_"
+
 			else
 					echo "TODO: Alias-based includes that should resolve via mappings"
 					exit 1
