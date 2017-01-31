@@ -3,11 +3,13 @@
 # License: http://unlicense.org/
 function init {
 
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] args: $@"
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] which bash: $(which bash)"
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] bash --version: $(bash --version)"
 
 	if [ ! -z "$BO_LOADED" ]; then
 			# If we loaded before we do not load again.
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] Skip due to BO_LOADED=1"
 			return;
 	fi
 
@@ -18,6 +20,7 @@ function init {
 
 	# If 'SHELL' is set to 'bash$' that is good enough for us.
 	if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] SHELL is not 'bash': $SHELL"
 			# 'SHELL' is not what we need so we try and verify that we are running in `bash`
 			# by looking for `bash` in the process description.
 			# TODO: Use additional ways to detect if we are running in bash.
@@ -38,7 +41,12 @@ function init {
 	fi
 
 
+	if [ -z "$ORIGINAL_BO_CLI_ARGS" ]; then
+			export ORIGINAL_BO_CLI_ARGS="$@"
+	fi
 	local ORIGINAL_BO_ROOT_SCRIPT_PATH="$BO_ROOT_SCRIPT_PATH"
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] ORIGINAL_BO_CLI_ARGS: $ORIGINAL_BO_CLI_ARGS"
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] ORIGINAL_BO_ROOT_SCRIPT_PATH: $ORIGINAL_BO_ROOT_SCRIPT_PATH"
 
 
 	###############################
@@ -58,6 +66,11 @@ function init {
 			return;
 		fi
 		echo ${*:2}
+	}
+
+	function BO_exit_error {
+			echo >&2 "$(BO_cecho "ERROR: $1" RED BOLD)"
+			exit 1
 	}
 
 	function BO_ensure_env_HOME {
@@ -130,6 +143,18 @@ function init {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] DONE"
 	}
 
+	function BO_has_cli_arg {
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] args: $@"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] ORIGINAL_BO_CLI_ARGS: $ORIGINAL_BO_CLI_ARGS"
+			if echo "$ORIGINAL_BO_CLI_ARGS" | grep -q -Ee "\s*$1\s*"; then
+					return 0
+			fi
+			if echo "$npm_config_argv" | grep -q -Ee '"$1"'; then
+					return 0
+			fi
+			return 1
+	}
+
 	function BO_checkVerbose {
 		local _VERBOSE="$VERBOSE"
 		# Look for '-v', '--verbose', '-d' or '--debug' flags.
@@ -166,6 +191,10 @@ function init {
 
 	BO_checkVerbose "VERBOSE" "$@"
 	export VERBOSE
+	export BO_VERBOSE
+
+	[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[bash.origin] BO_VERBOSE: ${BO_VERBOSE}"
+	[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[bash.origin] VERBOSE: ${VERBOSE}"
 
 	export BO_LOADED=1
 
@@ -205,7 +234,7 @@ function init {
 						[ -z "$BO_VERBOSE" ] || echo "[bash.origin] Delegate to BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 						# Delegate to the Bash.Origin script at 'BO_ROOT_SCRIPT_PATH'
 						# which was set before calling us.
-						BO_LOADED=0
+						export BO_LOADED=
 						. "$BO_ROOT_SCRIPT_PATH"
 						return;
 					fi
@@ -291,6 +320,27 @@ function init {
 			echo "##################################################";
 			echo ""
 		fi
+	}
+
+	function BO_hash {
+			echo -n "yourpassword" | openssl sha1
+	}
+
+	function BO_replace {
+			echo -n "$(echo "$1" | perl -pe "s/$2/\$1/")"
+	}
+
+	function BO_test {
+			if [ "$(echo "$1" | perl -wnE "say for /($2)/")" == "" ]; then
+					return 1
+			fi
+			return 0
+	}
+
+	function BO_ensure_parent_dir {
+			if [ ! -e "$(dirname "$1")" ]; then
+					mkdir -p "$(dirname "$1")"
+			fi
 	}
 
 	function BO_has {
@@ -576,6 +626,8 @@ function init {
 	function BO_ensure_node {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] args: $@"
 		set +e
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Existing NodeJS version: $(node --version > /dev/null 2>&1 || true) ($(which node))"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Desired NodeJS version: v${BO_VERSION_NVM_NODE}"
 		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:1"
@@ -596,10 +648,6 @@ function init {
 		if [ -e "/usr/bin" ]; then
 				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] 'ls /usr/bin': $(ls /usr/bin | grep node)"
 		fi
-		if [ ! -z "${BO_VERBOSE}" ]; then
-				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Existing NodeJS version: $(node --version || true) ($(which node))"
-		fi
-		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Desired NodeJS version: v${BO_VERSION_NVM_NODE}"
 		BO_ensure_nvm
 		function installAndUse {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
@@ -607,6 +655,7 @@ function init {
 			# @see http://mywiki.wooledge.org/BashFAQ/105
 			set +e
 			nvm install "$BO_VERSION_NVM_NODE"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Deleting prefix for NodeJS version $BO_VERSION_NVM_NODE using nvm."
 			nvm use --delete-prefix "${BO_VERSION_NVM_NODE}" > /dev/null 2>&1
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Installing and activating NodeJS version $BO_VERSION_NVM_NODE using nvm."
@@ -632,17 +681,20 @@ function init {
 		fi
 		# TODO: Do not set default if already set.
 		if [ "${1}" == "default" ]; then
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Setting NodeJS version $BO_VERSION_NVM_NODE as default."
-					set +e
-					if [ -z "$BO_VERBOSE" ]; then
-							nvm alias default node > /dev/null 2>&1
-					else
-							nvm alias default node
-					fi
-					set -e
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Setting NodeJS version $BO_VERSION_NVM_NODE as default."
-	    fi
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Setting NodeJS version $BO_VERSION_NVM_NODE as default."
+				set +e
+				if [ -z "$BO_VERBOSE" ]; then
+						nvm alias default node > /dev/null 2>&1
+				else
+						nvm alias default node
+				fi
+				set -e
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Setting NodeJS version $BO_VERSION_NVM_NODE as default."
+    fi
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] which node: $(which node)"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] ls -al $(which node): ls -al $(which node)"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] node --version: $(node --version > /dev/null 2>&1 || true)"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE"
 	}
 
 	# DEPRECATED
@@ -718,7 +770,7 @@ function init {
 	function BO_run_node {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] args: $@"
 		BO_ensure_node
-		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version > /dev/null 2>&1)"
 		node "$@"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] END"
 	}
