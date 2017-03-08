@@ -343,6 +343,31 @@ function init {
 			fi
 	}
 
+
+	if echo "$@" | grep -q -Ee '(\$|\s*)--install-only(\s*|\$)'; then
+			BO_FLAG_INSTALL_ONLY=1
+	elif echo "$npm_config_argv" | grep -q -Ee '"--install-only"'; then
+			BO_FLAG_INSTALL_ONLY=1
+	fi
+
+	function BO_exit_if_install_only {
+			onExitFunc="$1"
+			function doExit {
+					if [ ! -z "$onExitFunc" ]; then
+							"$onExitFunc"
+					fi
+			    exit 0
+			}
+			if [[ $BO_FLAG_INSTALL_ONLY == 1 ]]; then
+					doExit
+			elif echo "$@" | grep -q -Ee '(\$|\s*)--install-only(\s*|\$)'; then
+					doExit
+			elif echo "$npm_config_argv" | grep -q -Ee '"--install-only"'; then
+					doExit
+			fi
+	}
+
+
 	function BO_has {
 	  type "$1" > /dev/null 2>&1
 	}
