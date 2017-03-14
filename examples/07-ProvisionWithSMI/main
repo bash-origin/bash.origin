@@ -6,9 +6,12 @@ local __BO_DIR__="$___TMP___"
 
 pushd "$__BO_DIR__" > /dev/null
 
-		echo "TEST_MATCH_IGNORE>>>"
-		BO_run_smi install
-		echo "<<<TEST_MATCH_IGNORE"
+# TODO: 'smi' is currently too slow to install.
+		echo ">>>SKIP_TEST<<<"
+
+#		echo "TEST_MATCH_IGNORE>>>"
+#		BO_run_smi install
+#		echo "<<<TEST_MATCH_IGNORE"
 
 	  # TODO: Assertions
 
