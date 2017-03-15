@@ -39,16 +39,24 @@ function init {
 					exit 1
 			fi
 	fi
+
 	if [[ $BO_BASH_ALLOW_3 != 1 ]] && [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
-			echo -e "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4!\n"
-			echo -e "[BO] ACTION: Install bash version 4. On OSX you can use:\n"
-			echo -e "             brew install bash\n"
-			echo -e "[BO] ACTION: Then call your script again using:\n"
-			echo -e "             SHELL=/usr/local/bin/bash /usr/local/bin/bash <ScriptPath>\n"
-			echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
-			echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
-			echo -e "             # Now open a new terminal\n"
-			exit 1
+			if [ "$(which bash)" != "$SHELL" ]; then
+					if [[ "$(bash --version)" == "GNU bash, version 4."* ]]; then
+							# We update the SHELL to where 'bash' actually is.
+							SHELL="$(which bash)"
+					else
+							echo -e "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4!\n"
+							echo -e "[BO] ACTION: Install bash version 4. On OSX you can use:\n"
+							echo -e "             brew install bash\n"
+							echo -e "[BO] ACTION: Then call your script again using:\n"
+							echo -e "             SHELL=/usr/local/bin/bash /usr/local/bin/bash <ScriptPath>\n"
+							echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
+							echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
+							echo -e "             # Now open a new terminal\n"
+							exit 1
+					fi
+			fi
 	fi
 
 
@@ -1219,7 +1227,7 @@ function init {
 
 		# TODO: Introduce external variable to set target install path
 		local installTargetPath="$ORIGINAL_BO_ROOT_SCRIPT_PATH"
-		if [ -z "$installTargetPath" ]; then
+		if [ -z "$installTargetPath" ] || [ "$installTargetPath" == "$BO_ROOT_SCRIPT_PATH" ]; then
 				# Target path not set so we use the default one
 				BO_ensure_env_HOME "Use default .bash.origin"
 				installTargetPath="$HOME/.bash.origin"
