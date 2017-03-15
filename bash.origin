@@ -18,7 +18,7 @@ function init {
 			return 1
 	fi
 
-	# If 'SHELL' is set to 'bash$' that is good enough for us.
+	# If 'SHELL' is set to 'bash' that is good enough for us.
 	if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] SHELL is not 'bash': $SHELL"
 			# 'SHELL' is not what we need so we try and verify that we are running in `bash`
@@ -32,14 +32,19 @@ function init {
 					echo -e "[BO] WARNING: Your 'SHELL' environment variable is set to '$SHELL' while it should be set to '**/bash'\n"
 					echo -e "[BO] ERROR: You must be using the 'bash' shell interpreter!\n"
 					echo -e "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
-					echo -e "             SHELL=\"/bin/bash\" /bin/bash\n"
+					echo -e "             SHELL=/bin/bash /bin/bash\n"
 					echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
 					echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
 					echo -e "             # Now open a new terminal\n"
 					return 1
 			fi
 	fi
-
+	if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
+			echo -e "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4!\n"
+			echo -e "[BO] ACTION: Install bash version 4. On OSX you can use:\n"
+			echo -e "             brew install bash\n"
+			return 1
+	fi
 
 	if [ -z "$ORIGINAL_BO_CLI_ARGS" ]; then
 			export ORIGINAL_BO_CLI_ARGS="$@"
@@ -241,7 +246,7 @@ function init {
 				else
 					BO_ensure_env_HOME "Delegate to BO_ROOT_SCRIPT_PATH"
 					if [ "$BO_ROOT_SCRIPT_PATH" != "$HOME/.bash.origin" ]; then
-						echo "ERROR: 'BO_ROOT_SCRIPT_PATH' ($BO_ROOT_SCRIPT_PATH) not found!"
+						echo "[bash.origin] ERROR: 'BO_ROOT_SCRIPT_PATH' ($BO_ROOT_SCRIPT_PATH) not found!"
 						exit 1
 					fi
 				fi
