@@ -15,7 +15,7 @@ function init {
 
 	if ! which perl > /dev/null; then
 			echo -e "[BO] ERROR: You must have 'perl' installed!\n"
-			return 1
+			exit 1
 	fi
 
 	# If 'SHELL' is set to 'bash' that is good enough for us.
@@ -36,15 +36,21 @@ function init {
 					echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
 					echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
 					echo -e "             # Now open a new terminal\n"
-					return 1
+					exit 1
 			fi
 	fi
-	if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
+	if [[ $BO_BASH_ALLOW_3 != 1 ]] && [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
 			echo -e "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4!\n"
 			echo -e "[BO] ACTION: Install bash version 4. On OSX you can use:\n"
 			echo -e "             brew install bash\n"
-			return 1
+			echo -e "[BO] ACTION: Then call your script again using:\n"
+			echo -e "             SHELL=/usr/local/bin/bash /usr/local/bin/bash <ScriptPath>\n"
+			echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
+			echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
+			echo -e "             # Now open a new terminal\n"
+			exit 1
 	fi
+
 
 	if [ -z "$ORIGINAL_BO_CLI_ARGS" ]; then
 			export ORIGINAL_BO_CLI_ARGS="$@"
