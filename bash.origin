@@ -200,7 +200,8 @@ function init {
 	# Boot self
 	###############################
 
-	BO_sourceProfile
+	# NOTE: We no longer source the profile automatically!
+	#BO_sourceProfile
 
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
@@ -747,7 +748,7 @@ function init {
 #		if BO_has "node"; then
 #			return
 #		fi
-		BO_sourceProfile
+#		BO_sourceProfile
 #		if BO_has "node"; then
 #			return
 #		fi
