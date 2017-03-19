@@ -468,8 +468,21 @@ function init {
 							fi
 							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Load module from plugin: $PLUGIN_MODULE_PATH_"
 							BO_sourceModule "$PLUGIN_MODULE_PATH_"
+					elif [[ "${1}" == "@/"* ]]; then
+
+							local PLUGIN_PATH_=`BO_run_silent_node --eval '
+									var uriParts = process.argv[1].match(/^@(.+)#(?:.+\/)?(.+)$/);
+									process.stdout.write(uriParts[1]);
+							' "${1}"`
+							local PLUGIN_VERSION_=`BO_run_silent_node --eval '
+									var uriParts = process.argv[1].match(/^@(.+)#(?:.+\/)?(.+)$/);
+									process.stdout.write(uriParts[2]);
+							' "${1}"`
+							local PLUGIN_MODULE_PATH_="$PLUGIN_PATH_/_#_org.bashorigin_#_${PLUGIN_VERSION_}.sh"
+							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Load module from plugin: $PLUGIN_MODULE_PATH_"
+							BO_sourceModule "$PLUGIN_MODULE_PATH_"
 					else
-							echo "TODO: Non-github repository URLs"
+							echo "ERROR: No actor found for URI: ${1}"
 							exit 1
 					fi
 			elif [[ "${1}" == "/"* ]]; then
