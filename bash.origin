@@ -121,9 +121,13 @@ function init {
 
 	function BO_sourceProfile {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] args: $@"
+		if [[ $BO_ENABLE_SOURCE_PROFILE == 0 ]]; then
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] return due to 'BO_ENABLE_SOURCE_PROFILE == 0'"
+			return 0
+		fi
 		if [ ! -z "$CIRCLE_SHA1" ]; then
 			# On circleci we do not load the profile again
-			# TODO: Make this generic or add a new variable used to flag a skip
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourceProfile] return due to 'CIRCLE_SHA1' set"
 			return 0
 		fi
 		# TODO: Allow sourcing multiple times if 'force' argument provided.
@@ -201,7 +205,10 @@ function init {
 	###############################
 
 	# NOTE: We no longer source the profile automatically!
-	#BO_sourceProfile
+	if [ -z "$BO_ENABLE_SOURCE_PROFILE" ]; then
+		BO_ENABLE_SOURCE_PROFILE=0;
+	fi
+	BO_sourceProfile
 
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
