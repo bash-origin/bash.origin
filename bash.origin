@@ -18,6 +18,9 @@ function init {
 			exit 1
 	fi
 
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] SHELL: $SHELL"
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] $SHELL --version: $($SHELL --version)"
+
 	# If 'SHELL' is set to 'bash' that is good enough for us.
 	if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] SHELL is not 'bash': $SHELL"
@@ -39,6 +42,8 @@ function init {
 					exit 1
 			fi
 	fi
+
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_BASH_ALLOW_3: $BO_BASH_ALLOW_3"
 
 	if [[ $BO_BASH_ALLOW_3 != 1 ]] && [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
 			if [ "$(which bash)" != "$SHELL" ]; then
