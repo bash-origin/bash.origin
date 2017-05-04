@@ -89,7 +89,7 @@ function init {
 		if [ "$1" != "1" ]; then
 			return;
 		fi
-		echo ${*:2}
+		echo -e "${*:2}"
 	}
 
 	function BO_exit_error {
@@ -234,15 +234,12 @@ function init {
 	#       and should not be set externally other than to force a specific
 	#       internal state for debugging purposes.
 	if [ -z "$_BO_OPTIMIZED" ]; then
-			# If not set we set it based on BO_VERBOSE.
-			if [ -z "$BO_VERBOSE" ]; then
-					export _BO_OPTIMIZED=1
-			else
-					export _BO_OPTIMIZED=0
-			fi
-	elif [ ! -z "$BO_VERBOSE" ]; then
-			# If set we downgrade it if BO_VERBOSE is set.
-			export _BO_OPTIMIZED=0
+		# If not set we set it based on BO_VERBOSE.
+		if [ -z "$BO_VERBOSE" ]; then
+				export _BO_OPTIMIZED=1
+		else
+				export _BO_OPTIMIZED=0
+		fi
 	fi
 
 	if echo "$@" | grep -q -Ee '(\$|\s*)--compile(\s*|\$)'; then
@@ -314,11 +311,14 @@ function init {
 	fi
 	export BO_SYSTEM_CACHE_DIR
 
+	if [ -z "$BO_VERSION_RECENT_NODE" ]; then
+		BO_VERSION_RECENT_NODE="5"
+	fi
 	if [ -z "$BO_VERSION_NVM" ]; then
 		BO_VERSION_NVM="0.31.1"
 	fi
 	if [ -z "$BO_VERSION_NVM_NODE" ]; then
-		BO_VERSION_NVM_NODE="4"
+		BO_VERSION_NVM_NODE="5"
 	fi
 	if [ -z "$BO_VERSION_NVM_IOJS" ]; then
 		# DEPRECATED
@@ -423,10 +423,10 @@ function init {
 			# If source file is newer than compiled file
 			# TODO: Compile if 'bash.origin.modules' plugin implementation directory is newer than compiled module.
 			if [ ! -e "${_compiled_module_source_path}" ] || [ $_BO_OPTIMIZED == 0 ] || [ ${_raw_module_source_path} -nt ${_compiled_module_source_path} ]; then
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] Compile source '${_raw_module_source_path}' to '${_compiled_module_source_path}' (pwd: $(pwd))"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] Compile source '${_raw_module_source_path}' to '${_compiled_module_source_path}' (pwd: $(pwd), _BO_OPTIMIZED: $_BO_OPTIMIZED)"
     			BO_callPlugin "bash.origin.modules" compile ${_raw_module_source_path} ${_compiled_module_source_path}
 			else
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] Skip compile as source has not changed."
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] Skip compile as source has not changed."
 			fi
 			BO_setResult "$1" "${_compiled_module_source_path}"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] DONE"
@@ -693,10 +693,26 @@ function init {
 			fi
 	}
 
+	function BO_ensure_recent_node {
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] args: $@"
+		# We just care that a version of NodeJS later than BO_VERSION_RECENT_NODE is installed.
+		set +e
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] Existing NodeJS version: $(node --version 2>&1 || true) ($(which node))"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] Desired NodeJS version: v5"
+		if [[ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" -ge $BO_VERSION_RECENT_NODE ]]; then
+			set -e
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] found"
+			BO_ensure_bo_script_bin
+			return
+		fi
+		set -e
+		BO_ensure_node "$@"		
+	}
+
 	function BO_ensure_node {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] args: $@"
 		set +e
-		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Existing NodeJS version: $(node --version > /dev/null 2>&1 || true) ($(which node))"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Existing NodeJS version: $(node --version 2>&1 || true) ($(which node))"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Desired NodeJS version: v${BO_VERSION_NVM_NODE}"
 		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
@@ -760,7 +776,7 @@ function init {
 				fi
 				set -e
 				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] done: Setting NodeJS version $BO_VERSION_NVM_NODE as default."
-    fi
+   		fi
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] which node: $(which node)"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] ls -al $(which node): ls -al $(which node)"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] node --version: $(node --version > /dev/null 2>&1 || true)"
@@ -828,19 +844,27 @@ function init {
 	}
 
 	function BO_run_silent_node {
-			local __OLD_BO_VERBOSE="${BO_VERBOSE}"
-			local __OLD_VERBOSE="${VERBOSE}"
-			BO_VERBOSE=
-			VERBOSE=
-			BO_run_node "$@"
-			BO_VERBOSE="${__OLD_BO_VERBOSE}"
-			VERBOSE="${__OLD_VERBOSE}"
+		local __OLD_BO_VERBOSE="${BO_VERBOSE}"
+		local __OLD_VERBOSE="${VERBOSE}"
+		BO_VERBOSE=
+		VERBOSE=
+		BO_run_recent_node "$@"
+		BO_VERBOSE="${__OLD_BO_VERBOSE}"
+		VERBOSE="${__OLD_VERBOSE}"
+	}
+
+	function BO_run_recent_node {
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_recent_node] args: $@"
+		BO_ensure_recent_node
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_recent_node] NodeJS version: $(node --version 2>&1)"
+		node "$@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_recent_node] END"
 	}
 
 	function BO_run_node {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] args: $@"
 		BO_ensure_node
-		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version > /dev/null 2>&1)"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version 2>&1)"
 		node "$@"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] END"
 	}
