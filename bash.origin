@@ -172,15 +172,15 @@ function init {
 	}
 
 	function BO_has_cli_arg {
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] args: $@"
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] ORIGINAL_BO_CLI_ARGS: $ORIGINAL_BO_CLI_ARGS"
-			if echo "$ORIGINAL_BO_CLI_ARGS" | grep -q -Ee "\s*$1\s*"; then
-					return 0
-			fi
-			if echo "$npm_config_argv" | grep -q -Ee '"$1"'; then
-					return 0
-			fi
-			return 1
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] args: $@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] ORIGINAL_BO_CLI_ARGS: $ORIGINAL_BO_CLI_ARGS"
+		if echo "$ORIGINAL_BO_CLI_ARGS" | grep -q -Ee "\s*$1\s*"; then
+				return 0
+		fi
+		if echo "$npm_config_argv" | grep -q -Ee '"$1"'; then
+				return 0
+		fi
+		return 1
 	}
 
 	function BO_checkVerbose {
