@@ -188,9 +188,11 @@ function init {
 		# Look for '-v', '--verbose', '-d' or '--debug' flags.
 		if echo "$@" | grep -q -Ee '(\$|\s)--?([vd]|verbose|debug)(\s|\$)'; then
 		    _VERBOSE="1"
+			BO_log "1" "[BO_checkVerbose] enable due to verbose command arg: $@"
 		fi
 		if echo "$npm_config_argv" | grep -q -Ee '"--?([vd]|verbose|debug)"'; then
 		    _VERBOSE="1"
+			BO_log "1" "[BO_checkVerbose] enable due to verbose npm_config_argv arg: $npm_config_argv"
 		fi
 #		if [ "$_VERBOSE" == "1" ]; then
 #			BO_log "$_VERBOSE" "[BO_checkVerbose] Verbose Enabled: $_VERBOSE"
