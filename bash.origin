@@ -186,7 +186,7 @@ function init {
 	function BO_checkVerbose {
 		local _VERBOSE="$VERBOSE"
 		# Look for '-v', '--verbose', '-d' or '--debug' flags.
-		if echo "$@" | grep -q -Ee '(\$|\s*)--?([vd]|verbose|debug)(\s*|\$)'; then
+		if echo "$@" | grep -q -Ee '(\$|\s)--?([vd]|verbose|debug)(\s|\$)'; then
 		    _VERBOSE="1"
 		fi
 		if echo "$npm_config_argv" | grep -q -Ee '"--?([vd]|verbose|debug)"'; then
@@ -242,7 +242,7 @@ function init {
 		fi
 	fi
 
-	if echo "$@" | grep -q -Ee '(\$|\s*)--compile(\s*|\$)'; then
+	if echo "$@" | grep -q -Ee '(\$|\s)--compile(\s|\$)'; then
 			export _BO_OPTIMIZED=0
 	elif echo "$npm_config_argv" | grep -q -Ee '"--compile"'; then
 			export _BO_OPTIMIZED=0
@@ -376,7 +376,7 @@ function init {
 	}
 
 
-	if echo "$@" | grep -q -Ee '(\$|\s*)--install-only(\s*|\$)'; then
+	if echo "$@" | grep -q -Ee '(\$|\s)--install-only(\s|\$)'; then
 			BO_FLAG_INSTALL_ONLY=1
 	elif echo "$npm_config_argv" | grep -q -Ee '"--install-only"'; then
 			BO_FLAG_INSTALL_ONLY=1
@@ -392,7 +392,7 @@ function init {
 			}
 			if [[ $BO_FLAG_INSTALL_ONLY == 1 ]]; then
 					doExit
-			elif echo "$@" | grep -q -Ee '(\$|\s*)--install-only(\s*|\$)'; then
+			elif echo "$@" | grep -q -Ee '(\$|\s)--install-only(\s|\$)'; then
 					doExit
 			elif echo "$npm_config_argv" | grep -q -Ee '"--install-only"'; then
 					doExit
