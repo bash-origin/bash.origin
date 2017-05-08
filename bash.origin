@@ -385,20 +385,25 @@ function init {
 	fi
 
 	function BO_exit_if_install_only {
-			onExitFunc="$1"
-			function doExit {
-					if [ ! -z "$onExitFunc" ]; then
-							"$onExitFunc"
-					fi
-			    exit 0
-			}
-			if [[ $BO_FLAG_INSTALL_ONLY == 1 ]]; then
-					doExit
-			elif echo "$@" | grep -q -Ee '(\$|\s)--install-only(\s|\$)'; then
-					doExit
-			elif echo "$npm_config_argv" | grep -q -Ee '"--install-only"'; then
-					doExit
+		installFunc="$1"
+		function doInstall {
+			if [ ! -z "$installFunc" ]; then
+				"$installFunc"
 			fi
+		}
+		function doExit {
+			doInstall
+			exit 0
+		}
+		if [[ $BO_FLAG_INSTALL_ONLY == 1 ]]; then
+			doExit
+		elif echo "$@" | grep -q -Ee '(\$|\s)--install-only(\s|\$)'; then
+			doExit
+		elif echo "$npm_config_argv" | grep -q -Ee '"--install-only"'; then
+			doExit
+		else
+			doInstall
+		fi
 	}
 
 
@@ -443,6 +448,11 @@ function init {
 			if [ "$2" != "as" ]; then
 						echo "$BO_LOG_PREFIX""ERROR: Second argument to BO_requireModule should be 'as'!"
 						exit 1
+			fi
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] ___bo_module_instance_caller_dirname___: $___bo_module_instance_caller_dirname___"
+			if [ ! -z "$___bo_module_instance_caller_dirname___" ]; then
+				varName="$3__CALLER_DIRNAME__"
+				export ${varName}="$___bo_module_instance_caller_dirname___"
 			fi
 			if [[ "${1}" == "."* ]]; then
 					# Relative include based on PWD is used from outside a module
@@ -882,7 +892,12 @@ function init {
 		BO_ensure_node
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_npm] npm version: $(npm --version)"
+		local currentNPM=`printenv | grep '^npm_'`
+		# TODO: Reset all 'npm_*' variables.
+		export npm_config_argv=
+		export npm_config_dev=
 		npm $@
+#		eval "$currentNPM"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_npm] END"
 	}
 
