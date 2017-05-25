@@ -183,6 +183,40 @@ function init {
 		return 1
 	}
 
+	function BO_parse_args {
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_parse_args] args: $@"
+        local parsedArgs=$(echo -e $(BO_run_recent_node --eval '
+            const MINIMIST = require("minimist");
+            const VAR_PREFIX = process.argv[1];
+
+            var vars = {};
+            function exportVar (name, value) {
+                vars[VAR_PREFIX + name] = ("" + value);
+            }
+
+            const argsArray = process.argv.slice(2);
+            exportVar("_0", argsArray.join(" "));
+
+            const args = MINIMIST(argsArray);
+
+            Object.keys(args).forEach(function (name) {
+                if (name === "_") {
+                    args[name].forEach(function (value, i) {
+                        exportVar("_" + (i + 1), value);
+                    });
+                } else {
+                    exportVar("OPT_" + name, args[name]);
+                }
+            });
+
+            Object.keys(vars).forEach(function (name) {
+                process.stdout.write(name + "=\"" + vars[name] + "\"\\n");
+            });
+        ' "$@"))
+        [ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$parsedArgs"
+		eval "$parsedArgs"
+	}
+
 	function BO_checkVerbose {
 		local _VERBOSE="$VERBOSE"
 		# Look for '-v', '--verbose', '-d' or '--debug' flags.
