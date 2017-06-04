@@ -1,16 +1,17 @@
 {
-    "name": "bash.origin",
-    "version": "0.1.59",
-    "repository": "https://github.com/bash-origin/bash.origin.git",
-    "bin": {
-        "bash.origin": "./bin/bash.origin",
-        "bash.origin.script": "./bin/bash.origin.script"
-    },
-    "dependencies": {
-        "bash.origin.test": "^0.1.29"
-    },
-    "scripts": {
-        "install": "./bash.origin BO install",
-        "test": "BO_ROOT_SCRIPT_PATH=$(pwd)/node_modules/bash.origin/bash.origin bash.origin.test examples"
-    }
+  "name": "bash.origin",
+  "version": "0.1.59",
+  "repository": "https://github.com/bash-origin/bash.origin.git",
+  "bin": {
+    "bash.origin": "./bin/bash.origin",
+    "bash.origin.script": "./bin/bash.origin.script"
+  },
+  "dependencies": {
+    "bash.origin.test": "^0.1.29",
+    "minimist": "^1.2.0"
+  },
+  "scripts": {
+    "install": "./bash.origin BO install",
+    "test": "BO_ROOT_SCRIPT_PATH=$(pwd)/node_modules/bash.origin/bash.origin bash.origin.test examples"
+  }
 }

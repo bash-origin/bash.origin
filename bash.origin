@@ -183,40 +183,6 @@ function init {
 		return 1
 	}
 
-	function BO_parse_args {
-		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_parse_args] args: $@"
-        local parsedArgs=$(echo -e $(BO_run_recent_node --eval '
-            const MINIMIST = require("minimist");
-            const VAR_PREFIX = process.argv[1];
-
-            var vars = {};
-            function exportVar (name, value) {
-                vars[VAR_PREFIX + name] = ("" + value);
-            }
-
-            const argsArray = process.argv.slice(2);
-            exportVar("_0", argsArray.join(" "));
-
-            const args = MINIMIST(argsArray);
-
-            Object.keys(args).forEach(function (name) {
-                if (name === "_") {
-                    args[name].forEach(function (value, i) {
-                        exportVar("_" + (i + 1), value);
-                    });
-                } else {
-                    exportVar("OPT_" + name, args[name]);
-                }
-            });
-
-            Object.keys(vars).forEach(function (name) {
-                process.stdout.write(name + "=\"" + vars[name] + "\"\\n");
-            });
-        ' "$@"))
-        [ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$parsedArgs"
-		eval "$parsedArgs"
-	}
-
 	function BO_checkVerbose {
 		local _VERBOSE="$VERBOSE"
 		# Look for '-v', '--verbose', '-d' or '--debug' flags.
@@ -253,7 +219,7 @@ function init {
 
 	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
-	local BO_DIR="$___TMP___"
+	export BO_DIR="$___TMP___"
 
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_DIR: $BO_DIR"
 
@@ -405,10 +371,32 @@ function init {
 			return 0
 	}
 
+	function BO_ensure_dir {
+		if [ ! -e "$1" ]; then
+			mkdir -p "$1"
+		fi
+	}
+
 	function BO_ensure_parent_dir {
-			if [ ! -e "$(dirname "$1")" ]; then
-					mkdir -p "$(dirname "$1")"
-			fi
+		if [ ! -e "$(dirname "$1")" ]; then
+			mkdir -p "$(dirname "$1")"
+		fi
+	}
+
+	function BO_ensure_empty_path {
+		if [ ! -e "$1" ]; then
+			# Path does not exist
+			BO_ensure_dir "$1"
+			return 0;
+		fi
+		# Path exists; check if empty
+		# @source https://stackoverflow.com/a/20456797/330439
+		if find "$1" -mindepth 1 -print -quit | grep -q .; then
+			# has content
+			return 1;
+		fi
+		# is empty
+		return 0;
 	}
 
 
@@ -454,6 +442,42 @@ function init {
 		sudo $1
 	}
 
+	function BO_parse_args {
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_parse_args] args: $@"
+		# TODO: Relocate this into external module so we can install 'minimist'
+		#       or use pure bash implementation.
+        local parsedArgs=$(echo -e $(BO_run_silent_node --eval '
+            const MINIMIST = require("'$BO_DIR'/node_modules/minimist");
+            const VAR_PREFIX = process.argv[1];
+
+            var vars = {};
+            function exportVar (name, value) {
+                vars[VAR_PREFIX + name] = ("" + value);
+            }
+
+            const argsArray = process.argv.slice(2);
+            exportVar("_0", argsArray.join(" "));
+
+            const args = MINIMIST(argsArray);
+
+            Object.keys(args).forEach(function (name) {
+                if (name === "_") {
+                    args[name].forEach(function (value, i) {
+                        exportVar("_" + (i + 1), value);
+                    });
+                } else {
+                    exportVar("OPT_" + name, args[name]);
+                }
+            });
+
+            Object.keys(vars).forEach(function (name) {
+                process.stdout.write(name + "=\"" + vars[name] + "\"\\n");
+            });
+        ' "$@"))
+        [ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$parsedArgs"
+		eval "$parsedArgs"
+	}
+
 	function BO_compileModule {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] args: $@"
 			# TODO: Resolve './' and aliased paths based on mappings.
@@ -494,7 +518,10 @@ function init {
 					BO_sourceModule "$(pwd)/$1"
 			elif [[ "${1}" == "@"* ]]; then
 
-					if [[ "${1}" == "@com.github/"* ]]; then
+					if [[ "${1}" == "@com.github/"* ]] || [[ "${1}" == "@github.com~"* ]]; then
+
+						if [[ "${1}" == "@com.github/"* ]]; then
+
 							local PLUGIN_URI_=`BO_run_silent_node --eval '
 									var uriParts = process.argv[1].match(/^@([^\/]+)\/(.+)#(?:.+\/)?(.+)$/);
 									uriParts[1] = uriParts[1].split(".");
@@ -502,13 +529,33 @@ function init {
 									uriParts[1] = uriParts[1].join(".");
 									process.stdout.write(uriParts[1] + "/" + uriParts[2]);
 							' "${1}"`
+							local PLUGIN_URI_SUB_PATH_=""
 							local PLUGIN_VERSION_=`BO_run_silent_node --eval '
 									var uriParts = process.argv[1].match(/^@([^\/]+)\/(.+)#(?:.+\/)?(.+)$/);
 									process.stdout.write(uriParts[3]);
 							' "${1}"`
+						else
+
+							local PLUGIN_URI_=`BO_run_silent_node --eval '
+									var uriParts = process.argv[1].match(/^@([^\/]+)\/(.+)#(?:.+\/)?(.+)$/);
+									process.stdout.write(uriParts[1]);
+							' "${1}"`
+							local PLUGIN_URI_SUB_PATH_=`BO_run_silent_node --eval '
+									var uriParts = process.argv[1].match(/^@([^\/]+)\/(.+)#(?:.+\/)?(.+)$/);
+									process.stdout.write(uriParts[2]);
+							' "${1}"`
+							local PLUGIN_VERSION_=`BO_run_silent_node --eval '
+									var uriParts = process.argv[1].match(/^@([^\/]+)\/(.+)#(?:.+\/)?(.+)$/);
+									process.stdout.write(uriParts[3]);
+							' "${1}"`
+						fi
+
 							local PLUGIN_PATH_
 							BO_ensurePlugin "PLUGIN_PATH_" "$PLUGIN_URI_"
 							PLUGIN_PATH_="$(dirname "${PLUGIN_PATH_}")"
+							if [ "${PLUGIN_URI_SUB_PATH_}" != "" ]; then
+								PLUGIN_PATH_="${PLUGIN_PATH_}/${PLUGIN_URI_SUB_PATH_}"
+							fi
 							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Using ensured plugin path: $PLUGIN_PATH_"
 							local PLUGIN_MODULE_NAME_="_#_org.bashorigin_#_${PLUGIN_VERSION_}.sh"
 							local PLUGIN_MODULE_PATH_="${PLUGIN_PATH_}/${PLUGIN_MODULE_NAME_}"
@@ -663,6 +710,48 @@ function init {
 			}
 			BO_setResult "$1" "`abspath "$2"`"
 		fi
+	}
+
+	# @source https://stackoverflow.com/a/12498485/330439
+	function BO_relative {
+		# both $1 and $2 are absolute paths beginning with /
+		# returns relative path to $2/$target from $1/$source
+		source=$1
+		target=$2
+
+		common_part=$source # for now
+		result="" # for now
+
+		while [[ "${target#$common_part}" == "${target}" ]]; do
+			# no match, means that candidate common part is not correct
+			# go up one level (reduce common part)
+			common_part="$(dirname $common_part)"
+			# and record that we went back, with correct / handling
+			if [[ -z $result ]]; then
+				result=".."
+			else
+				result="../$result"
+			fi
+		done
+
+		if [[ $common_part == "/" ]]; then
+			# special case for root (no common path)
+			result="$result/"
+		fi
+
+		# since we now have identified the common part,
+		# compute the non-common part
+		forward_part="${target#$common_part}"
+
+		# and now stick all parts together
+		if [[ -n $result ]] && [[ -n $forward_part ]]; then
+			result="$result$forward_part"
+		elif [[ -n $forward_part ]]; then
+			# extra slash removal
+			result="${forward_part:1}"
+		fi
+
+		echo $result
 	}
 
 	function BO_isSourced {
