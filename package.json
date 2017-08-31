@@ -6,6 +6,7 @@
         "bash.origin": "./bin/bash.origin",
         "bash.origin.script": "./bin/bash.origin.script"
     },
+    "main": "bash.origin.js",
     "dependencies": {
         "bash.origin.test": "^0.1.29",
         "minimist": "^1.2.0"

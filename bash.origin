@@ -183,6 +183,14 @@ function init {
 		return 1
 	}
 
+	function BO_has_arg {
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_arg] args: $@"
+		if echo "${*:2}" | grep -q -Ee "(^|\s)$1(\s|\$)"; then
+			return 0
+		fi
+		return 1
+	}
+
 	function BO_checkVerbose {
 		local _VERBOSE="$VERBOSE"
 		# Look for '-v', '--verbose', '-d' or '--debug' flags.
@@ -206,6 +214,7 @@ function init {
 			export BO_IS_SOURCING=
 			export BO_sourceProfile__sourced=
 	}
+	
 
 	###############################
 	# Boot self
@@ -442,6 +451,7 @@ function init {
 		sudo $1
 	}
 
+
 	function BO_parse_args {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_parse_args] args: $@"
 		# TODO: Relocate this into external module so we can install 'minimist'
@@ -452,6 +462,7 @@ function init {
 
             var vars = {};
             function exportVar (name, value) {
+				name = name.replace(/-/g, "_");
                 vars[VAR_PREFIX + name] = ("" + value);
             }
 
@@ -466,7 +477,7 @@ function init {
                         exportVar("_" + (i + 1), value);
                     });
                 } else {
-                    exportVar("OPT_" + name, args[name]);
+                    exportVar("_OPT_" + name, args[name]);
                 }
             });
 
@@ -475,7 +486,9 @@ function init {
             });
         ' "$@"))
         [ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$parsedArgs"
-		eval "$parsedArgs"
+		eval "$parsedArgs" || {
+	        BO_log "1" "ARGS: $parsedArgs"
+		}
 	}
 
 	function BO_compileModule {
@@ -984,8 +997,10 @@ function init {
 		BO_VERBOSE=
 		VERBOSE=
 		BO_run_recent_node "$@"
+		local exitCode=$?
 		BO_VERBOSE="${__OLD_BO_VERBOSE}"
 		VERBOSE="${__OLD_VERBOSE}"
+		return $exitCode;
 	}
 
 	function BO_run_recent_node {
@@ -993,7 +1008,9 @@ function init {
 		BO_ensure_recent_node
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_recent_node] NodeJS version: $(node --version 2>&1)"
 		node "$@"
+		local exitCode=$?
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_recent_node] END"
+		return $exitCode;
 	}
 
 	function BO_run_node {
@@ -1001,7 +1018,9 @@ function init {
 		BO_ensure_node
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version 2>&1)"
 		node "$@"
+		local exitCode=$?
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] END"
+		return $exitCode;
 	}
 
 	# DEPRECATED
@@ -1020,8 +1039,10 @@ function init {
 		export npm_config_argv=
 		export npm_config_dev=
 		npm $@
+		local exitCode=$?
 #		eval "$currentNPM"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_npm] END"
+		return $exitCode;
 	}
 
 	function BO_ensure_smi {
@@ -1119,12 +1140,7 @@ function init {
 		fi
 	}
 
-	function BO_downloadToSystemCache {
-		local DOWNLOAD_PATH__
-		BO_systemCachePath DOWNLOAD_PATH__ "$2" "$3"
-		local DOWNLOAD_URL_="$4"
-		local DOWNLOAD_FILE_EXTENSION_=`echo "$DOWNLOAD_URL_" | perl -wnE 'say for /\.([^\.]+)$/g'`
-		# TODO: Append '?t=$(date +%s)' to URL to force download?
+	function BO_downloadUrlTo {
 	  	function download {
 			if BO_has "curl"; then
 				curl \
@@ -1145,6 +1161,19 @@ function init {
 				wget $ARGS
 			fi
 	  	}
+
+		download -s "$1" -o "$2" || {
+			echo >&2 "$BO_LOG_PREFIX""Failed to download '$1' to '$2'"
+			return 1
+		}
+	}
+
+	function BO_downloadToSystemCache {
+		local DOWNLOAD_PATH__
+		BO_systemCachePath DOWNLOAD_PATH__ "$2" "$3"
+		local DOWNLOAD_URL_="$4"
+		local DOWNLOAD_FILE_EXTENSION_=`echo "$DOWNLOAD_URL_" | perl -wnE 'say for /\.([^\.]+)$/g'`
+		# TODO: Append '?t=$(date +%s)' to URL to force download?
 	  	local ARCHIVE_DOWNLOAD_PATH__
 	  	if [ "$DOWNLOAD_FILE_EXTENSION_" == "gz" ]; then
 	  		# TODO: Don't assume '.tar.'. Check to make sure.
@@ -1162,7 +1191,8 @@ function init {
 			rm -Rf "$ARCHIVE_DOWNLOAD_PATH__"
 	  	fi
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "${BO_LOG_PREFIX}Downloading '$DOWNLOAD_URL_' to '$ARCHIVE_DOWNLOAD_PATH__'"
-		download -s "$DOWNLOAD_URL_" -o "$ARCHIVE_DOWNLOAD_PATH__" || {
+		
+		BO_downloadUrlTo "$DOWNLOAD_URL_" "$ARCHIVE_DOWNLOAD_PATH__" || {
 			echo >&2 "$BO_LOG_PREFIX""Failed to download '$ARCHIVE_DOWNLOAD_PATH__'"
 			return 1
 		}
@@ -1464,6 +1494,28 @@ exit 1
 		fi
 		echo "$BO_LOG_PREFIX""bash.origin updated!"
 	}
+
+
+	BO_parse_args "ARGS" "$@"
+
+
+	if [ "$ARGS_OPT_init" == "true" ]; then
+		newDir="$(pwd)/$ARGS_1"
+		if [ -e "$newDir" ]; then
+			BO_exit_error "Directory '$newDir' already exists!"
+		fi
+		# TODO: Check with network to see if name is available.
+		mkdir -p "$newDir"
+		pushd "$newDir" > /dev/null
+			git init
+			bash.origin.test examples --init
+			npm test
+		popd > /dev/null
+		echo "$(BO_cecho "New bash.origin based project successfully created at: $newDir" GREEN)"
+		echo "ACTION: To publish on IPFS run: $(BO_cecho "bash.origin $ARGS_1 --publish" MAGENTA)"
+		exit 0
+	fi
+
 
 	# Bash Origin Bin invocation
 	if [ "$1" == "BOB" ]; then
