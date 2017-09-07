@@ -5,7 +5,7 @@ const FS = require("fs");
 
 exports.depend = function (id, config) {
 
-    var idParts = id.match(/^([^#]+)#(.+)$/);
+    var idParts = id.match(/^@?([^#]+)#(.+)$/);
 
     if (!idParts) {
         throw new Error("No API Contract specified! Use '" + id + "#<uri>'.");
@@ -62,3 +62,61 @@ exports.depend = function (id, config) {
     return impl.forConfig(config || {});
 }
 
+exports.isInvokable = function (obj) {
+    var keys = Object.keys(obj);
+    return (
+        keys.length === 1 &&
+        /^@.+\./.test(keys[0])
+    );
+}
+
+exports.invokeApi = function (obj, apiUri, apiArgsObj, options) {
+
+    apiArgsObj = apiArgsObj || {};
+    if (!Array.isArray(apiArgsObj)) {
+        apiArgsObj = [
+            apiArgsObj
+        ];
+    }
+    options = options || {};
+
+    var keys = Object.keys(obj);
+
+    var implId = keys[0].replace(/^@/, "");
+    var implConfig = obj[keys[0]];
+
+    if (options.config) {
+        implConfig = mergeDeep(implConfig, options.config);
+    }
+
+    var implAPIs = exports.depend(implId, implConfig);
+
+    if (typeof implAPIs[apiUri] !== "function") {
+        console.error("implAPIs", implAPIs);
+        throw new Error("Implementation for '" + implId + "' does not declare API '" + apiUri + "'!");
+    }
+
+    return implAPIs[apiUri].apply(null, apiArgsObj);
+}
+
+
+// @see https://stackoverflow.com/a/37164538/330439
+function isObject(item) {
+  return (item && typeof item === 'object' && !Array.isArray(item));
+}
+function mergeDeep (target, source) {
+  let output = Object.assign({}, target);
+  if (isObject(target) && isObject(source)) {
+    Object.keys(source).forEach(function (key) {
+      if (isObject(source[key])) {
+        if (!(key in target))
+          Object.assign(output, { [key]: source[key] });
+        else
+          output[key] = mergeDeep(target[key], source[key]);
+      } else {
+        Object.assign(output, { [key]: source[key] });
+      }
+    });
+  }
+  return output;
+}

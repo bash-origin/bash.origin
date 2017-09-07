@@ -456,8 +456,25 @@ function init {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_parse_args] args: $@"
 		# TODO: Relocate this into external module so we can install 'minimist'
 		#       or use pure bash implementation.
+
         local parsedArgs=$(echo -e $(BO_run_silent_node --eval '
-            const MINIMIST = require("'$BO_DIR'/node_modules/minimist");
+	    const PATH = require("path");
+	    const FS = require("fs");
+
+	    try {
+	      var MINIMIST = require("'$BO_DIR'/node_modules/minimist");
+	    } catch (err) {
+
+	      var minimistPath = PATH.join(process.env._, "../../lib/node_modules/minimist");
+	      if (!FS.existsSync(minimistPath)) {
+		require("child_process").execSync("npm install -g minimist", {
+		  stdio: "ignore"
+		});
+	      }
+
+	      var MINIMIST = require(PATH.join(process.env._, "../../lib/node_modules/minimist"));
+	    }
+
             const VAR_PREFIX = process.argv[1];
 
             var vars = {};
@@ -847,7 +864,8 @@ function init {
 		set +e
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] Existing NodeJS version: $(node --version 2>&1 || true) ($(which node))"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] Desired NodeJS version: v5"
-		if [[ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" -ge $BO_VERSION_RECENT_NODE ]]; then
+
+		if BO_has node && [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" -ge "$BO_VERSION_RECENT_NODE" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] found"
 			BO_ensure_bo_script_bin
@@ -994,12 +1012,14 @@ function init {
 	function BO_run_silent_node {
 		local __OLD_BO_VERBOSE="${BO_VERBOSE}"
 		local __OLD_VERBOSE="${VERBOSE}"
+                BO_SILENT=1
 		BO_VERBOSE=
 		VERBOSE=
 		BO_run_recent_node "$@"
 		local exitCode=$?
 		BO_VERBOSE="${__OLD_BO_VERBOSE}"
 		VERBOSE="${__OLD_VERBOSE}"
+                BO_SILENT=
 		return $exitCode;
 	}
 
