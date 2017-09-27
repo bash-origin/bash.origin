@@ -28,6 +28,9 @@ exports.depend = function (id, config) {
     } else
     if (/^bash\.origin\./.test(idParts[1])) {
         subPaths.push("github.com~bash-origin~" + idParts[1]);
+    } else
+    if (/^github\.com~/.test(idParts[1])) {
+        subPaths.push(idParts[1]);
     } else {
         throw new Error("No lookup pattern found for id '" + id + "'!");
     }
@@ -105,7 +108,7 @@ function isObject(item) {
   return (item && typeof item === 'object' && !Array.isArray(item));
 }
 function mergeDeep (target, source) {
-  let output = Object.assign({}, target);
+  var output = Object.assign({}, target);
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach(function (key) {
       if (isObject(source[key])) {

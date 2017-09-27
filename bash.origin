@@ -175,11 +175,19 @@ function init {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] args: $@"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] ORIGINAL_BO_CLI_ARGS: $ORIGINAL_BO_CLI_ARGS"
 		if echo "$ORIGINAL_BO_CLI_ARGS" | grep -q -Ee "(^|\s)$1(\s|\$)"; then
-				return 0
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] found arg '$1' in 'ORIGINAL_BO_CLI_ARGS'"
+			return 0
 		fi
-		if echo "$npm_config_argv" | grep -q -Ee '"$1"'; then
-				return 0
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] npm_config_argv: $npm_config_argv"
+		if [[ "$npm_config_argv" =~ "$1" ]]; then
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] found arg '$1' in 'npm_config_argv'"
+			return 0
 		fi
+		#if echo "$npm_config_argv" | grep -q -Ee '"$1"'; then
+		#	[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] found arg '$1' in 'npm_config_argv'"
+		#	return 0
+		#fi
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_has_cli_arg] Did not find arg '$1' in ORIGINAL_BO_CLI_ARGS ($ORIGINAL_BO_CLI_ARGS) nor npm_config_argv ($npm_config_argv)"
 		return 1
 	}
 
@@ -326,7 +334,7 @@ function init {
 		BO_VERSION_RECENT_NODE="5"
 	fi
 	if [ -z "$BO_VERSION_NVM" ]; then
-		BO_VERSION_NVM="0.31.1"
+		BO_VERSION_NVM="0.33.4"
 	fi
 	if [ -z "$BO_VERSION_NVM_NODE" ]; then
 		BO_VERSION_NVM_NODE="5"
@@ -530,7 +538,7 @@ function init {
 	function BO_requireModule {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] args: $@"
 			if [[ "${BASH_VERSION}" != "4."* ]]; then
-					echo "$BO_LOG_PREFIX""ERROR: You must be using bash version 4 or newer to use 'BO_requireModule'! Put this '#!/usr/bin/env bash' shebang at the top of the script file you are executing to get the 'bash' command from your PATH instead of default for your shell."
+					echo "$BO_LOG_PREFIX""ERROR: You must be using bash version 4 or newer to use 'BO_requireModule' (yours is '${BASH_VERSION}')! Put this '#!/usr/bin/env bash' shebang at the top of the script file you are executing to get the 'bash' command from your PATH instead of default for your shell."
 					exit 1
 			fi
 			if [ "$2" != "as" ]; then
@@ -626,7 +634,7 @@ function init {
 					BO_sourceModule "$PLUGIN_MODULE_PATH_"
 
 			else
-					echo "TODO: Alias-based includes that should resolve via mappings"
+					echo "TODO: Alias-based includes that should resolve via mappings: $@"
 					exit 1
 			fi
 			local func="$2"
@@ -1516,56 +1524,70 @@ exit 1
 	}
 
 
-	BO_parse_args "ARGS" "$@"
+	function BO_init_workspace {
+		newDir="$(pwd)/$1"
 
+		echo
+		read -p "$(BO_cecho "Initialize bash.origin workspace at '$newDir'? [y|n]: " WHITE BOLD)" -n 1 -r
+		echo
 
-	if [ "$ARGS_OPT_init" == "true" ]; then
-		newDir="$(pwd)/$ARGS_1"
-		if [ -e "$newDir" ]; then
-			BO_exit_error "Directory '$newDir' already exists!"
+		if [[ $REPLY =~ ^[Yy]$ ]]; then
+
+			if [ -e "$newDir" ]; then
+				BO_exit_error "Directory '$newDir' already exists!"
+			fi
+			# TODO: Check with network to see if name is available.
+			mkdir -p "$newDir"
+			pushd "$newDir" > /dev/null
+				git init
+				bash.origin.test examples --init
+				npm test
+			popd > /dev/null
+			echo "$(BO_cecho "New bash.origin based project successfully created at: $newDir" GREEN)"
+			#echo "ACTION: To publish run: $(BO_cecho "bash.origin $1 --publish" MAGENTA)"
+			exit 0
+
+		else
+			echo "Aborted!"
+			exit 1
 		fi
-		# TODO: Check with network to see if name is available.
-		mkdir -p "$newDir"
-		pushd "$newDir" > /dev/null
-			git init
-			bash.origin.test examples --init
-			npm test
-		popd > /dev/null
-		echo "$(BO_cecho "New bash.origin based project successfully created at: $newDir" GREEN)"
-		echo "ACTION: To publish on IPFS run: $(BO_cecho "bash.origin $ARGS_1 --publish" MAGENTA)"
-		exit 0
-	fi
+	}
 
 
 	# Bash Origin Bin invocation
 	if [ "$1" == "BOB" ]; then
 
-			# TODO: Do any other init work?
+        if BO_has_arg "--init" "$@"; then
 
-			if [ "$2" == "BOE" ]; then
-					# When used via '. bash.origin BOE'
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Sourced 'bash.origin' environment. (args: $@)"
-			else
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Loaded 'bash.origin' environment. (args: $@)"
-					func="$2"
-					shift
-					shift
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""func: $func"
-					. "$func" "$@"
-			fi
+			BO_parse_args "ARGS" "$@"
+			BO_init_workspace "$ARGS_2"
+
+		elif [ "$2" == "BOE" ]; then
+			# When used via '. bash.origin BOE'
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Sourced 'bash.origin' environment. (args: $@)"
+		else
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Loaded 'bash.origin' environment. (args: $@)"
+			func="$2"
+			shift
+			shift
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""func: $func"
+			. "$func" "$@"
+		fi
 
 	# Bash Origin Script invocation
-  elif [ "$1" == "BOS" ]; then
-			local ___old_BO_OPTIMIZED="$_BO_OPTIMIZED"
-			if [ "$3" == "-c" ]; then
-					_BO_OPTIMIZED=0
-			fi
-			# Load provided URI as bash.origin.script module
-			BO_requireModule "${2}" as "module" ${*:3}
-			_BO_OPTIMIZED="$___old_BO_OPTIMIZED"
+  	elif [ "$1" == "BOS" ]; then
+
+		local ___old_BO_OPTIMIZED="$_BO_OPTIMIZED"
+		if [ "$3" == "-c" ]; then
+				_BO_OPTIMIZED=0
+		fi
+		# Load provided URI as bash.origin.script module
+		BO_requireModule "${2}" as "module" ${*:3}
+		_BO_OPTIMIZED="$___old_BO_OPTIMIZED"
 
 	# Bash Origin Internal Util invocation
 	elif [ "$1" == "BO" ]; then
+
 		if [ ! -z "$VERBOSE" ]; then
 				export BO_VERBOSE=1
 		fi
@@ -1588,7 +1610,9 @@ exit 1
 		fi
 		echo "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
 		exit 1
+
 	elif [ "$BO" == "install" ]; then
+
 		BO_self_update
 		BO=""
 		exit 0
