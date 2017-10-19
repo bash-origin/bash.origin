@@ -1512,7 +1512,8 @@ function init {
 				fi
 				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""bash.origin installed!"
 		fi
-		BO_ensure_nvm
+		# NOTE: We do not install nvm by default.
+		#BO_ensure_nvm
 	}
 
 	function BO_self_update {
