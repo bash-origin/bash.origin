@@ -1310,14 +1310,19 @@ function init {
 		local PLUGIN_NAME=`echo "$2" | perl -wnE 'say for /^(?:.+\/)?([^@\/]+)@?/g'`
 		local PLUGIN_ID=`echo "$2" | sed 's/\//~/g'`
 		local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@[v]{1}([^@]+)$/g'`
+		local PLUGIN_ORG="bash-origin"
+		if [[ "$PLUGIN_ID" == "github.com~"* ]] || [[ "$PLUGIN_ID" == "com.github~"* ]]; then
+			PLUGIN_ORG=`echo "$PLUGIN_ID" | perl -wnE 'say for /^.+~([^~]+)~/g'`
+		fi
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_NAME: $PLUGIN_NAME"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_ID: $PLUGIN_ID"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_ORG: $PLUGIN_ORG"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_VERSION: $PLUGIN_VERSION"
 		if [ ! -z "${PLUGIN_VERSION}" ]; then
-				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
+				local PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		else
 				local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@([^@]+)$/g'`
-				local PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
+				local PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		fi
 		local PLUGIN_PATH=""
 		if [ "$BO_PLUGIN_SEARCH_DIRPATHS" != "" ] && [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
@@ -1331,15 +1336,15 @@ function init {
 							PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID"
 					fi
 					if [ "$PLUGIN_PATH" == "" ]; then
-							if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/github.com~bash-origin~$PLUGIN_NAME" ]; then
-								PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/github.com~bash-origin~$PLUGIN_NAME"
+							if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME" ]; then
+								PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME"
 							fi
 					fi
 				fi
 		fi
 		if [ "$PLUGIN_PATH" == "" ] && [ "$PLUGIN_VERSION" == "" ]; then
-				local __latestVersionLookupUri="https://api.github.com/repos/bash-origin/$PLUGIN_NAME/tags"
-				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Fetching latest version for 'github.com/bash-origin/$PLUGIN_NAME' from '$__latestVersionLookupUri'"
+				local __latestVersionLookupUri="https://api.github.com/repos/$PLUGIN_ORG/$PLUGIN_NAME/tags"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Fetching latest version for 'github.com/$PLUGIN_ORG/$PLUGIN_NAME' from '$__latestVersionLookupUri'"
 				set +e
 				versions=`curl -s "$__latestVersionLookupUri" | grep '"name": "v'`
 				set -e
@@ -1349,7 +1354,7 @@ function init {
 				#       provisioned and we can try again.
 				if [ "$versions" == "" ]; then
 						PLUGIN_VERSION="master"
-						PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
+						PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
 				else
 						latestTag=`echo "$versions" | head -n 1 | perl -pe 's/^.+?"(v?[^"]+)",$/$1/'`
 						if [ "$latestTag" == "" ]; then
@@ -1357,15 +1362,15 @@ function init {
 								exit 1
 						fi
 						PLUGIN_VERSION="$latestTag"
-						PLUGIN_URL="https://github.com/bash-origin/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
+						PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
 				fi
 		fi
 		if [ "$PLUGIN_PATH" == "" ]; then
-			BO_isInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION"
+			BO_isInSystemCache PLUGIN_PATH "github.com/$PLUGIN_ORG/$PLUGIN_NAME" "$PLUGIN_VERSION"
 			if [ "$PLUGIN_PATH" == "" ]; then
 				# TODO: Ask user before installing.
 				[ -z "$BO_VERBOSE" ] || echo "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
-				BO_ensureInSystemCache PLUGIN_PATH "github.com/bash-origin/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
+				BO_ensureInSystemCache PLUGIN_PATH "github.com/$PLUGIN_ORG/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
 			fi
 		fi
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Found plugin path: $PLUGIN_PATH"
