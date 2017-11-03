@@ -468,23 +468,12 @@ function init {
 		# TODO: Relocate this into external module so we can install 'minimist'
 		#       or use pure bash implementation.
 
+		BO_ensureInSystemCache "__minimistPath" "github.com/substack/minimist" "1.2.0" "https://github.com/substack/minimist/archive/1.2.0.zip"
+
         local parsedArgs=$(echo -e $(BO_run_silent_node --eval '
-	    const PATH = require("path");
-	    const FS = require("fs");
-
-	    try {
-	      var MINIMIST = require("'$BO_DIR'/node_modules/minimist");
-	    } catch (err) {
-
-	      var minimistPath = PATH.join(process.env._, "../../lib/node_modules/minimist");
-	      if (!FS.existsSync(minimistPath)) {
-		require("child_process").execSync("npm install -g minimist", {
-		  stdio: "ignore"
-		});
-	      }
-
-	      var MINIMIST = require(PATH.join(process.env._, "../../lib/node_modules/minimist"));
-	    }
+			const PATH = require("path");
+			const FS = require("fs");
+			const MINIMIST = require("'$__minimistPath'");
 
             const VAR_PREFIX = process.argv[1];
 

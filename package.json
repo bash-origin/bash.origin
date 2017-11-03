@@ -8,8 +8,7 @@
     },
     "main": "bash.origin.js",
     "dependencies": {
-        "bash.origin.test": "^0.1.29",
-        "minimist": "^1.2.0"
+        "bash.origin.test": "^0.1.33"
     },
     "scripts": {
         "install": "./bash.origin BO install",
