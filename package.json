@@ -1,6 +1,9 @@
 {
     "name": "bash.origin",
     "version": "0.1.63",
+    "pm": {
+        "publish": "npm"
+    },
     "repository": "https://github.com/bash-origin/bash.origin.git",
     "bin": {
         "bash.origin": "./bin/bash.origin",
@@ -11,7 +14,6 @@
         "bash.origin.test": "^0.1.34"
     },
     "scripts": {
-        "install": "./bash.origin BO install",
         "test": "BO_ROOT_SCRIPT_PATH=$(pwd)/node_modules/bash.origin/bash.origin bash.origin.test examples"
     }
 }
