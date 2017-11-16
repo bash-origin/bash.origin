@@ -91,5 +91,5 @@ if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" == "bash" ]; then
 else
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] SHELL is not 'bash': $SHELL"
 
-	SHELL=$(which bash) $SHELL $BO_ROOT_SCRIPT_PATH BOS "$@"
+	SHELL=$(which bash) $SHELL $BO_ROOT_SCRIPT_PATH BOB "$@"
 fi

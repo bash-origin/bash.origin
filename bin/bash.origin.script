@@ -86,7 +86,7 @@ if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" == "bash" ]; then
 	export BO_IS_SOURCING=1
 	export BO_sourceProfile__sourced=
 
-	. $BO_ROOT_SCRIPT_PATH BOB "$@"
+	. $BO_ROOT_SCRIPT_PATH BOS "$@"
 
 else
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] SHELL is not 'bash': $SHELL"
