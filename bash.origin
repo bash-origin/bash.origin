@@ -23,22 +23,27 @@ function init {
 	# If 'SHELL' is set to 'bash' that is good enough for us.
 	if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] SHELL is not 'bash': $SHELL"
+
 			# 'SHELL' is not what we need so we try and verify that we are running in `bash`
 			# by looking for `bash` in the process description.
-			# TODO: Use additional ways to detect if we are running in bash.
-			set +e
-			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] Running: ps | perl -pe \"s/^\s*$$\s+.*?(bash).*?$/\$1/\" | grep '^bash$'"
-			local __BO_SHELL="$(ps | perl -pe "s/^\s*$$\s+.*?(bash).*?$/\$1/" | grep '^bash$')"
-			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] __BO_SHELL: $__BO_SHELL"
-			set -e
+			# NOTE: This does not work reliably (e.g. on alpine docker image)
+			#set +e
+			#[ -z "$BO_VERBOSE" ] || echo "[bash.origin] Running: ps | perl -pe \"s/^\s*$$\s+.*?(bash).*?$/\$1/\" | grep '^bash$'"
+			#local __BO_SHELL="$(ps | perl -pe "s/^\s*$$\s+.*?(bash).*?$/\$1/" | grep '^bash$')"
+			#[ -z "$BO_VERBOSE" ] || echo "[bash.origin] __BO_SHELL: $__BO_SHELL"
+			#set -e
+
 			#if [ "$(ps -p $$ | tail -1 | awk '{ print $4 }' | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
+
+			# TODO: Use additional ways to detect if we are running in bash.
+
 			if [ "$__BO_SHELL" != "bash" ]; then
-					echo -e "[BO] WARNING: Your 'SHELL' environment variable is set to '$SHELL' while it should be set to '**/bash'\n"
+					echo -e "[BO] WARNING: Your 'SHELL' environment variable is set to '$SHELL' while it should be set to '$(which bash)'\n"
 					echo -e "[BO] ERROR: You must be using the 'bash' shell interpreter!\n"
 					echo -e "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
-					echo -e "             SHELL=/bin/bash /bin/bash\n"
+					echo -e "             SHELL=$(which bash) $(which bash)\n"
 					echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
-					echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
+					echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) $(which bash)"
 					echo -e "             # Now open a new terminal\n"
 					exit 1
 			fi
