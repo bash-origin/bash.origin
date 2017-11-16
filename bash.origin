@@ -38,11 +38,12 @@ function init {
 			# TODO: Use additional ways to detect if we are running in bash.
 
 			if [ "$__BO_SHELL" != "bash" ]; then
+					echo -e ""
 					echo -e "[BO] WARNING: Your 'SHELL' environment variable is set to '$SHELL' while it should be set to '$(which bash)'\n"
 					echo -e "[BO] ERROR: You must be using the 'bash' shell interpreter!\n"
 					echo -e "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
 					echo -e "             SHELL=$(which bash) $(which bash)\n"
-					echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
+					echo -e "[BO] ACTION[macOS]: or change your default shell to the bash shell by running:\n"
 					echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) $(which bash)"
 					echo -e "             # Now open a new terminal\n"
 					exit 1

@@ -83,4 +83,12 @@ if function_exists "BO_resetLoaded"; then
 	BO_resetLoaded
 fi
 
-. $BO_ROOT_SCRIPT_PATH BOS "$@"
+
+# If 'SHELL' is not set to 'bash' we call it via bash
+if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] SHELL is not 'bash': $SHELL"
+
+	SHELL=$(which bash) $SHELL $BO_ROOT_SCRIPT_PATH BOS "$@"
+else
+	. $BO_ROOT_SCRIPT_PATH BOS "$@"
+fi
