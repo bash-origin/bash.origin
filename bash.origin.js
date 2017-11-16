@@ -94,12 +94,18 @@ exports.invokeApi = function (obj, apiUri, apiArgsObj, options) {
 
     var implAPIs = exports.depend(implId, implConfig);
 
-    if (typeof implAPIs[apiUri] !== "function") {
-        console.error("implAPIs", implAPIs);
-        throw new Error("Implementation for '" + implId + "' does not declare API '" + apiUri + "'!");
+    if (!Array.isArray(apiUri)) {
+        apiUri = [ apiUri ];
     }
 
-    return implAPIs[apiUri].apply(null, apiArgsObj);
+    for (var i=0; i<apiUri.length; i++) {
+
+        if (typeof implAPIs[apiUri[i]] === "function") {
+            return implAPIs[apiUri[i]].apply(null, apiArgsObj);
+        }
+    }
+
+    throw new Error("Implementation for '" + implId + "' does not declare API '" + apiUri.join(", ") + "'!");
 }
 
 
