@@ -27,7 +27,9 @@ function init {
 			# by looking for `bash` in the process description.
 			# TODO: Use additional ways to detect if we are running in bash.
 			set +e
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] Running: ps | perl -pe \"s/^\s*$$\s+.*?(bash).*?$/\$1/\" | grep '^bash$'"
 			local __BO_SHELL="$(ps | perl -pe "s/^\s*$$\s+.*?(bash).*?$/\$1/" | grep '^bash$')"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] __BO_SHELL: $__BO_SHELL"
 			set -e
 			#if [ "$(ps -p $$ | tail -1 | awk '{ print $4 }' | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
 			if [ "$__BO_SHELL" != "bash" ]; then
