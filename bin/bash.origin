@@ -65,20 +65,31 @@ fi
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
-. "$BO_ROOT_SCRIPT_PATH"
+#. "$BO_ROOT_SCRIPT_PATH"
 
-[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
+#[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
+#function function_exists {
+#	declare -f -F $1 > /dev/null
+#	return $?
+#}
+#function boEnvironmentNotLoaded {
+#	echo "[bash.origin][bin/bash.origin] ERROR: The BO_* functions do not seem to be available. Make sure to set BO_LOADED=0 before calling/sourcing this script!"
+#	exit 1
+#}
+#function_exists "BO_resetLoaded" && BO_resetLoaded || boEnvironmentNotLoaded
 
-function function_exists {
-	declare -f -F $1 > /dev/null
-	return $?
-}
-function boEnvironmentNotLoaded {
-	echo "[bash.origin][bin/bash.origin] ERROR: The BO_* functions do not seem to be available. Make sure to set BO_LOADED=0 before calling/sourcing this script!"
-	exit 1
-}
-function_exists "BO_resetLoaded" && BO_resetLoaded || boEnvironmentNotLoaded
+# If 'SHELL' is set to 'bash' we reset some variables
+if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" == "bash" ]; then
 
+	export BO_LOADED=
+	export BO_IS_SOURCING=1
+	export BO_sourceProfile__sourced=
 
-. $BO_ROOT_SCRIPT_PATH BOB "$@"
+	. $BO_ROOT_SCRIPT_PATH BOB "$@"
+
+else
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] SHELL is not 'bash': $SHELL"
+
+	SHELL=$(which bash) $SHELL $BO_ROOT_SCRIPT_PATH BOS "$@"
+fi
