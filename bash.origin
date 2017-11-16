@@ -3,6 +3,8 @@
 # License: http://unlicense.org/
 function init {
 
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] --- START --- (pwd: $(pwd))"
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] SHELL: $SHELL"
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] args: $@"
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] which bash: $(which bash)"
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] bash --version: $(bash --version)"
@@ -17,9 +19,6 @@ function init {
 			echo -e "[BO] ERROR: You must have 'perl' installed!\n"
 			exit 1
 	fi
-
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] SHELL: $SHELL"
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] $SHELL --version: $($SHELL --version)"
 
 	# If 'SHELL' is set to 'bash' that is good enough for us.
 	if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
@@ -43,6 +42,7 @@ function init {
 			fi
 	fi
 
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] $SHELL --version: $($SHELL --version)"
 	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_BASH_ALLOW_3: $BO_BASH_ALLOW_3"
 
 	if [[ $BO_BASH_ALLOW_3 != 1 ]] && [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
@@ -538,6 +538,7 @@ function init {
 						exit 1
 			fi
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] ___bo_module_instance_caller_dirname___: $___bo_module_instance_caller_dirname___"
+			varName=""
 			if [ ! -z "$___bo_module_instance_caller_dirname___" ]; then
 				varName="$3__CALLER_DIRNAME__"
 				export ${varName}="$___bo_module_instance_caller_dirname___"

@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # Source https://github.com/bash-origin/bash.origin
 
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] --- START --- (pwd: $(pwd))"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] SHELL: $SHELL"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin] args: $@"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin] which bash: $(which bash)"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin] bash --version: $(bash --version)"
+
 BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
 eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 function BO_setResult {
@@ -22,9 +28,8 @@ function BO_deriveSelfDir {
 }
 BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
-[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] ls -al ${HOME}/.bash.origin: $(ls -al ${HOME}/.bash.origin)"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] __BO_DIR__: $__BO_DIR__"
-
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] ls -al ${HOME}/.bash.origin: $(ls -al ${HOME}/.bash.origin 2>/dev/null)"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
 if [ "$BO_ROOT_SCRIPT_PATH" != "" ]; then
