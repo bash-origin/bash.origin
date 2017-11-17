@@ -10,7 +10,7 @@
         "bash.origin.script": "./bin/bash.origin.script"
     },
     "main": "bash.origin.js",
-    "dependencies": {
+    "devDependencies": {
         "bash.origin.test": "^0.1.35"
     },
     "scripts": {
