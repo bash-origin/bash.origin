@@ -1106,6 +1106,30 @@ function init {
 		"$SMI_CACHE_PATH_/bin/smi" $@
 	}
 
+	function BO_getLatestTagForURI {
+		local ORG_REPO=`echo "$1" | perl -wnE 'say for /^(?:[^\/]+\/)?(.+)$/g'`
+
+		local __latestVersionLookupUri="https://api.github.com/repos/$ORG_REPO/tags"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Fetching latest version for 'github.com/$ORG_REPO' from '$__latestVersionLookupUri'"
+		set +e
+		versions=`curl -s "$__latestVersionLookupUri" | grep '"name": "v'`
+		set -e
+		# TODO: If repository not found emit *insight* formatted message to indicate this so that
+		#       tooling can auto-provision repository and then download accordingly.
+		#       We can add a rest call here that can hold execution until the repository is
+		#       provisioned and we can try again.
+		if [ "$versions" == "" ]; then
+			echo "master"
+		else
+			latestTag=`echo "$versions" | head -n 1 | perl -pe 's/^.+?"(v?[^"]+)",$/$1/'`
+			if [ "$latestTag" == "" ]; then
+				echo >&2 "$BO_LOG_PREFIX""ERROR: Latest tag could not be determined for uri '$1'!"
+				exit 1
+			fi
+			echo "$latestTag"
+		fi
+	}
+
 	function BO_systemCachePath {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] args: $@"
 		local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
