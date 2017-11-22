@@ -1515,7 +1515,7 @@ function init {
 			background=";${background}"
 		fi
 
-		echo >&2 -en "${ESC_SEQ}${!style};${!foreground}${background}m${message}${RESET_ALL}"
+		echo >&2 -e "${ESC_SEQ}${!style};${!foreground}${background}m${message}${RESET_ALL}"
 	}
 
 

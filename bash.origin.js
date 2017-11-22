@@ -14,7 +14,7 @@ exports.depend = function (id, config) {
     var BO_PLUGIN_SEARCH_DIRPATHS = process.env.BO_PLUGIN_SEARCH_DIRPATHS;
 
     if (!BO_PLUGIN_SEARCH_DIRPATHS) {
-        throw new Error("'BO_PLUGIN_SEARCH_DIRPATHS' not set!");
+        throw new Error("'BO_PLUGIN_SEARCH_DIRPATHS' not set while trying to depend on '" + id + "'!");
     }
 
     var subPaths = [];
