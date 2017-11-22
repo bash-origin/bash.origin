@@ -3,26 +3,34 @@
 # License: http://unlicense.org/
 function init {
 
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] --- START --- (pwd: $(pwd))"
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] SHELL: $SHELL"
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] args: $@"
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] which bash: $(which bash)"
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] bash --version: $(bash --version)"
+	if echo "$@" | grep -q -Ee '(\$|\s)--debug(\s|\$)'; then
+		export BO_VERBOSE=1
+		export VERBOSE=1
+	elif echo "$npm_config_argv" | grep -q -Ee '"--debug"'; then
+		export BO_VERBOSE=1
+		export VERBOSE=1
+	fi
+
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] --- START --- (pwd: $(pwd))"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] SHELL: $SHELL"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] args: $@"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] which bash: $(which bash)"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] bash --version: $(bash --version)"
 
 	if [ ! -z "$BO_LOADED" ]; then
 			# If we loaded before we do not load again.
-			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] Skip due to BO_LOADED=1"
+			[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] Skip due to BO_LOADED=1"
 			return;
 	fi
 
 	if ! which perl > /dev/null; then
-			echo -e "[BO] ERROR: You must have 'perl' installed!\n"
+			echo -e >&2 "[BO] ERROR: You must have 'perl' installed!\n"
 			exit 1
 	fi
 
 	# If 'SHELL' is set to 'bash' that is good enough for us.
 	if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" != "bash" ]; then
-			[ -z "$BO_VERBOSE" ] || echo "[bash.origin] SHELL is not 'bash': $SHELL"
+			[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] SHELL is not 'bash': $SHELL"
 
 			# 'SHELL' is not what we need so we try and verify that we are running in `bash`
 			# by looking for `bash` in the process description.
@@ -38,20 +46,20 @@ function init {
 			# TODO: Use additional ways to detect if we are running in bash.
 
 			if [ "$__BO_SHELL" != "bash" ]; then
-					echo -e ""
-					echo -e "[BO] WARNING: Your 'SHELL' environment variable is set to '$SHELL' while it should be set to '$(which bash)'\n"
-					echo -e "[BO] ERROR: You must be using the 'bash' shell interpreter!\n"
-					echo -e "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
-					echo -e "             SHELL=$(which bash) $(which bash)\n"
-					echo -e "[BO] ACTION[macOS]: or change your default shell to the bash shell by running:\n"
-					echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) $(which bash)"
-					echo -e "             # Now open a new terminal\n"
+					echo -e >&2 ""
+					echo -e >&2 "[BO] WARNING: Your 'SHELL' environment variable is set to '$SHELL' while it should be set to '$(which bash)'\n"
+					echo -e >&2 "[BO] ERROR: You must be using the 'bash' shell interpreter!\n"
+					echo -e >&2 "[BO] ACTION: Enter the bash shell for this session only first by running:\n"
+					echo -e >&2 "             SHELL=$(which bash) $(which bash)\n"
+					echo -e >&2 "[BO] ACTION[macOS]: or change your default shell to the bash shell by running:\n"
+					echo -e >&2 "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) $(which bash)"
+					echo -e >&2 "             # Now open a new terminal\n"
 					exit 1
 			fi
 	fi
 
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] $SHELL --version: $($SHELL --version)"
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_BASH_ALLOW_3: $BO_BASH_ALLOW_3"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] $SHELL --version: $($SHELL --version)"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_BASH_ALLOW_3: $BO_BASH_ALLOW_3"
 
 	if [[ $BO_BASH_ALLOW_3 != 1 ]] && [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
 			if [ "$(which bash)" != "$SHELL" ]; then
@@ -59,14 +67,14 @@ function init {
 							# We update the SHELL to where 'bash' actually is.
 							SHELL="$(which bash)"
 					else
-							echo -e "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4!\n"
-							echo -e "[BO] ACTION: Install bash version 4. On OSX you can use:\n"
-							echo -e "             brew install bash\n"
-							echo -e "[BO] ACTION: Then call your script again using:\n"
-							echo -e "             SHELL=/usr/local/bin/bash /usr/local/bin/bash <ScriptPath>\n"
-							echo -e "[BO] ACTION: or change your default shell to the bash shell by running:\n"
-							echo -e "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
-							echo -e "             # Now open a new terminal\n"
+							echo -e >&2 "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4!\n"
+							echo -e >&2 "[BO] ACTION: Install bash version 4. On OSX you can use:\n"
+							echo -e >&2 "             brew install bash\n"
+							echo -e >&2 "[BO] ACTION: Then call your script again using:\n"
+							echo -e >&2 "             SHELL=/usr/local/bin/bash /usr/local/bin/bash <ScriptPath>\n"
+							echo -e >&2 "[BO] ACTION: or change your default shell to the bash shell by running:\n"
+							echo -e >&2 "             sudo dscl localhost -change /Local/Default/Users/$USER UserShell $(which zsh) /bin/bash"
+							echo -e >&2 "             # Now open a new terminal\n"
 							exit 1
 					fi
 			fi
@@ -77,8 +85,8 @@ function init {
 			export ORIGINAL_BO_CLI_ARGS="$@"
 	fi
 	local ORIGINAL_BO_ROOT_SCRIPT_PATH="$BO_ROOT_SCRIPT_PATH"
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] ORIGINAL_BO_CLI_ARGS: $ORIGINAL_BO_CLI_ARGS"
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] ORIGINAL_BO_ROOT_SCRIPT_PATH: $ORIGINAL_BO_ROOT_SCRIPT_PATH"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] ORIGINAL_BO_CLI_ARGS: $ORIGINAL_BO_CLI_ARGS"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] ORIGINAL_BO_ROOT_SCRIPT_PATH: $ORIGINAL_BO_ROOT_SCRIPT_PATH"
 
 
 	###############################
@@ -97,7 +105,7 @@ function init {
 		if [ "$1" != "1" ]; then
 			return;
 		fi
-		echo -e "${*:2}"
+		echo -e >&2 "${*:2}"
 	}
 
 	function BO_exit_error {
@@ -108,7 +116,7 @@ function init {
 	function BO_ensure_env_HOME {
 		# Should fail if not set or set to empty string.
 		if [ ! -n "${HOME}" ] || [ "${HOME}" == "" ]; then
-			echo "[BO] ERROR: 'HOME' environment variable is not set! Used by: $1"
+			echo >&2 "[BO] ERROR: 'HOME' environment variable is not set! Used by: $1"
 			exit 1
 		fi
 	}
@@ -246,7 +254,7 @@ function init {
 	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 	export BO_DIR="$___TMP___"
 
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_DIR: $BO_DIR"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_DIR: $BO_DIR"
 
 	BO_checkVerbose "VERBOSE" "$@"
 	export VERBOSE
@@ -270,9 +278,9 @@ function init {
 	fi
 
 	if echo "$@" | grep -q -Ee '(\$|\s)--compile(\s|\$)'; then
-			export _BO_OPTIMIZED=0
+		export _BO_OPTIMIZED=0
 	elif echo "$npm_config_argv" | grep -q -Ee '"--compile"'; then
-			export _BO_OPTIMIZED=0
+		export _BO_OPTIMIZED=0
 	fi
 
 
@@ -287,7 +295,7 @@ function init {
 					local ORIGINAL_BO_ROOT_SCRIPT_DIR
 					BO_deriveSelfDir ORIGINAL_BO_ROOT_SCRIPT_DIR "$BO_ROOT_SCRIPT_PATH"
 					if [ "$BO_DIR" != "$ORIGINAL_BO_ROOT_SCRIPT_DIR" ]; then
-						[ -z "$BO_VERBOSE" ] || echo "[bash.origin] Delegate to BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
+						[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] Delegate to BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 						# Delegate to the Bash.Origin script at 'BO_ROOT_SCRIPT_PATH'
 						# which was set before calling us.
 						export BO_LOADED=
@@ -297,7 +305,7 @@ function init {
 				else
 					BO_ensure_env_HOME "Delegate to BO_ROOT_SCRIPT_PATH"
 					if [ "$BO_ROOT_SCRIPT_PATH" != "$HOME/.bash.origin" ]; then
-						echo "[bash.origin] ERROR: 'BO_ROOT_SCRIPT_PATH' ($BO_ROOT_SCRIPT_PATH) not found!"
+						echo >&2 "[bash.origin] ERROR: 'BO_ROOT_SCRIPT_PATH' ($BO_ROOT_SCRIPT_PATH) not found!"
 						exit 1
 					fi
 				fi
@@ -315,7 +323,7 @@ function init {
 	fi
 
 	export BO_ROOT_SCRIPT_PATH
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
 	###############################
 	# Declare Globals
@@ -355,7 +363,7 @@ function init {
 		BO_VERSION_SMI_CLI="0.35.14"
 	fi
 
-	[ -z "$BO_VERBOSE" ] || echo "[bash.origin] BO_GLOBAL_SYSTEM_CACHE_DIR: $BO_GLOBAL_SYSTEM_CACHE_DIR"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_GLOBAL_SYSTEM_CACHE_DIR: $BO_GLOBAL_SYSTEM_CACHE_DIR"
 
 
 	###############################
@@ -371,29 +379,29 @@ function init {
 			return;
 		fi
 		if [ "$2" == "HEADER" ]; then
-			echo "##################################################";
-			echo "# $3";
-			echo "##################################################";
+			echo >&2 "##################################################";
+			echo >&2 "# $3";
+			echo >&2 "##################################################";
 		fi
 		if [ "$2" == "FOOTER" ]; then
-			echo "##################################################";
-			echo ""
+			echo >&2 "##################################################";
+			echo >&2 ""
 		fi
 	}
 
 	function BO_hash {
-			echo -n "yourpassword" | openssl sha1
+		echo -n "$1" | openssl sha1
 	}
 
 	function BO_replace {
-			echo -n "$(echo "$1" | perl -pe "s/$2/\$1/")"
+		echo -n "$(echo "$1" | perl -pe "s/$2/\$1/")"
 	}
 
 	function BO_test {
-			if [ "$(echo "$1" | perl -wnE "say for /($2)/")" == "" ]; then
-					return 1
-			fi
-			return 0
+		if [ "$(echo "$1" | perl -wnE "say for /($2)/")" == "" ]; then
+			return 1
+		fi
+		return 0
 	}
 
 	function BO_ensure_dir {
@@ -426,9 +434,9 @@ function init {
 
 
 	if echo "$@" | grep -q -Ee '(\$|\s)--install-only(\s|\$)'; then
-			BO_FLAG_INSTALL_ONLY=1
+		BO_FLAG_INSTALL_ONLY=1
 	elif echo "$npm_config_argv" | grep -q -Ee '"--install-only"'; then
-			BO_FLAG_INSTALL_ONLY=1
+		BO_FLAG_INSTALL_ONLY=1
 	fi
 
 	function BO_exit_if_install_only {
@@ -465,7 +473,7 @@ function init {
 		# TODO: Detect if we even need to ask for sudo. If not just run command.
 		local NEED_TO_ASK="1"
 		if [ "$NEED_TO_ASK" == "1" ]; then
-			echo "$BO_LOG_PREFIX""WARNING: Asking for sudo access to run: $1"
+			echo >&2 "$BO_LOG_PREFIX""WARNING: Asking for sudo access to run: $1"
 		fi
 		sudo $1
 	}
@@ -538,11 +546,11 @@ function init {
 	function BO_requireModule {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] args: $@"
 			if [[ "${BASH_VERSION}" != "4."* ]]; then
-					echo "$BO_LOG_PREFIX""ERROR: You must be using bash version 4 or newer to use 'BO_requireModule' (yours is '${BASH_VERSION}')! Put this '#!/usr/bin/env bash' shebang at the top of the script file you are executing to get the 'bash' command from your PATH instead of default for your shell."
+					echo >&2 "$BO_LOG_PREFIX""ERROR: You must be using bash version 4 or newer to use 'BO_requireModule' (yours is '${BASH_VERSION}')! Put this '#!/usr/bin/env bash' shebang at the top of the script file you are executing to get the 'bash' command from your PATH instead of default for your shell."
 					exit 1
 			fi
 			if [ "$2" != "as" ]; then
-						echo "$BO_LOG_PREFIX""ERROR: Second argument to BO_requireModule should be 'as'!"
+						echo >&2 "$BO_LOG_PREFIX""ERROR: Second argument to BO_requireModule should be 'as'!"
 						exit 1
 			fi
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] ___bo_module_instance_caller_dirname___: $___bo_module_instance_caller_dirname___"
@@ -599,13 +607,13 @@ function init {
 							local PLUGIN_MODULE_NAME_="_#_org.bashorigin_#_${PLUGIN_VERSION_}.sh"
 							local PLUGIN_MODULE_PATH_="${PLUGIN_PATH_}/${PLUGIN_MODULE_NAME_}"
 							if [ ! -e "$PLUGIN_MODULE_PATH_" ]; then
-									echo "$BO_LOG_PREFIX""ERROR: Module '$PLUGIN_MODULE_NAME_' does not exist in plugin at path '$PLUGIN_MODULE_PATH_'!"
+									echo >&2 "$BO_LOG_PREFIX""ERROR: Module '$PLUGIN_MODULE_NAME_' does not exist in plugin at path '$PLUGIN_MODULE_PATH_'!"
 
 									# DEPRECATED
 									PLUGIN_MODULE_NAME_="org.bashorigin-${PLUGIN_VERSION_}.sh"
 									PLUGIN_MODULE_PATH_="${PLUGIN_PATH_}/${PLUGIN_MODULE_NAME_}"
 									if [ ! -e "$PLUGIN_MODULE_PATH_" ]; then
-											echo "$BO_LOG_PREFIX""ERROR: Module '$PLUGIN_MODULE_NAME_' does not exist in plugin at path '$PLUGIN_MODULE_PATH_'!"
+											echo >&2 "$BO_LOG_PREFIX""ERROR: Module '$PLUGIN_MODULE_NAME_' does not exist in plugin at path '$PLUGIN_MODULE_PATH_'!"
 
 											exit 1
 									fi
@@ -626,7 +634,7 @@ function init {
 							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Load module from plugin: $PLUGIN_MODULE_PATH_"
 							BO_sourceModule "$PLUGIN_MODULE_PATH_"
 					else
-							echo "ERROR: No actor found for URI: ${1}"
+							echo >&2 "ERROR: No actor found for URI: ${1}"
 							exit 1
 					fi
 			elif [[ "${1}" == "/"* ]]; then
@@ -635,7 +643,7 @@ function init {
 					BO_sourceModule "$PLUGIN_MODULE_PATH_"
 
 			else
-					echo "TODO: Alias-based includes that should resolve via mappings: $@"
+					echo >&2 "TODO: Alias-based includes that should resolve via mappings: $@"
 					exit 1
 			fi
 			local func="$2"
@@ -721,7 +729,7 @@ function init {
 		}
 		checkPath "$2"
 		if [ "$_POINTER_RESOLVED" == "0" ]; then
-			echo "ERROR: Could not resolve pointer '$_POINTER_LOOKUP_FILENAME' for path '$2'"
+			echo >&2 "ERROR: Could not resolve pointer '$_POINTER_LOOKUP_FILENAME' for path '$2'"
 			exit 1;
 		fi
 	}
@@ -841,7 +849,7 @@ function init {
 
 	function BO_exit_on_error {
 		if [[ $? -ne 0 ]] ; then
-			echo "FATAL ERROR while running '$*': $1"
+			echo >&2 "FATAL ERROR while running '$*': $1"
 		    exit 1
 		fi
 	}
@@ -1080,14 +1088,14 @@ function init {
 		BO_isInSystemCache CACHED_PATH "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI"
 		if [ "$CACHED_PATH" == "" ]; then
 			# TODO: Ask user before installing.
-			echo "$BO_LOG_PREFIX""Installing smi ..."
+			echo >&2 "$BO_LOG_PREFIX""Installing smi ..."
 			BO_ensureInSystemCache "DOWNLOADED_PATH" "github.com/sourcemint/smi" "$BO_VERSION_SMI_CLI" "https://github.com/sourcemint/smi/archive/v$BO_VERSION_SMI_CLI.tar.gz"
 			# TODO: Install into "$DOWNLOADED_PATH.`now`" and only rename on success.
 			# TODO: Stop this from also being written to stdout.
 			pushd "$DOWNLOADED_PATH" > /dev/null
 				BO_run_npm install --production
 			popd > /dev/null
-			echo "$BO_LOG_PREFIX""... smi installed"
+			echo >&2 "$BO_LOG_PREFIX""... smi installed"
 			CACHED_PATH="$DOWNLOADED_PATH"
 		fi
 		BO_setResult $1 "$CACHED_PATH"
@@ -1236,7 +1244,7 @@ function init {
 	  	elif [ "$DOWNLOAD_FILE_EXTENSION_" == "phar" ]; then
 	  		ARCHIVE_DOWNLOAD_PATH__="$DOWNLOAD_PATH__.phar"
 	  	else
-			echo "$BO_LOG_PREFIX""ERROR: Derived file extension '$DOWNLOAD_FILE_EXTENSION_' from url '$DOWNLOAD_URL_' not supported!"
+			echo >&2 "$BO_LOG_PREFIX""ERROR: Derived file extension '$DOWNLOAD_FILE_EXTENSION_' from url '$DOWNLOAD_URL_' not supported!"
 			return 1
 	  	fi
 	  	if [ -e "$ARCHIVE_DOWNLOAD_PATH__" ]; then
@@ -1391,7 +1399,7 @@ function init {
 			BO_isInSystemCache PLUGIN_PATH "github.com/$PLUGIN_ORG/$PLUGIN_NAME" "$PLUGIN_VERSION"
 			if [ "$PLUGIN_PATH" == "" ]; then
 				# TODO: Ask user before installing.
-				[ -z "$BO_VERBOSE" ] || echo "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
+				[ -z "$BO_VERBOSE" ] || echo >&2 "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
 				BO_ensureInSystemCache PLUGIN_PATH "github.com/$PLUGIN_ORG/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
 			fi
 		fi
@@ -1430,9 +1438,9 @@ function init {
 	}
 
 	function BO_trim_file_end {
-			# Remove training space to ensure comparisons work across OSes
-			# @see http://unix.stackexchange.com/a/81689/92833
-			a=$(<$1); printf '%s\n' "$a" > $1
+		# Remove training space to ensure comparisons work across OSes
+		# @see http://unix.stackexchange.com/a/81689/92833
+		a=$(<$1); printf '%s\n' "$a" > $1
 	}
 
 	function BO_cecho {
@@ -1492,7 +1500,7 @@ function init {
 			background=";${background}"
 		fi
 
-		echo -e "${ESC_SEQ}${!style};${!foreground}${background}m${message}${RESET_ALL}"
+		echo >&2 -en "${ESC_SEQ}${!style};${!foreground}${background}m${message}${RESET_ALL}"
 	}
 
 
@@ -1539,7 +1547,7 @@ function init {
 	}
 
 	function BO_self_update {
-echo "TODO: BO_self_update"
+echo >&2 "TODO: BO_self_update"
 exit 1
 		local BASH_ORIGIN_PATH
 		local FOUND_PREVIOUS_CACHE="0"
@@ -1574,12 +1582,12 @@ exit 1
 				bash.origin.test examples --init
 				npm test
 			popd > /dev/null
-			echo "$(BO_cecho "New bash.origin based project successfully created at: $newDir" GREEN)"
-			#echo "ACTION: To publish run: $(BO_cecho "bash.origin $1 --publish" MAGENTA)"
+			BO_cecho "New bash.origin based project successfully created at: $newDir" GREEN
+			#echo >&2 "ACTION: To publish run: $(BO_cecho "bash.origin $1 --publish" MAGENTA)"
 			exit 0
 
 		else
-			echo "Aborted!"
+			echo >&2 "Aborted!"
 			exit 1
 		fi
 	}
@@ -1631,7 +1639,7 @@ exit 1
 			elif [ -e "$BO_DIR/.bash.origin" ]; then
 				BO_self_install "$BO_DIR/.bash.origin" "$3"
 			else
-				echo "[bash.origin] ERROR: Could not locate path to source!"
+				echo >&2 "[bash.origin] ERROR: Could not locate path to source!"
 				exit 1
 			fi
 			exit 0
@@ -1639,7 +1647,7 @@ exit 1
 			BO_self_update
 			exit 0
 		fi
-		echo "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
+		echo >&2 "$BO_LOG_PREFIX""ERROR: Unknown BO command '$2'!"
 		exit 1
 
 	elif [ "$BO" == "install" ]; then
