@@ -1075,7 +1075,7 @@ function init {
 		# TODO: Reset all 'npm_*' variables.
 		export npm_config_argv=
 		export npm_config_dev=
-		npm $@
+		npm $@ 1>&2
 		local exitCode=$?
 #		eval "$currentNPM"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_npm] END"
@@ -1404,6 +1404,21 @@ function init {
 			fi
 		fi
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Found plugin path: $PLUGIN_PATH"
+
+		# Install dependencies
+		# TODO: Use 'smi' to install with better package type detection.
+		if [ ! -e "$PLUGIN_PATH/.installed" ]; then
+			if [ -e "$PLUGIN_PATH/package.json" ]; then
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Installing dependencies for plugin path: $PLUGIN_PATH"
+
+				pushd "$PLUGIN_PATH" > /dev/null
+					BO_run_npm install --production
+
+					touch ".installed"
+				popd > /dev/null
+			fi
+		fi
+
 		BO_setResult $1 "$PLUGIN_PATH/$PLUGIN_NAME"
 	}
 
