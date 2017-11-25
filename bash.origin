@@ -1354,6 +1354,9 @@ function init {
 	}
 
 	function BO_downloadToSystemCache {
+		if [[ $BO_ALLOW_DOWNLOADS != 1 ]]; then
+			BO_exit_error "Cannot download '$4' due to 'BO_ALLOW_DOWNLOADS=1'!"
+		fi
 		local DOWNLOAD_PATH__
 		BO_systemCachePath DOWNLOAD_PATH__ "$2" "$3"
 		local DOWNLOAD_URL_="$4"
@@ -1485,14 +1488,13 @@ function init {
 					# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
 					if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME" ]; then
 							PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME"
-					fi
-					if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID" ]; then
+					elif [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID" ]; then
 							PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID"
 					fi
 					if [ "$PLUGIN_PATH" == "" ]; then
-							if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME" ]; then
-								PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME"
-							fi
+						if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME" ]; then
+							PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME"
+						fi
 					fi
 				fi
 		fi
@@ -1536,7 +1538,7 @@ function init {
 				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Installing dependencies for plugin path: $PLUGIN_PATH"
 
 				pushd "$PLUGIN_PATH" > /dev/null
-					BO_run_npm install --production
+					BO_run_npm install --production > /dev/null
 
 					touch ".installed"
 				popd > /dev/null
@@ -1547,9 +1549,9 @@ function init {
 	}
 
 	function BO_callDownloadedPlugin {
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callDownloadedPlugin] args: $@"
-			_BO_ensurePlugin__onlyDownloadedLocations=1
-			BO_callPlugin "$@"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_callDownloadedPlugin] args: $@"
+		_BO_ensurePlugin__onlyDownloadedLocations=1
+		BO_callPlugin "$@"
 	}
 
 	function BO_callPlugin {
