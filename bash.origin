@@ -3,6 +3,10 @@
 # License: http://unlicense.org/
 function init {
 
+	if [ -z "$BO_PREFIX_DIR" ]; then
+		export BO_PREFIX_DIR="/usr/local"
+	fi
+
 	if echo "$@" | grep -q -Ee '(\$|\s)--debug(\s|\$)'; then
 		export BO_VERBOSE=1
 		export VERBOSE=1
@@ -101,6 +105,77 @@ function init {
 	# Declare Boot Functions
 	###############################
 
+	function BO_cecho {
+		# Escape sequence and resets
+		ESC_SEQ="\033["
+		RESET_ALL="${ESC_SEQ}0m"
+		RESET_BOLD="${ESC_SEQ}21m"
+		RESET_UL="${ESC_SEQ}24m"
+		NONE=""
+		# Foreground colours
+		FG_BLACK="30"
+		FG_RED="31"
+		FG_GREEN="32"
+		FG_YELLOW="33"
+		FG_BLUE="34"
+		FG_MAGENTA="35"
+		FG_CYAN="36"
+		FG_WHITE="37"
+		FG_BR_BLACK="90"
+		FG_BR_RED="91"
+		FG_BR_GREEN="92"
+		FG_BR_YELLOW="93"
+		FG_BR_BLUE="94"
+		FG_BR_MAGENTA="95"
+		FG_BR_CYAN="96"
+		FG_BR_WHITE="97"
+		# Background colours (optional)
+		BG_BLACK="40"
+		BG_RED="41"
+		BG_GREEN="42"
+		BG_YELLOW="43"
+		BG_BLUE="44"
+		BG_MAGENTA="45"
+		BG_CYAN="46"
+		BG_WHITE="47"
+		# Font styles
+		FS_REG="0"
+		FS_BOLD="1"
+		FS_UL="4"
+
+		message=${1}
+		foreground="NONE"
+		style="FS_REG"
+		background="NONE"
+
+		if [ ! -z "${2}" ]; then
+			foreground="FG_${2}"
+		fi
+		if [ ! -z "${3}" ]; then
+			style="FS_${3}"
+		fi
+		if [ ! -z "${4}" ]; then
+			background="BG_${4}"
+		fi
+		background="${!background}"
+		if [ "${background}" != "" ]; then
+			background=";${background}"
+		fi
+
+		echo -e "${ESC_SEQ}${!style};${!foreground}${background}m${message}${RESET_ALL}"
+	}
+
+	function BO_has {
+		if type "$1" > /dev/null 2>&1 || hash "$1" > /dev/null 2>&1; then
+			return 0
+		fi
+		return 1
+	}
+
+	function BO_hash {
+		echo -n "$1" | openssl sha1
+	}
+
 	function BO_log {
 		if [ "$1" != "1" ]; then
 			return;
@@ -109,8 +184,8 @@ function init {
 	}
 
 	function BO_exit_error {
-			echo >&2 "$(BO_cecho "ERROR: $1" RED BOLD)"
-			exit 1
+		echo >&2 "$(BO_cecho "ERROR: $1" RED BOLD)"
+		exit 1
 	}
 
 	function BO_ensure_env_HOME {
@@ -233,10 +308,10 @@ function init {
 	}
 
 	function BO_resetLoaded {
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_resetLoaded]"
-			export BO_LOADED=
-			export BO_IS_SOURCING=
-			export BO_sourceProfile__sourced=
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_resetLoaded]"
+		export BO_LOADED=
+		export BO_IS_SOURCING=
+		export BO_sourceProfile__sourced=
 	}
 	
 
@@ -271,9 +346,9 @@ function init {
 	if [ -z "$_BO_OPTIMIZED" ]; then
 		# If not set we set it based on BO_VERBOSE.
 		if [ -z "$BO_VERBOSE" ]; then
-				export _BO_OPTIMIZED=1
+			export _BO_OPTIMIZED=1
 		else
-				export _BO_OPTIMIZED=0
+			export _BO_OPTIMIZED=0
 		fi
 	fi
 
@@ -304,7 +379,7 @@ function init {
 					fi
 				else
 					BO_ensure_env_HOME "Delegate to BO_ROOT_SCRIPT_PATH"
-					if [ "$BO_ROOT_SCRIPT_PATH" != "$HOME/.bash.origin" ]; then
+					if [ "$BO_ROOT_SCRIPT_PATH" != "$BO_PREFIX_DIR/bin/bash.origin" ]; then
 						echo >&2 "[bash.origin] ERROR: 'BO_ROOT_SCRIPT_PATH' ($BO_ROOT_SCRIPT_PATH) not found!"
 						exit 1
 					fi
@@ -317,8 +392,8 @@ function init {
 		elif [ -e "$BO_DIR/.bash.origin" ]; then
 			BO_ROOT_SCRIPT_PATH="$BO_DIR/.bash.origin"
 		else
-			BO_ensure_env_HOME "Use default .bash.origin"
-			BO_ROOT_SCRIPT_PATH="$HOME/.bash.origin"
+			BO_ensure_env_HOME "Use default '$BO_PREFIX_DIR/bin/bash.origin'"
+			BO_ROOT_SCRIPT_PATH="$BO_PREFIX_DIR/bin/bash.origin"
 		fi
 	fi
 
@@ -337,8 +412,8 @@ function init {
 
 	BO_ROOT_SOURCE_URL="https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin"
 	if [ -z "$BO_GLOBAL_SYSTEM_CACHE_DIR" ]; then
-		BO_ensure_env_HOME "Use default .bash.origin.cache"
-		BO_GLOBAL_SYSTEM_CACHE_DIR="$HOME/.bash.origin.cache"
+		BO_ensure_env_HOME "Use default '$BO_PREFIX_DIR/lib/bash.origin.cache'"
+		BO_GLOBAL_SYSTEM_CACHE_DIR="$BO_PREFIX_DIR/lib/bash.origin.cache"
 	fi
 	export BO_GLOBAL_SYSTEM_CACHE_DIR
 	if [ -z "$BO_SYSTEM_CACHE_DIR" ]; then
@@ -346,15 +421,57 @@ function init {
 	fi
 	export BO_SYSTEM_CACHE_DIR
 
-	if [ -z "$BO_VERSION_RECENT_NODE" ]; then
-		BO_VERSION_RECENT_NODE="5"
-	fi
 	if [ -z "$BO_VERSION_NVM" ]; then
 		BO_VERSION_NVM="0.33.4"
 	fi
-	if [ -z "$BO_VERSION_NVM_NODE" ]; then
-		BO_VERSION_NVM_NODE="5"
+
+
+	function BO_major_node_version {
+		if ! BO_has node; then
+			BO_exit_error "'node' command not found! If you want to provision it dynamically, set 'BO_VERSION_NVM_NODE'."
+		fi
+		echo "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')"
+	}
+
+	if [[ $BO_ASSUME_NODE != 1 ]]; then
+		if [ ! -z "$BO_VERSION_NODE" ]; then
+			# NOTE: This code will only run ONCE!
+
+			# If 'BO_VERSION_NODE' is set we make sure node is found and
+			# the version matches and then never check it again.
+			if ! BO_has node; then
+				BO_exit_error "'node' command not found! If you want to provision it dynamically, set 'BO_VERSION_NODE' et.al."			
+			fi
+			if [ "$(BO_major_node_version)" != "$BO_VERSION_NODE" ]; then
+				BO_exit_error "'node' version '$(BO_major_node_version)' from environment does not match version '$BO_VERSION_NODE' declared by 'BO_VERSION_NODE'. Make sure to only set the MAJOR version!"
+			fi
+			# From now on we do not check the 'node' version again
+			# and just assume we have the correct version set
+			# by the virture of:
+			export BO_ASSUME_NODE=1
+
+			export BO_VERSION_NVM_NODE="$BO_VERSION_NODE"
+		fi
 	fi
+
+	# Holds the node version that was detected from outside.
+	function BO_original_node_version {
+		if [ -z "$ORIGINAL_BO_VERSION_NODE" ]; then
+			ORIGINAL_BO_VERSION_NODE="$(BO_major_node_version)"
+		fi
+		echo "$ORIGINAL_BO_VERSION_NODE"
+	}
+
+	if [ -z "$BO_VERSION_NVM_NODE" ]; then
+		BO_VERSION_NVM_NODE="$(BO_original_node_version)"
+	fi
+	if [ -z "$BO_VERSION_RECENT_NODE" ]; then
+		# NOTE: The idea of 'BO_VERSION_RECENT_NODE' is to hold a most recent version
+		# of 'node' while 'BO_VERSION_NVM_NODE' holds the main *system* version.
+		BO_VERSION_RECENT_NODE="$BO_VERSION_NVM_NODE"
+	fi
+
+
 	if [ -z "$BO_VERSION_NVM_IOJS" ]; then
 		# DEPRECATED
 		BO_VERSION_NVM_IOJS="iojs-v3.0.0"
@@ -387,10 +504,6 @@ function init {
 			echo >&2 "##################################################";
 			echo >&2 ""
 		fi
-	}
-
-	function BO_hash {
-		echo -n "$1" | openssl sha1
 	}
 
 	function BO_replace {
@@ -461,13 +574,6 @@ function init {
 		fi
 	}
 
-
-	function BO_has {
-		if type "$1" > /dev/null 2>&1 || hash "$1" > /dev/null 2>&1; then
-			return 0
-		fi
-		return 1
-	}
 
 	function BO_sudo {
 		# TODO: Detect if we even need to ask for sudo. If not just run command.
@@ -876,13 +982,16 @@ function init {
 	}
 
 	function BO_ensure_recent_node {
+		if [[ $BO_ASSUME_NODE == 1 ]]; then
+			return;
+		fi
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] args: $@"
 		# We just care that a version of NodeJS later than BO_VERSION_RECENT_NODE is installed.
 		set +e
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] Existing NodeJS version: $(node --version 2>&1 || true) ($(which node))"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] Desired NodeJS version: v5"
 
-		if BO_has node && [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" -ge "$BO_VERSION_RECENT_NODE" ]; then
+		if BO_has node && [ "$(BO_original_node_version)" -ge "$BO_VERSION_RECENT_NODE" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] found"
 			BO_ensure_bo_script_bin
@@ -893,11 +1002,14 @@ function init {
 	}
 
 	function BO_ensure_node {
+		if [[ $BO_ASSUME_NODE == 1 ]]; then
+			return;
+		fi
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] args: $@"
 		set +e
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Existing NodeJS version: $(node --version 2>&1 || true) ($(which node))"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] Desired NodeJS version: v${BO_VERSION_NVM_NODE}"
-		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
+		if [ "$(BO_original_node_version)" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:1"
 			BO_ensure_bo_script_bin
@@ -906,7 +1018,7 @@ function init {
 		set -e
 		BO_sourceProfile
 		set +e
-		if [ "$(node --version 2>&1 | perl -pe 's/^v(\d+).+$/$1/')" == "${BO_VERSION_NVM_NODE}" ]; then
+		if [ "$(BO_original_node_version)" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:2"
 			BO_ensure_bo_script_bin
@@ -1015,12 +1127,18 @@ function init {
 	}
 
 	function BO_link_node {
+		if [[ $BO_ASSUME_NODE == 1 ]]; then
+			return;
+		fi		
 		rm -f "$1/node" > /dev/null 2>&1 || true
 		BO_ensure_node
 		ln -s "$NVM_BIN/node" "$1/node"
 	}
 
 	function BO_link_npm {
+		if [[ $BO_ASSUME_NODE == 1 ]]; then
+			return;
+		fi
 		rm -f "$1/npm" > /dev/null 2>&1 || true
 		BO_ensure_node
 		ln -s "$NVM_BIN/npm" "$1/npm"
@@ -1042,7 +1160,9 @@ function init {
 
 	function BO_run_recent_node {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_recent_node] args: $@"
-		BO_ensure_recent_node
+		if [[ $BO_ASSUME_NODE != 1 ]]; then
+			BO_ensure_recent_node
+		fi		
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_recent_node] NodeJS version: $(node --version 2>&1)"
 		node "$@"
 		local exitCode=$?
@@ -1052,7 +1172,9 @@ function init {
 
 	function BO_run_node {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] args: $@"
-		BO_ensure_node
+		if [[ $BO_ASSUME_NODE != 1 ]]; then
+			BO_ensure_node
+		fi
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version 2>&1)"
 		node "$@"
 		local exitCode=$?
@@ -1068,7 +1190,9 @@ function init {
 
 	function BO_run_npm {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_npm] args: $@"
-		BO_ensure_node
+		if [[ $BO_ASSUME_NODE != 1 ]]; then
+			BO_ensure_node
+		fi
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_node] NodeJS version: $(node --version)"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_run_npm] npm version: $(npm --version)"
 		local currentNPM=`printenv | grep '^npm_'`
@@ -1458,66 +1582,6 @@ function init {
 		a=$(<$1); printf '%s\n' "$a" > $1
 	}
 
-	function BO_cecho {
-		# Escape sequence and resets
-		ESC_SEQ="\033["
-		RESET_ALL="${ESC_SEQ}0m"
-		RESET_BOLD="${ESC_SEQ}21m"
-		RESET_UL="${ESC_SEQ}24m"
-		NONE=""
-		# Foreground colours
-		FG_BLACK="30"
-		FG_RED="31"
-		FG_GREEN="32"
-		FG_YELLOW="33"
-		FG_BLUE="34"
-		FG_MAGENTA="35"
-		FG_CYAN="36"
-		FG_WHITE="37"
-		FG_BR_BLACK="90"
-		FG_BR_RED="91"
-		FG_BR_GREEN="92"
-		FG_BR_YELLOW="93"
-		FG_BR_BLUE="94"
-		FG_BR_MAGENTA="95"
-		FG_BR_CYAN="96"
-		FG_BR_WHITE="97"
-		# Background colours (optional)
-		BG_BLACK="40"
-		BG_RED="41"
-		BG_GREEN="42"
-		BG_YELLOW="43"
-		BG_BLUE="44"
-		BG_MAGENTA="45"
-		BG_CYAN="46"
-		BG_WHITE="47"
-		# Font styles
-		FS_REG="0"
-		FS_BOLD="1"
-		FS_UL="4"
-
-		message=${1}
-		foreground="NONE"
-		style="FS_REG"
-		background="NONE"
-
-		if [ ! -z "${2}" ]; then
-			foreground="FG_${2}"
-		fi
-		if [ ! -z "${3}" ]; then
-			style="FS_${3}"
-		fi
-		if [ ! -z "${4}" ]; then
-			background="BG_${4}"
-		fi
-		background="${!background}"
-		if [ "${background}" != "" ]; then
-			background=";${background}"
-		fi
-
-		echo >&2 -e "${ESC_SEQ}${!style};${!foreground}${background}m${message}${RESET_ALL}"
-	}
-
 
 	###############################
 	# Act
@@ -1530,15 +1594,15 @@ function init {
 		local installTargetPath="$ORIGINAL_BO_ROOT_SCRIPT_PATH"
 		if [ -z "$installTargetPath" ] || [ "$installTargetPath" == "$BO_ROOT_SCRIPT_PATH" ]; then
 				# Target path not set so we use the default one
-				BO_ensure_env_HOME "Use default .bash.origin"
-				installTargetPath="$HOME/.bash.origin"
+				BO_ensure_env_HOME "Use default '$BO_PREFIX_DIR/bin/bash.origin'"
+				installTargetPath="$BO_PREFIX_DIR/bin/bash.origin"
 		elif [ ! -e "$installTargetPath" ]; then
 			# We may have an old 'BO_ROOT_SCRIPT_PATH' set that no longer exists.
 			# We assue that is the case if the parent path no longer exists.
 			# If you don't want the path to be reset make sure the parent path exists!
 			if [ ! -e "$(dirname $installTargetPath)" ]; then
-				BO_ensure_env_HOME "Use default .bash.origin"
-				installTargetPath="$HOME/.bash.origin"
+				BO_ensure_env_HOME "Use default '$BO_PREFIX_DIR/bin/bash.origin'"
+				installTargetPath="$BO_PREFIX_DIR/bin/bash.origin"
 			fi
 		fi
 		if [ "$installTargetPath" == "$1" ]; then
