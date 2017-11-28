@@ -1355,7 +1355,7 @@ function init {
 
 	function BO_downloadToSystemCache {
 		if [[ $BO_ALLOW_DOWNLOADS != 1 ]]; then
-			BO_exit_error "Cannot download '$4' due to 'BO_ALLOW_DOWNLOADS=1'!"
+			BO_exit_error "Cannot download '$4' due to 'BO_ALLOW_DOWNLOADS!=1'!"
 		fi
 		local DOWNLOAD_PATH__
 		BO_systemCachePath DOWNLOAD_PATH__ "$2" "$3"
@@ -1535,6 +1535,10 @@ function init {
 		# TODO: Use 'smi' to install with better package type detection.
 		if [ -e "$PLUGIN_PATH/package.json" ] && [ ! -e "$PLUGIN_PATH/.installed" ]; then
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Installing dependencies for plugin path: $PLUGIN_PATH"
+
+			if [[ $BO_ALLOW_INSTALLS != 1 ]]; then
+				BO_exit_error "Cannot install '$PLUGIN_PATH' (triggered by missing '.installed') due to 'BO_ALLOW_INSTALLS!=1'!"
+			fi
 
 			pushd "$PLUGIN_PATH" > /dev/null
 				echo "TEST_MATCH_IGNORE>>>"
