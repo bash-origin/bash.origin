@@ -546,6 +546,42 @@ function init {
 	}
 
 
+	function BO_mark_time {
+		# TODO: Refactor to setup a rolling timer.
+		local cmd="$1"
+		local timer_format
+
+		if [[ -n "$2" ]]; then
+			timer_format="$2"
+		else
+			timer_format='%-Mm %-Ss'
+		fi
+		
+		case $cmd in
+			start)
+				# This can't be local because we need it to persist across calls.
+				_timer_StartSecs=$(date +'%s')
+				;;
+			stop)
+				if [[ ! $_timer_StartSecs ]]; then
+					echo "$FUNCNAME did not record a start." >&2
+					return 1
+				fi
+				
+				local _timer_StopSecs=$(date +'%s')
+				local DiffSecs=$(($_timer_StopSecs-$_timer_StartSecs))
+				local TimeLapse=$(date -u -d@"$DiffSecs" +"$timer_format")
+				
+				echo "$TimeLapse"
+				;;
+			*)
+				echo "$FUNCNAME: Invalid command '$cmd'." >&2
+				return 1
+				;;
+		esac
+	}
+
+
 	if echo "$@" | grep -q -Ee '(\$|\s)--install-only(\s|\$)'; then
 		BO_FLAG_INSTALL_ONLY=1
 	elif echo "$npm_config_argv" | grep -q -Ee '"--install-only"'; then
@@ -1533,21 +1569,23 @@ function init {
 
 		# Install dependencies
 		# TODO: Use 'smi' to install with better package type detection.
-		if [ -e "$PLUGIN_PATH/package.json" ] && [ ! -e "$PLUGIN_PATH/.installed" ]; then
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Installing dependencies for plugin path: $PLUGIN_PATH"
+		if [ -e "$PLUGIN_PATH/package.json" ]; then
+			if [ ! -e "$PLUGIN_PATH/.installed" ] && [ ! -e "$PLUGIN_PATH/.installed.production" ]; then
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Installing dependencies for plugin path: $PLUGIN_PATH"
 
-			if [[ $BO_ALLOW_INSTALLS != 1 ]]; then
-				BO_exit_error "Cannot install '$PLUGIN_PATH' (triggered by missing '.installed') due to 'BO_ALLOW_INSTALLS!=1'!"
+				if [[ $BO_ALLOW_INSTALLS != 1 ]]; then
+					BO_exit_error "Cannot install '$PLUGIN_PATH' (triggered by missing '.installed') due to 'BO_ALLOW_INSTALLS!=1'!"
+				fi
+
+				pushd "$PLUGIN_PATH" > /dev/null
+					echo "TEST_MATCH_IGNORE>>>"
+
+					BO_run_npm install --production
+
+					echo "<<<TEST_MATCH_IGNORE"
+					touch ".installed"
+				popd > /dev/null
 			fi
-
-			pushd "$PLUGIN_PATH" > /dev/null
-				echo "TEST_MATCH_IGNORE>>>"
-
-				BO_run_npm install --production
-
-				echo "<<<TEST_MATCH_IGNORE"
-				touch ".installed"
-			popd > /dev/null
 		fi
 
 		BO_setResult $1 "$PLUGIN_PATH/$PLUGIN_NAME"
