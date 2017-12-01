@@ -1303,50 +1303,69 @@ function init {
 		local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
 		local URI_REPONAME_=`echo "$URI_DIRNAME_" | perl -pe 's/.+~([^~]+)$/$1/'`
 		local URI_MAJOR_VERSION_=`echo "$3" | perl -wnE 'say for /^\d+/g'`
-		local DOWNLOAD_PATH_="$(pwd)/node_modules/$URI_DIRNAME_"
-		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (1): $DOWNLOAD_PATH_"
-		if [ -d "$DOWNLOAD_PATH_" ]; then
-			BO_setResult $1 "$DOWNLOAD_PATH_"
-		else
-			DOWNLOAD_PATH_="$(pwd)/node_modules/$URI_REPONAME_"
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (2): $DOWNLOAD_PATH_"
+
+		if [ ! -z "$BO_FORCE_SYSTEM_CACHE_DIR" ]; then
+			local DOWNLOAD_PATH_="$BO_FORCE_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/snapshot/$3"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (1): $DOWNLOAD_PATH_"
 			if [ -d "$DOWNLOAD_PATH_" ]; then
 				BO_setResult $1 "$DOWNLOAD_PATH_"
 			else
-				DOWNLOAD_PATH_="$BO_DIR/node_modules/$URI_DIRNAME_"
-				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (3): $DOWNLOAD_PATH_"
-				if [ -d "$DOWNLOAD_PATH_" ] && [ -e "$DOWNLOAD_PATH_/package.json" ]; then
+				local DOWNLOAD_DIR_="$(dirname "$DOWNLOAD_PATH_")"
+				if [ "$4" != "nocreate" ]; then
+					if [ ! -d "$DOWNLOAD_DIR_" ]; then
+						[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Creating directory: $DOWNLOAD_DIR_"
+						mkdir -p "$DOWNLOAD_DIR_"
+					fi
+				fi
+				BO_setResult $1 "$DOWNLOAD_PATH_"
+			fi
+		else
+			local DOWNLOAD_PATH_="$(pwd)/node_modules/$URI_DIRNAME_"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (1): $DOWNLOAD_PATH_"
+			if [ -d "$DOWNLOAD_PATH_" ]; then
+				BO_setResult $1 "$DOWNLOAD_PATH_"
+			else
+				DOWNLOAD_PATH_="$(pwd)/node_modules/$URI_REPONAME_"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (2): $DOWNLOAD_PATH_"
+				if [ -d "$DOWNLOAD_PATH_" ]; then
 					BO_setResult $1 "$DOWNLOAD_PATH_"
 				else
-					DOWNLOAD_PATH_="$BO_DIR/node_modules/$URI_REPONAME_"
-					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (4): $DOWNLOAD_PATH_"
+					DOWNLOAD_PATH_="$BO_DIR/node_modules/$URI_DIRNAME_"
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (3): $DOWNLOAD_PATH_"
 					if [ -d "$DOWNLOAD_PATH_" ] && [ -e "$DOWNLOAD_PATH_/package.json" ]; then
 						BO_setResult $1 "$DOWNLOAD_PATH_"
 					else
-						DOWNLOAD_PATH_="$BO_DIR/../$URI_DIRNAME_"
-						[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (5): $DOWNLOAD_PATH_"
+						DOWNLOAD_PATH_="$BO_DIR/node_modules/$URI_REPONAME_"
+						[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (4): $DOWNLOAD_PATH_"
 						if [ -d "$DOWNLOAD_PATH_" ] && [ -e "$DOWNLOAD_PATH_/package.json" ]; then
 							BO_setResult $1 "$DOWNLOAD_PATH_"
 						else
-							DOWNLOAD_PATH_="$BO_DIR/../$URI_REPONAME_"
-							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (6): $DOWNLOAD_PATH_"
+							DOWNLOAD_PATH_="$BO_DIR/../$URI_DIRNAME_"
+							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (5): $DOWNLOAD_PATH_"
 							if [ -d "$DOWNLOAD_PATH_" ] && [ -e "$DOWNLOAD_PATH_/package.json" ]; then
 								BO_setResult $1 "$DOWNLOAD_PATH_"
 							else
-								DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/installed/master"
-								[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (7): $DOWNLOAD_PATH_"
-								if [ -d "$DOWNLOAD_PATH_" ]; then
+								DOWNLOAD_PATH_="$BO_DIR/../$URI_REPONAME_"
+								[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (6): $DOWNLOAD_PATH_"
+								if [ -d "$DOWNLOAD_PATH_" ] && [ -e "$DOWNLOAD_PATH_/package.json" ]; then
 									BO_setResult $1 "$DOWNLOAD_PATH_"
 								else
-									DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/snapshot/$3"
-									[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (8): $DOWNLOAD_PATH_"
-									local DOWNLOAD_DIR_="$( dirname "$DOWNLOAD_PATH_")"
-									if [ "$4" != "nocreate" ]; then
-										if [ ! -d "$DOWNLOAD_DIR_" ]; then
-											mkdir -p "$DOWNLOAD_DIR_"
+									DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/installed/master"
+									[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (7): $DOWNLOAD_PATH_"
+									if [ -d "$DOWNLOAD_PATH_" ]; then
+										BO_setResult $1 "$DOWNLOAD_PATH_"
+									else
+										DOWNLOAD_PATH_="$BO_SYSTEM_CACHE_DIR/$URI_DIRNAME_~$URI_MAJOR_VERSION_/source/snapshot/$3"
+										[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (8): $DOWNLOAD_PATH_"
+										local DOWNLOAD_DIR_="$( dirname "$DOWNLOAD_PATH_")"
+										if [ "$4" != "nocreate" ]; then
+											if [ ! -d "$DOWNLOAD_DIR_" ]; then
+												[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Creating directory: $DOWNLOAD_DIR_"
+												mkdir -p "$DOWNLOAD_DIR_"
+											fi
 										fi
+										BO_setResult $1 "$DOWNLOAD_PATH_"
 									fi
-									BO_setResult $1 "$DOWNLOAD_PATH_"
 								fi
 							fi
 						fi

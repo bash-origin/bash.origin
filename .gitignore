@@ -7,3 +7,4 @@
 /examples/.deps/
 /node_modules/
 .rt/
+/examples/*/.cache
