@@ -1298,6 +1298,7 @@ function init {
 		fi
 	}
 
+	# TODO: Use require("bash.origin").resolve and if no path found derive one based on BO_SYSTEM_CACHE_DIR and if not set BO_GLOBAL_SYSTEM_CACHE_DIR.
 	function BO_systemCachePath {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] args: $@"
 		local URI_DIRNAME_=`echo "$2" | sed 's/\//~/g'`
@@ -1320,7 +1321,16 @@ function init {
 				BO_setResult $1 "$DOWNLOAD_PATH_"
 			fi
 		else
-			local DOWNLOAD_PATH_="$(pwd)/node_modules/$URI_DIRNAME_"
+			# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
+			local DOWNLOAD_PATH_="$BO_SOURCE_DIRPATHS/$URI_DIRNAME_"
+			if [ ! -z "${BO_SOURCE_DIRPATHS}" ]; then
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (0): $DOWNLOAD_PATH_"
+				if [ -d "$DOWNLOAD_PATH_" ]; then
+					BO_setResult $1 "$DOWNLOAD_PATH_"
+					return
+				fi
+			fi
+			DOWNLOAD_PATH_="$(pwd)/node_modules/$URI_DIRNAME_"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_systemCachePath] Check path (1): $DOWNLOAD_PATH_"
 			if [ -d "$DOWNLOAD_PATH_" ]; then
 				BO_setResult $1 "$DOWNLOAD_PATH_"
@@ -1574,18 +1584,18 @@ function init {
 				local PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		fi
 		local PLUGIN_PATH=""
-		if [ "$BO_PLUGIN_SEARCH_DIRPATHS" != "" ] && [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
-				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_PLUGIN_SEARCH_DIRPATHS'"
-				if [ ! -z "$BO_PLUGIN_SEARCH_DIRPATHS" ]; then
+		if [ "$BO_SOURCE_DIRPATHS" != "" ] && [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_SOURCE_DIRPATHS'"
+				if [ ! -z "$BO_SOURCE_DIRPATHS" ]; then
 					# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
-					if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME" ]; then
-							PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_NAME"
-					elif [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID" ]; then
-							PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/$PLUGIN_ID"
+					if [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_NAME" ]; then
+							PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_NAME"
+					elif [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_ID" ]; then
+							PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_ID"
 					fi
 					if [ "$PLUGIN_PATH" == "" ]; then
-						if [ -e "$BO_PLUGIN_SEARCH_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME" ]; then
-							PLUGIN_PATH="$BO_PLUGIN_SEARCH_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME"
+						if [ -e "$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME" ]; then
+							PLUGIN_PATH="$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME"
 						fi
 					fi
 				fi
