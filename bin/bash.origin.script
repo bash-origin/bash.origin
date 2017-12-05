@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # Source https://github.com/bash-origin/bash.origin
 
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] --- START --- (pwd: $(pwd))"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] SHELL: $SHELL"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] args: $@"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] which bash: $(which bash)"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] bash --version: $(bash --version)"
+
 BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
 eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 function BO_setResult {
@@ -22,9 +28,8 @@ function BO_deriveSelfDir {
 }
 BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
-[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] ls -al ${HOME}/.bash.origin: $(ls -al ${HOME}/.bash.origin)"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] __BO_DIR__: $__BO_DIR__"
-
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] ls -al ${HOME}/.bash.origin: $(ls -al ${HOME}/.bash.origin 2>/dev/null)"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
 if [ "$BO_ROOT_SCRIPT_PATH" != "" ]; then
@@ -60,20 +65,36 @@ fi
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
-. "$BO_ROOT_SCRIPT_PATH"
+#. "$BO_ROOT_SCRIPT_PATH"
 
-[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
+#[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
+#function function_exists {
+#	declare -f -F $1 > /dev/null
+#	return $?
+#}
+#function boEnvironmentNotLoaded {
+#	echo "[bash.origin][bin/bash.origin] ERROR: The BO_* functions do not seem to be available. Make sure to set BO_LOADED=0 before calling/sourcing this script!"
+#	exit 1
+#}
+#function_exists "BO_resetLoaded" && BO_resetLoaded || boEnvironmentNotLoaded
 
-function function_exists {
-	declare -f -F $1 > /dev/null
-	return $?
-}
-function boEnvironmentNotLoaded {
-	echo "[bash.origin][bin/bash.origin.script] ERROR: The BO_* functions do not seem to be available. Make sure to set BO_LOADED=0 before calling/sourcing this script!"
-	exit 1
-}
-function_exists "BO_resetLoaded" && BO_resetLoaded || boEnvironmentNotLoaded
+# If 'SHELL' is set to 'bash' we reset some variables
+if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" == "bash" ]; then
 
+	export BO_LOADED=
+	export BO_IS_SOURCING=1
+	export BO_sourceProfile__sourced=
 
-. $BO_ROOT_SCRIPT_PATH BOS "$@"
+	. $BO_ROOT_SCRIPT_PATH BOS "$@"
+
+else
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] SHELL is not 'bash': $SHELL"
+
+	export SHELL=$(which bash)
+
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] SHELL: $SHELL"
+	[ -z "$BO_VERBOSE" ] || echo "[bash.origin][bin/bash.origin.script] Call: $SHELL $BO_ROOT_SCRIPT_PATH BOS"
+
+	$SHELL $BO_ROOT_SCRIPT_PATH BOS "$@"
+fi
