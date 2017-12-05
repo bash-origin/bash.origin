@@ -1,10 +1,5 @@
 **Status: BETA**
 
-bash.origin
-===========
-
-[![CircleCI](https://circleci.com/gh/bash-origin/bash.origin.svg?style=svg)](https://circleci.com/gh/bash-origin/bash.origin)
-
 The original spark for this project came from needing an easy way to get the **path of the current Bast script** which is [way harder than it should be](http://stackoverflow.com/a/246128/330439).
 
 It has turned into a set of [Bash](https://www.gnu.org/software/bash/) conventions and utilities to bootstrap a system.
@@ -443,9 +438,3 @@ chmod u+x ./.bash.origin
 if [ ! -z "$VERBOSE" ]; then echo "[ensureBashOrigin] source from: ./.bash.origin"; fi
 ./.bash.origin BO install -f
 ````
-
-
-Provenance
-==========
-
-Original source logic under [Free Public License](https://opensource.org/licenses/FPL-1.0.0) by [Christoph Dorn](http://christophdorn.com)
