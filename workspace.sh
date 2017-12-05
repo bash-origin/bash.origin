@@ -1,5 +1,8 @@
 #!/usr/bin/env bash.origin.script
 
+BO_ALLOW_DOWNLOADS=1
+BO_ALLOW_INSTALLS=1
+
 depend {
     "inception": {
         "@com.github/cadorn/Inception#s1": {

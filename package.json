@@ -14,6 +14,7 @@
         "bash.origin.workspace": "^0.2.62"
     },
     "scripts": {
-        "test": "bash.origin.test examples"
+        "test": "bash.origin.test examples",
+        "publish-website": "bash.origin.script ./workspace.sh publish"
     }
 }
