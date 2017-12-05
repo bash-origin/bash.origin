@@ -11,7 +11,7 @@
     },
     "main": "bash.origin.js",
     "devDependencies": {
-        "bash.origin.workspace": "^0.2.62"
+        "bash.origin.workspace": "^0.2.64"
     },
     "scripts": {
         "test": "bash.origin.test examples",
