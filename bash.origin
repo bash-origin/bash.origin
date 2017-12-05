@@ -316,17 +316,26 @@ function init {
 	###############################
 
 	if [ -z "$BO_PREFIX_DIR" ]; then
-		# If 'node' is from an NVM install we locate the cache into the active nvm 'lib' directory.
-		if BO_has node && [ ! -z "$NVM_DIR" ] && [ ! -z "$NVM_BIN" ]; then
-			export BO_PREFIX_DIR="$(dirname $(dirname "$NVM_BIN"))"
-		elif [ -w "/usr/local" ]; then
-			# '/usr/local' is writable so we use that.
-			export BO_PREFIX_DIR="/usr/local"
-		else
+		function useFallbackPrefix {
 		    # We fall back to '~/.bash.origin.cache/'
 			BO_ensure_env_HOME "Use default '$BO_DIR/.bash.origin.cache' for BO_PREFIX_DIR"
 			export BO_PREFIX_DIR="$HOME/.bash.origin.cache"
 			[ -e "$BO_PREFIX_DIR" ] || mkdir "$BO_PREFIX_DIR"
+		}
+		# If we have a cache in our home dir we use that over all other
+		if [ -e "$HOME/.bash.origin.cache" ]; then
+			export BO_PREFIX_DIR="$HOME/.bash.origin.cache"
+		# If 'node' is from an NVM install we locate the cache into the active nvm 'lib' directory.
+		elif BO_has node && [ ! -z "$NVM_DIR" ] && [ ! -z "$NVM_BIN" ]; then
+			export BO_PREFIX_DIR="$(dirname $(dirname "$NVM_BIN"))"
+		elif [ -w "/usr/local" ]; then
+			# '/usr/local' is writable so we use that if we can create a cache directory below.
+			export BO_PREFIX_DIR="/usr/local"
+			if [ ! -e "/usr/local/lib/bash.origin.cache" ]; then
+				mkdir -p "/usr/local/lib/bash.origin.cache" || useFallbackPrefix
+			fi
+		else
+			useFallbackPrefix
 		fi
 	fi
 	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_PREFIX_DIR: $BO_PREFIX_DIR"
