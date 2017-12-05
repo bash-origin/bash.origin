@@ -1,0 +1,129 @@
+
+BODY {
+    width: 80%;
+    margin-left: 10%;
+    padding: 0px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    font-family: sans-serif;
+}
+
+BODY > P {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+A {
+    color: #0000ff;
+    text-decoration: none;
+    border-bottom: 1px dashed;
+}
+
+A:visited {
+    color: #aa5e13;
+    border-bottom: 1px solid #ffffff;
+}
+
+BODY > H1 {
+    border-bottom: 3px solid #1f75af;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+BODY > H2 {
+    border-bottom: 2px solid rgba(31,117,175,0.6);
+    padding-bottom: 5px;
+    padding-left: 10px;
+}
+
+BODY > H3 {
+    border-bottom: 1px solid rgba(32,117,175,0.4);
+    padding-left: 10px;
+}
+
+PRE {
+    background-color: #fcfcfc;
+    border: 1px solid #dcdcdc;
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+BLOCKQUOTE {
+    margin-left: 30px;
+    border-left: 2px solid #0068ff;
+    background-color: rgba(0,105,255,0.05);
+    padding: 5px;
+    padding-left: 10px;
+}
+BLOCKQUOTE > P {
+    margin: 3px;
+}
+
+CODE {
+    font: 12px "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+DIV.markdown-block-result {
+    background-color: #fcfcfc;
+    border: 1px dashed #cccccc;
+    padding: 10px;
+    margin-left: 30px;
+    margin-right: 10px;
+    position: relative;
+}
+
+DIV.markdown-block-result > DIV.result-label {
+    float: left;
+    background-color: #f3f3f3;
+    color: #888888;
+    padding: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: inline-block;
+    position: relative;
+    top: -10px;
+    border: 1px dashed #cccccc;
+    border-top: 0px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    font-size: 0.8rem;
+    z-index: 100;
+    margin-right: 20px;
+}
+
+TABLE {
+    WIDTH: 100%;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+H1 > DIV.menu {
+    float: right;
+    display: inline-block;
+    font-size: 1.1rem;
+    margin-top: 28px;
+}
+H1 > DIV.menu > A {
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 7px;
+    border: 2px solid #1f75af;
+    border-bottom: 0px;
+    color: #1f75af;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    margin-right: 10px;
+}
+H1 > DIV.menu > A.active {
+    background-color: #fcfcfc;    
+    color: #000000;
+}
+H1 > DIV.menu > A > SPAN.count {
+    background-color: #ececec;
+    border-radius: 10px;
+    font-weight: normal;
+    padding-left: 5px;
+    padding-right: 5px;
+}

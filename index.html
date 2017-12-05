@@ -9,11 +9,288 @@
 
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
-    </head>
+    <link rel="stylesheet" href="./css/skin.css">
+</head>
     <body>
         <!--[if lte IE 9]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
         <![endif]-->
-    Hello World from bash.origin
+    <table>
+<thead>
+<tr>
+<th style="text-align:center">License</th>
+<th style="text-align:center">Source</th>
+<th style="text-align:center">&#8212;&raquo;</th>
+<th style="text-align:center"><a href="https://github.com/bash-origin/bash.origin/tree/master/workspace.sh">Website</a></th>
+<th style="text-align:center"><a href="https://github.com/npm/npm">npm</a></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><a href="https://opensource.org/licenses/FPL-1.0.0">FPL</a></td>
+<td style="text-align:center"><a href="https://github.com/bash-origin/bash.origin">github.com/bash-origin/bash.origin</a></td>
+<td style="text-align:center"><a href="https://circleci.com/gh/bash-origin/bash.origin"><img src="https://circleci.com/gh/bash-origin/bash.origin.svg?style=svg" alt="CircleCI"></a></td>
+<td style="text-align:center"><a href="https://bash-origin.github.io/bash.origin">bash-origin.github.io/bash.origin</a></td>
+<td style="text-align:center"><a href="https://www.npmjs.com/package/bash.origin">bash.origin</a></td>
+</tr>
+</tbody>
+</table>
+<h1 id="undefined-bash-origin-https-bash-origin-github-io-bash-origin-"><a href="https://bash-origin.github.io/bash.origin">bash.origin</a></h1>
+<p><strong>Status: BETA</strong></p>
+<p>The original spark for this project came from needing an easy way to get the <strong>path of the current Bast script</strong> which is <a href="http://stackoverflow.com/a/246128/330439">way harder than it should be</a>.</p>
+<p>It has turned into a set of <a href="https://www.gnu.org/software/bash/">Bash</a> conventions and utilities to bootstrap a system.</p>
+<p>I needed a consistent starting point for Bash scripts so I don&#39;t have to re-write the same code over and over when writing scripts to bootstrap <code>node</code> and other programs.</p>
+<p>I also needed a way to share common scripts between projects. I use these scripts to assemble runtime dependencies and boot my programs into specific contexts.</p>
+<p>Running everything through a central script allows me to inject tooling logic and monitor the system from outside of the process, project and system.</p>
+<p><strong>NOTE: The documentation below is OUT OF DATE.</strong></p>
+<h2 id="undefinedoverview">Overview</h2>
+<p><code>bash.origin</code> ensures that when you run a script to install a project or do some work such as run <code>node</code> it is launched using a consistent set of <a href="http://en.wikipedia.org/wiki/Environment_variable">environment variables</a> and pre-provisioned assets.</p>
+<p>This can be used to <em>bootstrap a system</em> by ensuring <strong>ALL ENTRY POINTS</strong> to the system <strong>FIRST SOURCE bash.origin BEFORE DOING ANYTHING</strong>. Once this is achieved, one can use <code>bash.origin</code> to, among other things, inject common environment variables and custom signing functions which will subsequently be available to all scripts and commands run within the system.</p>
+<h1 id="undefinedinstall">Install</h1>
+<p>Use in bash to copy the <code>bash.origin</code> script to <code>~/.bash.origin</code>:</p>
+<pre><code><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment"># Source https://github.com/bash-origin/bash.origin</span>
+<span class="hljs-keyword">if</span> [ -z <span class="hljs-string">"<span class="hljs-variable">${BO_LOADED}</span>"</span> ]; <span class="hljs-keyword">then</span>
+    <span class="hljs-keyword">if</span> [ ! -f <span class="hljs-string">"<span class="hljs-variable">$HOME</span>/.bash.origin"</span> ]; <span class="hljs-keyword">then</span>
+        curl -s -o <span class="hljs-string">".bash.origin"</span> <span class="hljs-string">"https://raw.githubusercontent.com/bash-origin/bash.origin/master/bash.origin?t=<span class="hljs-variable">$(date +%s)</span>"</span>
+        chmod u+x ./.bash.origin
+        <span class="hljs-built_in">export</span> BO_VERBOSE=1
+        ./.bash.origin BO install
+    <span class="hljs-keyword">fi</span>
+    . <span class="hljs-string">"<span class="hljs-variable">$HOME</span>/.bash.origin"</span>
+<span class="hljs-keyword">fi</span>
+</code></pre><p>Use <a href="http://npmjs.org">npm</a> to copy the <code>bash.origin</code> script to <code>~/.bash.origin</code>:</p>
+<pre><code>npm <span class="hljs-keyword">install</span> -g bash.origin
+</code></pre><p>Use as a <a href="http://npmjs.org">npm</a> package dependency to copy the <code>bash.origin</code> script to <code>~/.bash.origin</code> when your package is installed:</p>
+<pre><code>npm install bash.<span class="hljs-built_in">origin</span> --<span class="hljs-built_in">save</span>
+</code></pre><h2 id="undefinedusage">Usage</h2>
+<p>No matter how <code>bash.origin</code> was installed above; it can be used in any script thereafter using:</p>
+<pre><code><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment"># Source https://github.com/cadorn/bash.origin</span>
+<span class="hljs-keyword">if</span> [ -z <span class="hljs-string">"<span class="hljs-variable">$BO_ROOT_SCRIPT_PATH</span>"</span> ]; <span class="hljs-keyword">then</span> . <span class="hljs-string">"<span class="hljs-variable">$HOME</span>/.bash.origin"</span>; <span class="hljs-keyword">else</span> . <span class="hljs-string">"<span class="hljs-variable">$BO_ROOT_SCRIPT_PATH</span>"</span>; <span class="hljs-keyword">fi</span>
+...
+</code></pre><h2 id="undefineddemo-tests">Demo/Tests</h2>
+<pre><code>./examples/<span class="hljs-keyword">run</span>.<span class="bash">sh</span>
+</code></pre><h2 id="undefinedexamples">Examples</h2>
+<ul>
+<li><a href="https://github.com/cadorn/bash.origin/tree/master/examples/01-HelloWorld">examples/01-HelloWorld</a> - Simple variable passing and common functions using <a href="http://npmjs.org">npm</a> package layout.</li>
+<li><a href="https://github.com/cadorn/bash.origin/tree/master/examples/02-SourceMultiplePrototypes">examples/02-SourceMultiplePrototypes</a> - Variable scope isolation when sourcing multiple prototypes.</li>
+<li><a href="https://github.com/cadorn/bash.origin/tree/master/examples/03-CliPlugin">examples/03-CliPlugin</a> - Plugin implementations callable from the command-line using a common framework.</li>
+<li><a href="https://github.com/cadorn/bash.origin/tree/master/examples/04-ProvisionWithSMI">examples/04-ProvisionWithSMI</a> - Provision dependencies for a package using <a href="https://github.com/sourcemint/smi">smi</a>.</li>
+<li><a href="https://github.com/cadorn/bash.origin/tree/master/examples/05-DownloadToSystemCache">examples/05-DownloadToSystemCache</a> - Download a file from a URL to the local system cache.</li>
+<li><a href="https://github.com/cadorn/bash.origin/tree/master/examples/06-ModifyPromptWithPlugin">examples/06-ModifyPromptWithPlugin</a> - Modify the prompt using the <a href="https://github.com/bash-origin/bash.origin.prompt">github.com/bash-origin/bash.origin.prompt</a> plugin.</li>
+</ul>
+<h1 id="undefinedconventions">Conventions</h1>
+<h3 id="undefined1-bash-module-boilerplate">1. Bash Module Boilerplate</h3>
+<pre><code><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment"># Source https://github.com/cadorn/bash.origin</span>
+. <span class="hljs-string">"<span class="hljs-variable">$HOME</span>/.bash.origin"</span>
+<span class="hljs-keyword">function</span> init {
+    <span class="hljs-built_in">eval</span> BO_SELF_BASH_SOURCE=<span class="hljs-string">"<span class="hljs-variable">$BO_READ_SELF_BASH_SOURCE</span>"</span>
+    BO_deriveSelfDir ___TMP___ <span class="hljs-string">"<span class="hljs-variable">$BO_SELF_BASH_SOURCE</span>"</span>
+    <span class="hljs-built_in">local</span> __BO_DIR__=<span class="hljs-string">"<span class="hljs-variable">$___TMP___</span>"</span>
+
+    ...
+}
+init
+</code></pre><p>NOTE: Sourcing <code>$HOME/bash.origin</code> will:</p>
+<ul>
+<li>run <code>BO_sourceProfile</code></li>
+<li>set <code>VERBOSE=1</code> environment variable if <code>-v</code> flag found in invocation arguments</li>
+</ul>
+<h4 id="undefinedcustom-bash-origin-">Custom <code>bash.origin</code></h4>
+<p>If <code>BO_ROOT_SCRIPT_PATH</code> is set (to a path pointing to a specific revision of <code>bash.origin</code>) prior to sourcing <code>bash.origin</code> the specified script will be delegated to by <code>$HOME/.bash.origin</code> as soon as it loads.</p>
+<h3 id="undefined2-use-__bo_dir__-for-own-script-file-directory">2. Use <code>__BO_DIR__</code> for own script file directory</h3>
+<h3 id="undefined3-use-bo_sourceprototype-to-setup-a-common-environment-for-programs">3. Use <code>BO_sourcePrototype</code> to setup a common environment for programs</h3>
+<p>The idea is that by <em>knowing your own script directory</em> (<code>__BO_DIR__</code>) you can <strong>include a common package</strong> that is included by all packages of your system that have scripted <em>entry points</em>. This common package contains a <strong>script prototype</strong> which is sourced by all scripts.</p>
+<p>For an example see <a href="https://github.com/cadorn/bash.origin/tree/master/examples/01-HelloWorld">examples/01-HelloWorld</a>.</p>
+<h3 id="undefined4-call-bo_run_-to-run-common-programs">4. Call <code>BO_run_*</code> to run common programs</h3>
+<p>The following programs are supported:</p>
+<ul>
+<li><a href="http://nodejs.org">node</a></li>
+</ul>
+<p>The program is installed on first use if it is not already installed.</p>
+<p>To install the program for instant access later, simply call it once and ask it for its version. i.e. <code>BO_run_node -v</code></p>
+<h3 id="undefined5-use-bo_systemcachepath-to-keep-system-global-code-packages">5. Use <code>BO_systemCachePath</code> to keep system-global code packages</h3>
+<p>Every global code package has a hostname-based URI and version:</p>
+<pre><code><span class="hljs-attribute">BO_systemCachePath</span> CACHED_PATH <span class="hljs-string">"<span class="hljs-variable">$ID</span>"</span> <span class="hljs-string">"<span class="hljs-variable">$VERSION</span>"</span>
+</code></pre><p>The path returned for the above call will be:</p>
+<pre><code><span class="hljs-string">"<span class="hljs-variable">$BO_SYSTEM_CACHE_DIR</span>/<span class="hljs-variable">$ID</span>~<span class="hljs-variable">$VERSION_MAJOR</span>/source/installed/master"</span>
+</code></pre><p>if found, or if not:</p>
+<pre><code><span class="hljs-string">"<span class="hljs-variable">$BO_SYSTEM_CACHE_DIR</span>/<span class="hljs-variable">$ID</span>~<span class="hljs-variable">$VERSION_MAJOR</span>/source/snapshot/<span class="hljs-variable">$VERSION</span>"</span>
+</code></pre><p>The whole point is that these <strong>paths are predictable</strong> and can be assumed as provisioned by programs booted using <code>bash.origin</code> <em>by the time the program boots</em>.</p>
+<h1 id="undefinedutilities">Utilities</h1>
+<h3 id="undefined-bo_resetloaded-"><code>BO_resetLoaded</code></h3>
+<p>Reset various environment variables so that BO can be sourced into the current shell again.</p>
+<h3 id="undefined-bo_now-"><code>BO_now</code></h3>
+<p>Assign the current unix timestamp to a variable.</p>
+<pre><code>    <span class="hljs-keyword">BO_now </span><span class="hljs-string">"ts"</span>
+</code></pre><h3 id="undefined-bo_format-"><code>BO_format</code></h3>
+<p>Log wrapped data or other templates:</p>
+<pre><code>BO_format <span class="hljs-string">"$VERBOSE"</span> <span class="hljs-string">"HEADER"</span> <span class="hljs-string">"Section Heading"</span>
+...
+BO_format <span class="hljs-string">"$VERBOSE"</span> <span class="hljs-string">"FOOTER"</span>
+</code></pre><h3 id="undefined-bo_has-"><code>BO_has</code></h3>
+<p>Check if a command is available using <code>if BO_has &quot;curl&quot;; then ...</code>.</p>
+<h3 id="undefined-bo_setresult-"><code>BO_setResult</code></h3>
+<p>Used in functions to return values:</p>
+<pre><code>function ourFunc {
+    BO_setResult <span class="hljs-symbol">$</span><span class="hljs-number">1</span> <span class="hljs-string">"result"</span>
+}
+<span class="hljs-function"><span class="hljs-title">ourFunc</span></span> RESULT_VAR ...
+</code></pre><h3 id="undefined-__bo_dir__-of-own-script"><code>__BO_DIR__</code> of own script</h3>
+<pre><code><span class="hljs-built_in">eval</span> BO_SELF_BASH_SOURCE=<span class="hljs-string">"<span class="hljs-variable">$BO_READ_SELF_BASH_SOURCE</span>"</span>
+BO_deriveSelfDir ___TMP___ <span class="hljs-string">"<span class="hljs-variable">$BO_SELF_BASH_SOURCE</span>"</span>
+<span class="hljs-built_in">local</span> __BO_DIR__=<span class="hljs-string">"<span class="hljs-variable">$___TMP___</span>"</span>
+</code></pre><p>Use a <em>local</em> variable in the <code>init</code> function to keep the scope local to the module.</p>
+<h3 id="undefined-bo_sourceprofile-"><code>BO_sourceProfile</code></h3>
+<p>Load the bash profile from <code>$HOME/*</code> to init the environment.</p>
+<h3 id="undefined-bo_followpointer-"><code>BO_followPointer</code></h3>
+<p>Follow a pointer file which may be a symlink to anotehr repo with a pointer file or a file containing a filepath.</p>
+<pre><code><span class="hljs-attribute">BO_followPointer</span> <span class="hljs-string">"Z0_ROOT"</span> <span class="hljs-string">"<span class="hljs-variable">$PWD</span>"</span> <span class="hljs-string">".0"</span>
+</code></pre><h3 id="undefined-bo_checkverbose-"><code>BO_checkVerbose</code></h3>
+<p>Check if <code>-v</code> was specified on the command line.</p>
+<h3 id="undefined-bo_sudo-"><code>BO_sudo</code></h3>
+<p>Run a command using <code>sudo</code>.</p>
+<h3 id="undefined-bo_realpath-"><code>BO_realpath</code></h3>
+<p>Return the realpath of a path.</p>
+<h3 id="undefined-bo_ensure_executable-"><code>BO_ensure_executable</code></h3>
+<p>Make sure a command at a given path is executable.</p>
+<h3 id="undefined-bo_dedupe_path-"><code>BO_dedupe_PATH</code></h3>
+<p>Removes duplicate paths from the <code>PATH</code> environment variable.</p>
+<h3 id="undefined-bo_strip_path-"><code>BO_strip_PATH</code></h3>
+<p>Remove a path from the <code>PATH</code> environment variable.</p>
+<h3 id="undefined-bo_prepend_path-"><code>BO_prepend_PATH</code></h3>
+<p>Prepend a path to the <code>PATH</code> environment variable.</p>
+<h3 id="undefined-bo_if_os-"><code>BO_if_os</code></h3>
+<p>Test for <code>linux</code>, <code>darwin</code> and others against <code>$OSTYPE</code></p>
+<p>Example: <code>BO_if_os linux &amp;&amp; ...</code></p>
+<h3 id="undefined-bo_if_nix-"><code>BO_if_nix</code></h3>
+<p>Test for <code>gnu</code>, <code>bsd</code> and <code>sun</code>.</p>
+<p>Example: <code>BO_if_nix gnu &amp;&amp; ...</code></p>
+<h3 id="undefined-bo_log-"><code>BO_log</code></h3>
+<p>Log a message respecting <em>verbose</em> flag:</p>
+<pre><code><span class="hljs-attribute">BO_log</span> <span class="hljs-string">"<span class="hljs-variable">$VERBOSE</span>"</span> <span class="hljs-string">"Log message"</span>
+</code></pre><h3 id="undefined-bo_ensure_nvm-"><code>BO_ensure_nvm</code></h3>
+<p>Ensure <a href="https://github.com/creationix/nvm">nvm</a> is installed.</p>
+<h3 id="undefined-bo_ensure_node-"><code>BO_ensure_node</code></h3>
+<p>Ensure the latest stable version of <a href="http://nodejs.org">node.js</a> is installed using <a href="https://github.com/creationix/nvm">nvm</a>.</p>
+<h3 id="undefined-bo_run_node-"><code>BO_run_node</code></h3>
+<p>Run a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">JavaScript</a> file using <a href="http://nodejs.org">node</a>.</p>
+<h3 id="undefined-bo_run_npm-"><code>BO_run_npm</code></h3>
+<h3 id="undefined-bo_ensure_iojs-"><code>BO_ensure_iojs</code></h3>
+<p>Ensure the latest stable version of <a href="http://iojs.org">io.js</a> is installed using <a href="https://github.com/creationix/nvm">nvm</a>.</p>
+<h3 id="undefined-bo_run_iojs-"><code>BO_run_iojs</code></h3>
+<p>Run a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">JavaScript</a> file using <a href="http://iojs.org">io.js</a>.</p>
+<h3 id="undefined-bo_link_-"><code>BO_link_*</code></h3>
+<p><code>BO_link_* &quot;$BIN_BASE_PATH&quot;</code> works for:</p>
+<ul>
+<li><code>BO_link_node</code></li>
+<li><code>BO_link_npm</code></li>
+<li><code>BO_link_smi</code></li>
+</ul>
+<h3 id="undefined-bo_issourced-"><code>BO_isSourced</code></h3>
+<p>Determine if the current script is being sourced using <code>BO_sourcePrototype</code>.</p>
+<pre><code><span class="hljs-keyword">BO_isSourced </span>IS_SOURCED
+</code></pre><h3 id="undefined-bo_sourceprototype-"><code>BO_sourcePrototype</code></h3>
+<p>Allows scripts to inherit from other scripts.</p>
+<p>For a nested example see <a href="https://github.com/cadorn/bash.origin/tree/master/examples/02-SourceMultiplePrototypes">examples/02-SourceMultiplePrototypes</a>.</p>
+<h3 id="undefined-bo_requiremodule-"><code>BO_requireModule</code></h3>
+<p>Allows scripts to reference CommonJS style(ish) modules with locally scoped functions and variables.</p>
+<p>Internal module variables leak to the global scope so this is not a security solution! Just a very handy scope abstraction.</p>
+<p>For a nested example see <a href="https://github.com/cadorn/bash.origin/tree/master/examples/08-ModuleSyntax">examples/08-ModuleSyntax</a>.</p>
+<h3 id="undefined-bo_systemcachepath-"><code>BO_systemCachePath</code></h3>
+<p>Example:</p>
+<pre><code>BO_systemCachePath CACHED_PATH <span class="hljs-string">\</span>
+    <span class="hljs-string">"github.com/sourcemint/smi"</span> <span class="hljs-string">\</span>
+    <span class="hljs-string">"$BO_VERSION_SMI_CLI"</span> <span class="hljs-string">\</span>
+    <span class="hljs-string">"install"</span>
+</code></pre><h3 id="undefined-bo_isinsystemcache-"><code>BO_isInSystemCache</code></h3>
+<p>Example:</p>
+<pre><code>BO_isInSystemCache CACHED_PATH <span class="hljs-string">\</span>
+    <span class="hljs-string">"github.com/sourcemint/smi"</span> <span class="hljs-string">\</span>
+    <span class="hljs-string">"$BO_VERSION_SMI_CLI"</span> <span class="hljs-string">\</span>
+    <span class="hljs-string">"install"</span>
+</code></pre><h3 id="undefined-bo_downloadtosystemcache-"><code>BO_downloadToSystemCache</code></h3>
+<pre><code>BO_ensureInSystemCache DOWNLOADED_PATH <span class="hljs-string">\</span>
+    <span class="hljs-string">"github.com/bash-origin/bash.origin"</span> <span class="hljs-string">\</span>
+    <span class="hljs-string">"0.1.5"</span> <span class="hljs-string">\</span>
+    <span class="hljs-string">"https://github.com/bash-origin/bash.origin/archive/v0.1.5.zip"</span>
+</code></pre><p>Extracts archives. Replaces if already exists.</p>
+<h3 id="undefined-bo_ensureinsystemcache-"><code>BO_ensureInSystemCache</code></h3>
+<p>Same as <code>BO_downloadToSystemCache</code> but does not replace if already exists.</p>
+<h3 id="undefined-bo_ensureextracted-"><code>BO_ensureExtracted</code></h3>
+<p>Extract an archive file:</p>
+<pre><code><span class="hljs-keyword">BO_ensureExtracted </span><span class="hljs-keyword">EXTRACTED_PATH </span><span class="hljs-string">"$DOWNLOADED_PATH"</span>
+</code></pre><h3 id="undefined-bo_run_smi-"><code>BO_run_smi</code></h3>
+<p>Run <a href="https://github.com/sourcemint/smi">smi</a> on a directory in order to install dependencies.</p>
+<p>For a simple example see <a href="https://github.com/cadorn/bash.origin/tree/master/examples/04-ProvisionWithSMI">examples/04-ProvisionWithSMI</a>.</p>
+<h3 id="undefined-bo_ensureplugin-"><code>BO_ensurePlugin</code></h3>
+<p>Make sure a <a href="https://github.com/bash-origin">Bash.Origin</a> plugin is installed. See <code>BO_callPlugin</code>.</p>
+<h3 id="undefined-bo_callplugin-"><code>BO_callPlugin</code></h3>
+<p>Call a <a href="https://github.com/bash-origin">Bash.Origin</a> plugin and install it if it does not exist.</p>
+<p>Taken from the <a href="https://github.com/cadorn/bash.origin/tree/master/examples/06-ModifyPromptWithPlugin">examples/06-ModifyPromptWithPlugin</a> example which loads the <a href="https://github.com/bash-origin/bash.origin.prompt">github.com/bash-origin/bash.origin.prompt</a> plugin:</p>
+<pre><code><span class="hljs-selector-tag">BO_callPlugin</span> "<span class="hljs-selector-tag">bash</span><span class="hljs-selector-class">.origin</span><span class="hljs-selector-class">.prompt</span>@<span class="hljs-keyword">0</span>.<span class="hljs-keyword">1</span>.<span class="hljs-keyword">1</span>" setPrompt <span class="hljs-string">"workspace"</span> <span class="hljs-string">"$__BO_DIR__"</span>
+</code></pre><p>Instead of using a named plugin an absolute path may be specified. i.e. <code>/path/to/bash.origin.prompt</code>.</p>
+<h3 id="undefined-bo_cecho-"><code>BO_cecho</code></h3>
+<p>Write coloured output:</p>
+<pre><code><span class="hljs-built_in">echo</span> <span class="hljs-string">"Hello <span class="hljs-variable">$(BO_cecho "World" YELLOW)</span>"</span>
+</code></pre><h1 id="undefineduse-cases">Use-Cases</h1>
+<h2 id="undefinednodejs-install-script">NodeJS Install Script</h2>
+<p><code>package.json</code>:</p>
+<pre><code>{
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"install"</span>: <span class="hljs-string">"./bin/install"</span>
+  },
+  <span class="hljs-attr">"dependencies"</span>: {
+    <span class="hljs-attr">"bash.origin"</span>: <span class="hljs-string">"0.1.x"</span>
+  }
+}
+</code></pre><p><code>bin/install</code>:</p>
+<pre><code><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment"># Source https://github.com/cadorn/bash.origin</span>
+. <span class="hljs-string">"<span class="hljs-variable">$HOME</span>/.bash.origin"</span>
+<span class="hljs-keyword">function</span> init {
+    <span class="hljs-built_in">eval</span> BO_SELF_BASH_SOURCE=<span class="hljs-string">"<span class="hljs-variable">$BO_READ_SELF_BASH_SOURCE</span>"</span>
+    BO_deriveSelfDir ___TMP___ <span class="hljs-string">"<span class="hljs-variable">$BO_SELF_BASH_SOURCE</span>"</span>
+    <span class="hljs-built_in">local</span> __BO_DIR__=<span class="hljs-string">"<span class="hljs-variable">$___TMP___</span>"</span>
+
+    <span class="hljs-comment"># Your install code</span>
+}
+init <span class="hljs-variable">$@</span>
+</code></pre><h1 id="undefinedbootstrapping">Bootstrapping</h1>
+<h2 id="undefinedensure-with-curl-">Ensure with <code>curl</code></h2>
+<pre><code class="undefinedsh"><span class="hljs-keyword">if</span> [ ! -z <span class="hljs-string">"<span class="hljs-variable">$VERBOSE</span>"</span> ]; <span class="hljs-keyword">then</span> <span class="hljs-built_in">echo</span> <span class="hljs-string">"[ensureBashOrigin] download from: https://raw.githubusercontent.com/bash-origin/bash.origin/d96910b21f2bfd3fc886bde1935efa944c63fc5b/bash.origin"</span>; <span class="hljs-keyword">fi</span>
+curl -s -o <span class="hljs-string">".bash.origin"</span> <span class="hljs-string">"https://raw.githubusercontent.com/bash-origin/bash.origin/d96910b21f2bfd3fc886bde1935efa944c63fc5b/bash.origin?t=<span class="hljs-variable">$(date +%s)</span>"</span>
+<span class="hljs-keyword">if</span> [ ! -e <span class="hljs-string">".bash.origin"</span> ]; <span class="hljs-keyword">then</span>
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">"\nERROR: Could not download/store bash.origin at '<span class="hljs-variable">$(pwd)</span>/.bash.origin'!\n"</span>
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">"ACTION: Ensure your current user can write to '<span class="hljs-variable">$(pwd)</span>/.bash.origin'."</span>
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">"        Ensure 'whoami' gives you the username that matches your '\$HOME' directory! If they do not match, reboot your system and try again.\n"</span>
+    <span class="hljs-built_in">exit</span> 1
+<span class="hljs-keyword">fi</span>
+chmod u+x ./.bash.origin
+<span class="hljs-keyword">if</span> [ ! -z <span class="hljs-string">"<span class="hljs-variable">$VERBOSE</span>"</span> ]; <span class="hljs-keyword">then</span> <span class="hljs-built_in">echo</span> <span class="hljs-string">"[ensureBashOrigin] source from: ./.bash.origin"</span>; <span class="hljs-keyword">fi</span>
+./.bash.origin BO install -f
+</code></pre>
+<h1 id="undefinedprovenance">Provenance</h1>
+<p>Original Source Logic under <a href="https://opensource.org/licenses/FPL-1.0.0">Free Public License 1.0.0</a> by <a href="http://christophdorn.com">Christoph Dorn</a> since 2015.</p>
+<pre><code>Free Public License 1.0.0
+
+Permission to <span class="hljs-keyword">use</span>, copy, <span class="hljs-keyword">modify</span>, <span class="hljs-keyword">and</span>/<span class="hljs-keyword">or</span> <span class="hljs-keyword">distribute</span> this software <span class="hljs-keyword">for</span> <span class="hljs-keyword">any</span> purpose <span class="hljs-keyword">with</span> <span class="hljs-keyword">or</span> 
+<span class="hljs-keyword">without</span> fee <span class="hljs-keyword">is</span> hereby granted.
+
+THE SOFTWARE <span class="hljs-keyword">IS</span> PROVIDED <span class="hljs-string">"AS IS"</span> <span class="hljs-keyword">AND</span> THE AUTHOR DISCLAIMS ALL WARRANTIES <span class="hljs-keyword">WITH</span> REGARD <span class="hljs-keyword">TO</span> 
+THIS SOFTWARE <span class="hljs-keyword">INCLUDING</span> ALL IMPLIED WARRANTIES <span class="hljs-keyword">OF</span> MERCHANTABILITY <span class="hljs-keyword">AND</span> FITNESS. <span class="hljs-keyword">IN</span> <span class="hljs-keyword">NO</span> <span class="hljs-keyword">EVENT</span> 
+SHALL THE AUTHOR BE LIABLE <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">ANY</span> SPECIAL, DIRECT, INDIRECT, <span class="hljs-keyword">OR</span> CONSEQUENTIAL DAMAGES <span class="hljs-keyword">OR</span> 
+<span class="hljs-keyword">ANY</span> DAMAGES WHATSOEVER RESULTING <span class="hljs-keyword">FROM</span> LOSS <span class="hljs-keyword">OF</span> <span class="hljs-keyword">USE</span>, <span class="hljs-keyword">DATA</span> <span class="hljs-keyword">OR</span> PROFITS, WHETHER <span class="hljs-keyword">IN</span> AN <span class="hljs-keyword">ACTION</span> 
+<span class="hljs-keyword">OF</span> CONTRACT, NEGLIGENCE <span class="hljs-keyword">OR</span> OTHER TORTIOUS <span class="hljs-keyword">ACTION</span>, ARISING <span class="hljs-keyword">OUT</span> <span class="hljs-keyword">OF</span> <span class="hljs-keyword">OR</span> <span class="hljs-keyword">IN</span> <span class="hljs-keyword">CONNECTION</span> <span class="hljs-keyword">WITH</span> THE 
+<span class="hljs-keyword">USE</span> <span class="hljs-keyword">OR</span> <span class="hljs-keyword">PERFORMANCE</span> <span class="hljs-keyword">OF</span> THIS SOFTWARE.
+</code></pre><blockquote>
+<p>Well-crafted Contributions are Welcome.</p>
+</blockquote>
+<p><strong>INTENDED USE:</strong> The <em>Logic and Code contained within</em> forms a <strong>Developer Tool</strong> and is intended to operate as part of a <em>Web Software Development Toolchain</em> on which a <em>Production System</em> operates indirectly. It is <strong>NOT INTENDED FOR USE IN HIGH-LOAD ENVIRONMENTS</strong> as there is <em>little focus on Runtime Optimization</em> in order to <em>maximize API Utility, Compatibility and Flexibility</em>. The logic &amp; code <strong>HAS NOT BEEN VALIDATED BY A SECURITY AUDIT</strong> and is <strong>NOT GUARANTEED</strong> TO KEEP
+PRIVATE INFORMATION NOR YOUR IDENTITY SECURE!</p>
+<p>If you <em>need more</em> than what is contained within, study the Code, understand the Logic, and build your <em>Own Implementation</em> that is <em>API Compatible</em>. Share it with others who follow the same <em>Logic</em> and <em>API Contract</em> specified within. This Community of Users will likely want to use Your Work in their own <em>Software Development Toolchains</em>.</p>
+<script href="./../github.com~cadorn~Inception/Aspects/01-SourceLogicPackage/Skin/jquery-v3.2.1.min.js"></script>
 </body>
 </html>
