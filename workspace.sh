@@ -1,7 +1,7 @@
 #!/usr/bin/env bash.origin.script
 
-BO_ALLOW_DOWNLOADS=1
-BO_ALLOW_INSTALLS=1
+export BO_ALLOW_DOWNLOADS=1
+export BO_ALLOW_INSTALLS=1
 
 depend {
     "inception": {
