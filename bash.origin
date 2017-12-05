@@ -340,6 +340,7 @@ function init {
 	fi
 	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_PREFIX_DIR: $BO_PREFIX_DIR"
 
+
 	# NOTE: We no longer source the profile automatically!
 	if [ -z "$BO_ENABLE_SOURCE_PROFILE" ]; then
 		BO_ENABLE_SOURCE_PROFILE=0;
@@ -419,6 +420,31 @@ function init {
 
 	export BO_ROOT_SCRIPT_PATH
 	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
+
+	function BO_ensure_bo_script_bin {
+		[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin][BO_ensure_bo_script_bin] args: $@"
+		# Ensure BO_ROOT_SCRIPT_PATH exists
+		if [ ! -e "$BO_ROOT_SCRIPT_PATH" ]; then
+			local _binBaseDir="$1"
+			# Ensure 'bash.origin.script' exists
+			if [ ! -e "$_binBaseDir/bash.origin.script" ]; then
+				[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] Placing wrapper script for 'bash.origin.script' at '$_binBaseDir/bash.origin.script'"
+				# TODO: Dynamically feed based on 'BO_resetLoaded'
+				echo -e "#!/usr/bin/env bash\nBO_LOADED=\nBO_IS_SOURCING=\nBO_sourceProfile__sourced=\n__ON_INIT__BO_IS_SOURCING=\n. $BO_ROOT_SCRIPT_PATH BOS $""@" > "$_binBaseDir/bash.origin.script"
+				chmod u+x "$_binBaseDir/bash.origin.script"
+			fi
+			# Ensure 'bash.origin' exists
+			if [ ! -e "$_binBaseDir/bash.origin" ]; then
+				[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] Placing wrapper script for 'bash.origin' at '$_binBaseDir/bash.origin'"
+				# TODO: Dynamically feed based on 'BO_resetLoaded'
+				echo -e "#!/usr/bin/env bash\nBO_LOADED=\nBO_IS_SOURCING=\nBO_sourceProfile__sourced=\n__ON_INIT__BO_IS_SOURCING=\n. $BO_ROOT_SCRIPT_PATH BOB $""@" > "$_binBaseDir/bash.origin"
+				chmod u+x "$_binBaseDir/bash.origin"
+			fi
+		fi
+	}
+
+	BO_ensure_bo_script_bin "$(dirname "$BO_ROOT_SCRIPT_PATH")"
+
 
 	###############################
 	# Declare Globals
@@ -1022,27 +1048,6 @@ function init {
 		fi
 	}
 
-	function BO_ensure_bo_script_bin {
-			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_bo_script_bin] args: $@"
-			# TODO: Store the 'bash.origin.script' file on other bin paths as well.
-			if [ ! -z "$NVM_BIN" ]; then
-					# Ensure 'bash.origin.script' is at '$NVM_BIN/bash.origin.script'
-					if [ ! -e "$NVM_BIN/bash.origin.script" ]; then
-							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "Placing wrapper script for '$BO_ROOT_SCRIPT_PATH' at '$NVM_BIN/bash.origin.script'"
-							# TODO: Dynamically feed based on 'BO_resetLoaded'
-							echo -e "#!/usr/bin/env bash\nBO_LOADED=\nBO_IS_SOURCING=\nBO_sourceProfile__sourced=\n. $BO_ROOT_SCRIPT_PATH BOS $""@" > "$NVM_BIN/bash.origin.script"
-							chmod u+x "$NVM_BIN/bash.origin.script"
-					fi
-					# Ensure 'bash.origin' is at '$NVM_BIN/bash.origin'
-					if [ ! -e "$NVM_BIN/bash.origin" ]; then
-							[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "Placing wrapper script for '$BO_ROOT_SCRIPT_PATH' at '$NVM_BIN/bash.origin'"
-							# TODO: Dynamically feed based on 'BO_resetLoaded'
-							echo -e "#!/usr/bin/env bash\nBO_LOADED=\nBO_IS_SOURCING=\nBO_sourceProfile__sourced=\n. $BO_ROOT_SCRIPT_PATH BOB $""@" > "$NVM_BIN/bash.origin"
-							chmod u+x "$NVM_BIN/bash.origin"
-					fi
-			fi
-	}
-
 	function BO_ensure_recent_node {
 		if [[ $BO_ASSUME_NODE == 1 ]]; then
 			return;
@@ -1056,7 +1061,7 @@ function init {
 		if BO_has node && [ "$(BO_original_node_version)" -ge "$BO_VERSION_RECENT_NODE" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_recent_node] found"
-			BO_ensure_bo_script_bin
+			BO_ensure_bo_script_bin "$(dirname "$NVM_BIN")"
 			return
 		fi
 		set -e
@@ -1074,7 +1079,7 @@ function init {
 		if [ "$(BO_original_node_version)" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:1"
-			BO_ensure_bo_script_bin
+			BO_ensure_bo_script_bin "$(dirname "$NVM_BIN")"
 			return
 		fi
 		set -e
@@ -1083,7 +1088,7 @@ function init {
 		if [ "$(BO_original_node_version)" == "${BO_VERSION_NVM_NODE}" ]; then
 			set -e
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_node] DONE:2"
-			BO_ensure_bo_script_bin
+			BO_ensure_bo_script_bin "$(dirname "$NVM_BIN")"
 			return
 		fi
 		set -e
@@ -1178,7 +1183,7 @@ function init {
 			fi
 			set -e
 		popd > /dev/null
-		BO_ensure_bo_script_bin
+		BO_ensure_bo_script_bin "$(dirname "$NVM_BIN")"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_nvm] DONE"
 #		curl \
 #		    -H "Pragma: no-cache, must-revalidate" \
