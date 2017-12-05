@@ -3,10 +3,6 @@
 # License: http://unlicense.org/
 function init {
 
-	if [ -z "$BO_PREFIX_DIR" ]; then
-		export BO_PREFIX_DIR="/usr/local"
-	fi
-
 	if echo "$@" | grep -q -Ee '(\$|\s)--debug(\s|\$)'; then
 		export BO_VERBOSE=1
 		export VERBOSE=1
@@ -319,6 +315,22 @@ function init {
 	# Boot self
 	###############################
 
+	if [ -z "$BO_PREFIX_DIR" ]; then
+		# If 'node' is from an NVM install we locate the cache into the active nvm 'lib' directory.
+		if BO_has node && [ ! -z "$NVM_DIR" ] && [ ! -z "$NVM_BIN" ]; then
+			export BO_PREFIX_DIR="$(dirname $(dirname "$NVM_BIN"))"
+		elif [ -w "/usr/local" ]; then
+			# '/usr/local' is writable so we use that.
+			export BO_PREFIX_DIR="/usr/local"
+		else
+		    # We fall back to '~/.bash.origin.cache/'
+			BO_ensure_env_HOME "Use default '$BO_DIR/.bash.origin.cache' for BO_PREFIX_DIR"
+			export BO_PREFIX_DIR="$HOME/.bash.origin.cache"
+			[ -e "$BO_PREFIX_DIR" ] || mkdir "$BO_PREFIX_DIR"
+		fi
+	fi
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_PREFIX_DIR: $BO_PREFIX_DIR"
+
 	# NOTE: We no longer source the profile automatically!
 	if [ -z "$BO_ENABLE_SOURCE_PROFILE" ]; then
 		BO_ENABLE_SOURCE_PROFILE=0;
@@ -392,7 +404,6 @@ function init {
 		elif [ -e "$BO_DIR/.bash.origin" ]; then
 			BO_ROOT_SCRIPT_PATH="$BO_DIR/.bash.origin"
 		else
-			BO_ensure_env_HOME "Use default '$BO_PREFIX_DIR/bin/bash.origin'"
 			BO_ROOT_SCRIPT_PATH="$BO_PREFIX_DIR/bin/bash.origin"
 		fi
 	fi
@@ -454,6 +465,8 @@ function init {
 		fi
 	fi
 
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_VERSION_NODE: $BO_VERSION_NODE"
+
 	# Holds the node version that was detected from outside.
 	function BO_original_node_version {
 		if [ -z "$ORIGINAL_BO_VERSION_NODE" ]; then
@@ -470,6 +483,10 @@ function init {
 		# of 'node' while 'BO_VERSION_NVM_NODE' holds the main *system* version.
 		BO_VERSION_RECENT_NODE="$BO_VERSION_NVM_NODE"
 	fi
+
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] ORIGINAL_BO_VERSION_NODE: $ORIGINAL_BO_VERSION_NODE"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_VERSION_NVM_NODE: $BO_VERSION_NVM_NODE"
+	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_VERSION_RECENT_NODE: $BO_VERSION_RECENT_NODE"
 
 
 	if [ -z "$BO_VERSION_NVM_IOJS" ]; then
@@ -1700,6 +1717,9 @@ function init {
 
 	function BO_self_install {
 		BO_checkVerbose "VERBOSE" "$@"
+
+		# TODO: If we are installed in '~/.bash.origin.cache/lib/..../bacj.origin' we need to
+		#       link '~/.bash.origin' instead of copying it.
 
 		# TODO: Introduce external variable to set target install path
 		local installTargetPath="$ORIGINAL_BO_ROOT_SCRIPT_PATH"
