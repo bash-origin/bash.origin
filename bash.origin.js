@@ -124,6 +124,13 @@ var mappings = exports.canonicalize.mappings = [];
 
 
 exports.search = function (uri) {
+
+    if (VERBOSE) console.error("[bash.origin] search(uri)", uri);
+    if (VERBOSE) console.error("[bash.origin] BO_SOURCE_DIRPATHS:", process.env.BO_SOURCE_DIRPATHS);
+    if (VERBOSE) console.error("[bash.origin] BO_SYSTEM_CACHE_DIR:", process.env.BO_SYSTEM_CACHE_DIR);
+    if (VERBOSE) console.error("[bash.origin] BO_GLOBAL_SYSTEM_CACHE_DIR:", process.env.BO_GLOBAL_SYSTEM_CACHE_DIR);
+    if (VERBOSE) console.error("[bash.origin] exports.search.paths:", exports.search.paths);
+    
     if (!Array.isArray(uri)) {
         uri = [ uri ];
     }
@@ -134,7 +141,7 @@ exports.search = function (uri) {
         for (var path, j=0, jl=exports.search.paths.length; j<jl; j++) {
             path = PATH.join(exports.search.paths[j], uri[i]);
 
-            if (VERBOSE) console.log("[bash.origin] Check if uri '" + uri[i] + "' lives at path:", path);
+            if (VERBOSE) console.error("[bash.origin] Check if uri '" + uri[i] + "' lives at path:", path);
 
             if (FS.existsSync(path)) {
                 return path;
