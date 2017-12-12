@@ -860,17 +860,23 @@ function init {
 		local _raw_source_path="$1"
 		# Check if we have a module extension and if we do compile the module first.
 		if [[ "${_raw_source_path}" == *".bo.sh" ]]; then
-				BO_compileModule "_raw_source_path" "${_raw_source_path}"
+			BO_compileModule "_raw_source_path" "${_raw_source_path}"
 		fi
 		# Now load the module
 		local _proto_source_path="${_raw_source_path}"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] _proto_source_path (1): ${_proto_source_path}"
+		if [ -d "${_proto_source_path}" ]; then
+			_proto_source_path="${_proto_source_path}/$(basename "${_proto_source_path}")"
+		fi
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] _proto_source_path (2): ${_proto_source_path}"
 		if [ ! -e "${_proto_source_path}" ]; then
-				_proto_source_path="${_proto_source_path}.sh"
-				if [ ! -e "${_proto_source_path}" ]; then
-						echo "$BO_LOG_PREFIX""ERROR: Cannot source '${_raw_source_path}' nor '${_proto_source_path}'. File not found!"
-						[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE:1"
-						return 1
-				fi
+			_proto_source_path="${_proto_source_path}.sh"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] _proto_source_path (3): ${_proto_source_path}"
+			if [ ! -e "${_proto_source_path}" ]; then
+				echo "$BO_LOG_PREFIX""ERROR: Cannot source '${_raw_source_path}' nor '${_proto_source_path}'. File not found!"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE:1"
+				return 1
+			fi
 		fi
 		local __ON_INIT__BO_IS_SOURCING
 		#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
