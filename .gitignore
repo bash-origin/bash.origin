@@ -1,6 +1,6 @@
 /.pio.cache/
 /.deps/
-/.installed.*
+/.installed*
 .tmp~*
 *~.compiled.bash
 /examples/*/.actual.*

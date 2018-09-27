@@ -291,11 +291,11 @@ function init {
 		# Look for '-v', '--verbose', '-d' or '--debug' flags.
 		if echo "$@" | grep -q -Ee '(^|\s)--?([vd]|verbose|debug)(\s|\$)'; then
 		    _VERBOSE="1"
-			BO_log "1" "[BO_checkVerbose] enable due to verbose command arg: $@"
+			BO_log "$BO_VERBOSE" "[BO_checkVerbose] enable due to verbose command arg: $@"
 		fi
 		if echo "$npm_config_argv" | grep -q -Ee '"--?([vd]|verbose|debug)"'; then
 		    _VERBOSE="1"
-			BO_log "1" "[BO_checkVerbose] enable due to verbose npm_config_argv arg: $npm_config_argv"
+			BO_log "$BO_VERBOSE" "[BO_checkVerbose] enable due to verbose npm_config_argv arg: $npm_config_argv"
 		fi
 #		if [ "$_VERBOSE" == "1" ]; then
 #			BO_log "$_VERBOSE" "[BO_checkVerbose] Verbose Enabled: $_VERBOSE"
@@ -597,6 +597,13 @@ function init {
 		return 0;
 	}
 
+	function BO_find_path_up {
+		local path=$1
+		while [[ "$path" != "" && ! -e "$path/$2" ]]; do
+			path=${path%/*}
+		done
+		echo "$path/$2"
+	}
 
 	function BO_mark_time {
 		# TODO: Refactor to setup a rolling timer.
@@ -693,7 +700,29 @@ function init {
                 vars[VAR_PREFIX + name] = ("" + value);
             }
 
-            const argsArray = process.argv.slice(2);
+            const rawArgsArray = process.argv.slice(2);
+            const argsArray = [];
+			var argState = null;
+			rawArgsArray.forEach(function (arg) {
+				if (argState === "concat") {
+					argsArray[argsArray.length-1] += " " + arg;
+					if (!/^"/.test(arg) && /"$/.test(arg)) {
+						argState = null;
+						argsArray[argsArray.length-1] = argsArray[argsArray.length-1].replace(/^"(.+)"$/, "$1");
+					}
+				} else {
+					argsArray.push(arg);
+					if (/^--/.test(arg)) {
+						argState = "opt";
+					}
+					if (argState === "opt") {
+						if (/^"/.test(arg) && !/"$/.test(arg)) {
+							argState = "concat";
+						}
+					}
+				}
+			});
+
             exportVar("_0", argsArray.join(" "));
 
             const args = MINIMIST(argsArray);
@@ -1190,6 +1219,7 @@ function init {
 			set -e
 		popd > /dev/null
 		BO_ensure_bo_script_bin "$(dirname "$NVM_BIN")"
+		export NVM_SH="$NVM_PATH_/nvm.sh"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_nvm] DONE"
 #		curl \
 #		    -H "Pragma: no-cache, must-revalidate" \
@@ -1764,6 +1794,9 @@ function init {
 					rm -f "$installTargetPath" || true
 				fi
 				if [ ! -e "$installTargetPath" ]; then
+					if [ ! -e "$(dirname "$installTargetPath")" ]; then
+						mkdir -p "$installTargetPath"
+					fi
 					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Copying '$1' to '$installTargetPath'"
 					cp -f "$1" "$installTargetPath"
 				else
