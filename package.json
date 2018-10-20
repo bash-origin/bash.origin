@@ -11,10 +11,16 @@
     },
     "main": "bash.origin.js",
     "devDependencies": {
-        "bash.origin.workspace": "^0.2.66"
+        "bash.origin.lib": "^0.2.15"
     },
     "scripts": {
-        "test": "bash.origin.test examples",
+        "test": "PATH='$(pwd)/bin:$PATH'; $(bash.origin.lib binPath)/bash.origin.test examples",
         "publish-website": "bash.origin.script ./workspace.sh publish"
+    },
+    "config": {
+        "bash.origin.lib": {
+            "pack": "default",
+            "stream": "0.1"
+        }
     }
 }
