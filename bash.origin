@@ -61,14 +61,14 @@ function init {
 	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] $SHELL --version: $($SHELL --version)"
 	[ -z "$BO_VERBOSE" ] || echo >&2 "[bash.origin] BO_BASH_ALLOW_3: $BO_BASH_ALLOW_3"
 
-	if [[ $BO_BASH_ALLOW_3 != 1 ]] && [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
+	if [[ $BO_BASH_ALLOW_3 != 1 ]] && [[ "$($SHELL --version)" != "GNU bash, version 4."* ]] && [[ "$($SHELL --version)" != "GNU bash, version 5."* ]]; then
 			if [ "$(which bash)" != "$SHELL" ]; then
-					if [[ "$(bash --version)" == "GNU bash, version 4."* ]]; then
+					if [[ "$(bash --version)" == "GNU bash, version 4."* ]] || [[ "$(bash --version)" == "GNU bash, version 5."* ]]; then
 							# We update the SHELL to where 'bash' actually is.
 							SHELL="$(which bash)"
 					else
-							echo -e >&2 "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4!\n"
-							echo -e >&2 "[BO] ACTION: Install bash version 4. On OSX you can use:\n"
+							echo -e >&2 "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4+!\n"
+							echo -e >&2 "[BO] ACTION: Install bash version 4+. On OSX you can use:\n"
 							echo -e >&2 "             brew install bash\n"
 							echo -e >&2 "[BO] ACTION: Then call your script again using:\n"
 							echo -e >&2 "             SHELL=/usr/local/bin/bash /usr/local/bin/bash <ScriptPath>\n"
@@ -768,13 +768,13 @@ function init {
 
 	function BO_requireModule {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] args: $@"
-			if [[ "${BASH_VERSION}" != "4."* ]]; then
+			if [[ "${BASH_VERSION}" != "4."* ]] && [[ "${BASH_VERSION}" != "5."* ]]; then
 					echo >&2 "$BO_LOG_PREFIX""ERROR: You must be using bash version 4 or newer to use 'BO_requireModule' (yours is '${BASH_VERSION}')! Put this '#!/usr/bin/env bash' shebang at the top of the script file you are executing to get the 'bash' command from your PATH instead of default for your shell."
 					exit 1
 			fi
 			if [ "$2" != "as" ]; then
-						echo >&2 "$BO_LOG_PREFIX""ERROR: Second argument to BO_requireModule should be 'as'!"
-						exit 1
+					echo >&2 "$BO_LOG_PREFIX""ERROR: Second argument to BO_requireModule should be 'as'!"
+					exit 1
 			fi
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] ___bo_module_instance_caller_dirname___: $___bo_module_instance_caller_dirname___"
 			varName=""
@@ -1644,28 +1644,40 @@ function init {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_ID: $PLUGIN_ID"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_ORG: $PLUGIN_ORG"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_VERSION: $PLUGIN_VERSION"
+
+		local PLUGIN_PATH=""
+		if which lib.json > /dev/null; then
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Resolving PLUGIN_NAME via lib.json"
+			PLUGIN_PATH=$(lib.json resolve.js "$PLUGIN_NAME/package.json" 2> /dev/null || true)
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_PATH: $PLUGIN_PATH"
+			if [ "$PLUGIN_PATH" != "" ]; then
+				PLUGIN_PATH=$(dirname "$PLUGIN_PATH")
+			fi
+		fi
+
 		if [ ! -z "${PLUGIN_VERSION}" ]; then
 				local PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		else
 				local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@([^@]+)$/g'`
 				local PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		fi
-		local PLUGIN_PATH=""
-		if [ "$BO_SOURCE_DIRPATHS" != "" ] && [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
-				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_SOURCE_DIRPATHS'"
-				if [ ! -z "$BO_SOURCE_DIRPATHS" ]; then
-					# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
-					if [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_NAME" ]; then
-							PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_NAME"
-					elif [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_ID" ]; then
-							PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_ID"
-					fi
-					if [ "$PLUGIN_PATH" == "" ]; then
-						if [ -e "$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME" ]; then
-							PLUGIN_PATH="$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME"
+		if [ "$PLUGIN_PATH" == "" ]; then
+			if [ "$BO_SOURCE_DIRPATHS" != "" ] && [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_SOURCE_DIRPATHS'"
+					if [ ! -z "$BO_SOURCE_DIRPATHS" ]; then
+						# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
+						if [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_NAME" ]; then
+								PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_NAME"
+						elif [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_ID" ]; then
+								PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_ID"
+						fi
+						if [ "$PLUGIN_PATH" == "" ]; then
+							if [ -e "$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME" ]; then
+								PLUGIN_PATH="$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME"
+							fi
 						fi
 					fi
-				fi
+			fi
 		fi
 		if [ "$PLUGIN_PATH" == "" ] && [ "$PLUGIN_VERSION" == "" ]; then
 				local __latestVersionLookupUri="https://api.github.com/repos/$PLUGIN_ORG/$PLUGIN_NAME/tags"
@@ -1690,11 +1702,13 @@ function init {
 						PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
 				fi
 		fi
+		PLUGIN_DID_DOWNLOAD=0
 		if [ "$PLUGIN_PATH" == "" ]; then
 			BO_isInSystemCache PLUGIN_PATH "github.com/$PLUGIN_ORG/$PLUGIN_NAME" "$PLUGIN_VERSION"
 			if [ "$PLUGIN_PATH" == "" ]; then
-				# TODO: Ask user before installing.
-				[ -z "$BO_VERBOSE" ] || echo >&2 "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
+				PLUGIN_DID_DOWNLOAD=1
+				# TODO: Ask user before provisioning.
+				[ -z "$BO_VERBOSE" ] || echo >&2 "$BO_LOG_PREFIX""Provisioning plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
 				BO_ensureInSystemCache PLUGIN_PATH "github.com/$PLUGIN_ORG/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
 			fi
 		fi
@@ -1702,8 +1716,8 @@ function init {
 
 		# Install dependencies
 		# TODO: Use 'smi' to install with better package type detection.
-		if [ -e "$PLUGIN_PATH/package.json" ]; then
-			if [ ! -e "$PLUGIN_PATH/.installed" ] && [ ! -e "$PLUGIN_PATH/.installed.production" ]; then
+		if [ -e "$PLUGIN_PATH/package.json" ] && [ $PLUGIN_DID_DOWNLOAD == 1 ]; then
+			if [ ! -e "$PLUGIN_PATH/.installed" ] && [ ! -e "$PLUGIN_PATH/.installed.production" ] && [ ! -e "$PLUGIN_PATH/node_modules/" ]; then
 				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Installing dependencies for plugin path: $PLUGIN_PATH"
 
 				if [[ $BO_ALLOW_INSTALLS != 1 ]]; then

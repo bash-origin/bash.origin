@@ -83,7 +83,7 @@ fi
 if [ "$(echo "$SHELL" | perl -pe 's/^.*(bash)$/$1/')" == "bash" ]; then
 
 	export BO_LOADED=
-	export BO_IS_SOURCING=1
+	export BO_IS_SOURCING=
 	export BO_sourceProfile__sourced=
 
 	. $BO_ROOT_SCRIPT_PATH BOB "$@"

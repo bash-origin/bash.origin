@@ -10,17 +10,9 @@
         "bash.origin.script": "./bin/bash.origin.script"
     },
     "main": "bash.origin.js",
-    "devDependencies": {
-        "bash.origin.lib": "^0.2.15"
-    },
+    "devDependencies": {},
     "scripts": {
-        "test": "PATH='$(pwd)/bin:$PATH'; $(bash.origin.lib binPath)/bash.origin.test examples",
+        "test": "bash.origin.test examples",
         "publish-website": "bash.origin.script ./workspace.sh publish"
-    },
-    "config": {
-        "bash.origin.lib": {
-            "pack": "default",
-            "stream": "0.1"
-        }
     }
 }

@@ -10,6 +10,7 @@
     "numFailingTests": 0,
     "numPassingTests": 1,
     "numPendingTests": 0,
+    "numTodoTests": 0,
     "perfStats": {
     },
     "snapshot": {
@@ -18,7 +19,8 @@
         "matched": 0,
         "unchecked": 0,
         "unmatched": 0,
-        "updated": 0
+        "updated": 0,
+        "uncheckedKeys": []
     },
     "testFilePath": "TeStLoCaLiZeD/main.js",
     "testResults": [
@@ -26,13 +28,15 @@
             "ancestorTitles": [],
             "failureMessages": [],
             "fullName": "Test",
+            "location": null,
             "numPassingAsserts": 0,
             "status": "passed",
             "title": "Test"
         }
     ],
     "sourceMaps": {},
-    "skipped": false
+    "skipped": false,
+    "leaks": false
 }
 [jest] RUN COMPLETE: {
     "numFailedTestSuites": 0,
@@ -42,8 +46,10 @@
     "numPendingTestSuites": 0,
     "numPendingTests": 0,
     "numRuntimeErrorTestSuites": 0,
+    "numTodoTests": 0,
     "numTotalTestSuites": 1,
     "numTotalTests": 1,
+    "openHandles": [],
     "snapshot": {
         "added": 0,
         "didUpdate": false,
@@ -55,6 +61,7 @@
         "matched": 0,
         "total": 0,
         "unchecked": 0,
+        "uncheckedKeysByFile": [],
         "unmatched": 0,
         "updated": 0
     },
@@ -66,6 +73,7 @@
             "numFailingTests": 0,
             "numPassingTests": 1,
             "numPendingTests": 0,
+            "numTodoTests": 0,
             "perfStats": {
             },
             "snapshot": {
@@ -74,7 +82,8 @@
                 "matched": 0,
                 "unchecked": 0,
                 "unmatched": 0,
-                "updated": 0
+                "updated": 0,
+                "uncheckedKeys": []
             },
             "testFilePath": "TeStLoCaLiZeD/main.js",
             "testResults": [
@@ -82,13 +91,15 @@
                     "ancestorTitles": [],
                     "failureMessages": [],
                     "fullName": "Test",
+                    "location": null,
                     "numPassingAsserts": 0,
                     "status": "passed",
                     "title": "Test"
                 }
             ],
             "sourceMaps": {},
-            "skipped": false
+            "skipped": false,
+            "leaks": false
         }
     ],
     "wasInterrupted": false

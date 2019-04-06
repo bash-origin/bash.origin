@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash.origin
+
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
 		. "../../bash.origin"

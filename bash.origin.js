@@ -243,7 +243,7 @@ exports.ensure = function (id) {
             "-e",
             "-s"
         ], {
-            cwd: process.env.BO_GLOBAL_SYSTEM_CACHE_DIR,
+            cwd: process.cwd(),//env.BO_GLOBAL_SYSTEM_CACHE_DIR,
             env: ((function () {
                 var env = process.env;
                 delete env.BO_LOADED;
@@ -253,7 +253,7 @@ exports.ensure = function (id) {
                     }
                     delete env[name];
                 });
-                return env;        
+                return env;
             })()),
             stdio: [
                 "pipe",
