@@ -866,8 +866,33 @@ function init {
 					BO_sourceModule "$PLUGIN_MODULE_PATH_"
 
 			else
-					echo >&2 "TODO: Alias-based includes that should resolve via mappings: $@"
+				if which lib.json > /dev/null; then
+
+					local PLUGIN_URI_=`BO_run_silent_node --eval '
+							var uriParts = process.argv[1].match(/^(.+)#(?:.+\/)?(.+)$/);
+							process.stdout.write(uriParts[1]);
+					' "${1}"`
+					local PLUGIN_VERSION_=`BO_run_silent_node --eval '
+							var uriParts = process.argv[1].match(/^(.+)#(?:.+\/)?(.+)$/);
+							process.stdout.write(uriParts[2]);
+					' "${1}"`
+
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Resolving PLUGIN_URI_ via lib.json"
+					PLUGIN_PATH_=$(lib.json resolve.js "$PLUGIN_URI_/package.json" || true)
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] PLUGIN_PATH_: $PLUGIN_PATH_"
+
+					if [ "$PLUGIN_PATH_" == "" ]; then
+						echo >&2 "ERROR: Could not resolve '$PLUGIN_URI_' via lib.json!"
+						exit 1
+					fi
+
+					local PLUGIN_MODULE_PATH_="$(dirname "$PLUGIN_PATH_")/_#_org.bashorigin_#_${PLUGIN_VERSION_}.sh"
+
+					BO_sourceModule "$PLUGIN_MODULE_PATH_"
+				else
+					echo >&2 "TODO: Non lib.json alias-based includes that should resolve via mappings: $@"
 					exit 1
+				fi
 			fi
 			local func="$2"
 			shift

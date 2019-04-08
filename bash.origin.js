@@ -186,21 +186,28 @@ exports.resolve = function (id) {
         throw new Error("No API Contract specified! Use '" + id + "#<API_URI>'.");
     }
 
-    var path = exports.search([
-        // This is a globally unique way of identifying a master source install of a package irrespective of version.
-        // It is implied that the 'master' version is recent and more recent than a snapshot.
-        // If it is not recent enough, delete it or check it out at a given commit and install.
-        $id.uri.master,
-        // This is always the most precise way as it includes the full version and is fully globally unique.
-        $id.uri.version && $id.uri.snapshot,
-        // This is a globally unique way of identifying a tagged package irrespective of version.
-        $id.uri.source,
-        // This is just the npm name and not very globally unique.
-        $id.uri.node_modules,
-        // A fallback that holds a snapshot of the master branch in a globally unique way irrespective of version.
-        // This happens when there are no available versions/tags.
-        !$id.uri.version && $id.uri.snapshot
-    ]);
+    let path = null;
+    try {
+        path = require('lib.json').forModule(module).js.resolve($id.lid);
+    } catch (err) {}
+
+    if (!path) {
+        path = exports.search([
+            // This is a globally unique way of identifying a master source install of a package irrespective of version.
+            // It is implied that the 'master' version is recent and more recent than a snapshot.
+            // If it is not recent enough, delete it or check it out at a given commit and install.
+            $id.uri.master,
+            // This is always the most precise way as it includes the full version and is fully globally unique.
+            $id.uri.version && $id.uri.snapshot,
+            // This is a globally unique way of identifying a tagged package irrespective of version.
+            $id.uri.source,
+            // This is just the npm name and not very globally unique.
+            $id.uri.node_modules,
+            // A fallback that holds a snapshot of the master branch in a globally unique way irrespective of version.
+            // This happens when there are no available versions/tags.
+            !$id.uri.version && $id.uri.snapshot
+        ]);
+    }
 
     path = new String(path || "");
     path.$id = $id;
