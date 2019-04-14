@@ -303,7 +303,13 @@ exports.depend = function (id, config) {
 
     var path = exports.ensure(id);
 
-    var impl = require(path + "/_#_org.bashorigin_#_" + path.$id.api + ".js");
+    if (!/_#_[^\/]+\.js$/.test(path)) {
+        path = path + "/_#_org.bashorigin_#_" + path.$id.api + ".js";
+    } else {
+        path = path.toString();
+    }
+
+    var impl = require(path);
 
     return impl.forConfig(config || {});
 }
