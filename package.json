@@ -10,6 +10,9 @@
         "bash.origin.script": "./bin/bash.origin.script"
     },
     "main": "bash.origin.js",
+    "dependencies": {
+        "minimist": "^1.2.0"
+    },
     "devDependencies": {
         "bash.origin.workspace": "^0.2.66"
     },
