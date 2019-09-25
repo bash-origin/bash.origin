@@ -72,8 +72,8 @@ function init {
 							# We update the SHELL to where 'bash' actually is.
 							SHELL="$(which bash)"
 					else
-							echo -e >&2 "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4!\n"
-							echo -e >&2 "[BO] ACTION: Install bash version 4. On OSX you can use:\n"
+							echo -e >&2 "[BO] ERROR: You are using bash version '$($SHELL --version)' instead of version 4+!\n"
+							echo -e >&2 "[BO] ACTION: Install bash version 4+. On OSX you can use:\n"
 							echo -e >&2 "             brew install bash\n"
 							echo -e >&2 "[BO] ACTION: Then call your script again using:\n"
 							echo -e >&2 "             SHELL=/usr/local/bin/bash /usr/local/bin/bash <ScriptPath>\n"
@@ -296,11 +296,11 @@ function init {
 		# Look for '-v', '--verbose', '-d' or '--debug' flags.
 		if echo "$@" | grep -q -Ee '(^|\s)--?([vd]|verbose|debug)(\s|\$)'; then
 		    _VERBOSE="1"
-			BO_log "1" "[BO_checkVerbose] enable due to verbose command arg: $@"
+			BO_log "$BO_VERBOSE" "[BO_checkVerbose] enable due to verbose command arg: $@"
 		fi
 		if echo "$npm_config_argv" | grep -q -Ee '"--?([vd]|verbose|debug)"'; then
 		    _VERBOSE="1"
-			BO_log "1" "[BO_checkVerbose] enable due to verbose npm_config_argv arg: $npm_config_argv"
+			BO_log "$BO_VERBOSE" "[BO_checkVerbose] enable due to verbose npm_config_argv arg: $npm_config_argv"
 		fi
 #		if [ "$_VERBOSE" == "1" ]; then
 #			BO_log "$_VERBOSE" "[BO_checkVerbose] Verbose Enabled: $_VERBOSE"
@@ -604,6 +604,13 @@ function init {
 		return 0;
 	}
 
+	function BO_find_path_up {
+		local path=$1
+		while [[ "$path" != "" && ! -e "$path/$2" ]]; do
+			path=${path%/*}
+		done
+		echo "$path/$2"
+	}
 
 	function BO_mark_time {
 		# TODO: Refactor to setup a rolling timer.
@@ -700,7 +707,29 @@ function init {
                 vars[VAR_PREFIX + name] = ("" + value);
             }
 
-            const argsArray = process.argv.slice(2);
+            const rawArgsArray = process.argv.slice(2);
+            const argsArray = [];
+			var argState = null;
+			rawArgsArray.forEach(function (arg) {
+				if (argState === "concat") {
+					argsArray[argsArray.length-1] += " " + arg;
+					if (!/^"/.test(arg) && /"$/.test(arg)) {
+						argState = null;
+						argsArray[argsArray.length-1] = argsArray[argsArray.length-1].replace(/^"(.+)"$/, "$1");
+					}
+				} else {
+					argsArray.push(arg);
+					if (/^--/.test(arg)) {
+						argState = "opt";
+					}
+					if (argState === "opt") {
+						if (/^"/.test(arg) && !/"$/.test(arg)) {
+							argState = "concat";
+						}
+					}
+				}
+			});
+
             exportVar("_0", argsArray.join(" "));
 
             const args = MINIMIST(argsArray);
@@ -729,7 +758,7 @@ function init {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] args: $@"
 			# TODO: Resolve './' and aliased paths based on mappings.
 			local _raw_module_source_path="$2"
-			local _compiled_module_source_path="$2~.compiled.bash"
+			local _compiled_module_source_path="$(dirname "$2")/.~$(basename "$2")~compiled.module.bash.sh"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] _raw_module_source_path: $(stat -f "%m%t%Sm %N" $_raw_module_source_path)"
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_compileModule] _compiled_module_source_path: $(stat -f "%m%t%Sm %N" $_compiled_module_source_path) 2> /dev/null"
 			# If source file is newer than compiled file
@@ -746,13 +775,13 @@ function init {
 
 	function BO_requireModule {
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] args: $@"
-			if [[ "${BASH_VERSION}" != "4."* ]]; then
+			if [[ "${BASH_VERSION}" != "4."* ]] && [[ "${BASH_VERSION}" != "5."* ]]; then
 					echo >&2 "$BO_LOG_PREFIX""ERROR: You must be using bash version 4 or newer to use 'BO_requireModule' (yours is '${BASH_VERSION}')! Put this '#!/usr/bin/env bash' shebang at the top of the script file you are executing to get the 'bash' command from your PATH instead of default for your shell."
 					exit 1
 			fi
 			if [ "$2" != "as" ]; then
-						echo >&2 "$BO_LOG_PREFIX""ERROR: Second argument to BO_requireModule should be 'as'!"
-						exit 1
+					echo >&2 "$BO_LOG_PREFIX""ERROR: Second argument to BO_requireModule should be 'as'!"
+					exit 1
 			fi
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] ___bo_module_instance_caller_dirname___: $___bo_module_instance_caller_dirname___"
 			varName=""
@@ -844,8 +873,33 @@ function init {
 					BO_sourceModule "$PLUGIN_MODULE_PATH_"
 
 			else
-					echo >&2 "TODO: Alias-based includes that should resolve via mappings: $@"
+				if which lib.json > /dev/null; then
+
+					local PLUGIN_URI_=`BO_run_silent_node --eval '
+							var uriParts = process.argv[1].match(/^(.+)#(?:.+\/)?(.+)$/);
+							process.stdout.write(uriParts[1]);
+					' "${1}"`
+					local PLUGIN_VERSION_=`BO_run_silent_node --eval '
+							var uriParts = process.argv[1].match(/^(.+)#(?:.+\/)?(.+)$/);
+							process.stdout.write(uriParts[2]);
+					' "${1}"`
+
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] Resolving PLUGIN_URI_ via lib.json"
+					PLUGIN_PATH_=$(lib.json resolve.js "$PLUGIN_URI_/package.json" || true)
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_requireModule] PLUGIN_PATH_: $PLUGIN_PATH_"
+
+					if [ "$PLUGIN_PATH_" == "" ]; then
+						echo >&2 "ERROR: Could not resolve '$PLUGIN_URI_' via lib.json!"
+						exit 1
+					fi
+
+					local PLUGIN_MODULE_PATH_="$(dirname "$PLUGIN_PATH_")/_#_org.bashorigin_#_${PLUGIN_VERSION_}.sh"
+
+					BO_sourceModule "$PLUGIN_MODULE_PATH_"
+				else
+					echo >&2 "TODO: Non lib.json alias-based includes that should resolve via mappings: $@"
 					exit 1
+				fi
 			fi
 			local func="$2"
 			shift
@@ -867,17 +921,23 @@ function init {
 		local _raw_source_path="$1"
 		# Check if we have a module extension and if we do compile the module first.
 		if [[ "${_raw_source_path}" == *".bo.sh" ]]; then
-				BO_compileModule "_raw_source_path" "${_raw_source_path}"
+			BO_compileModule "_raw_source_path" "${_raw_source_path}"
 		fi
 		# Now load the module
 		local _proto_source_path="${_raw_source_path}"
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] _proto_source_path (1): ${_proto_source_path}"
+		if [ -d "${_proto_source_path}" ]; then
+			_proto_source_path="${_proto_source_path}/$(basename "${_proto_source_path}")"
+		fi
+		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] _proto_source_path (2): ${_proto_source_path}"
 		if [ ! -e "${_proto_source_path}" ]; then
-				_proto_source_path="${_proto_source_path}.sh"
-				if [ ! -e "${_proto_source_path}" ]; then
-						echo "$BO_LOG_PREFIX""ERROR: Cannot source '${_raw_source_path}' nor '${_proto_source_path}'. File not found!"
-						[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE:1"
-						return 1
-				fi
+			_proto_source_path="${_proto_source_path}.sh"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] _proto_source_path (3): ${_proto_source_path}"
+			if [ ! -e "${_proto_source_path}" ]; then
+				echo "$BO_LOG_PREFIX""ERROR: Cannot source '${_raw_source_path}' nor '${_proto_source_path}'. File not found!"
+				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] DONE:1"
+				return 1
+			fi
 		fi
 		local __ON_INIT__BO_IS_SOURCING
 		#echo "ENV: `( set -o posix ; set ) | less | grep BO_IS_SOURCING | while read line; do echo "___$line";done`"
@@ -1195,6 +1255,7 @@ function init {
 			set -e
 		popd > /dev/null
 		BO_ensure_bo_script_bin "$(dirname "$NVM_BIN")"
+		export NVM_SH="$NVM_PATH_/nvm.sh"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensure_nvm] DONE"
 #		curl \
 #		    -H "Pragma: no-cache, must-revalidate" \
@@ -1619,28 +1680,40 @@ function init {
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_ID: $PLUGIN_ID"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_ORG: $PLUGIN_ORG"
 		[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_VERSION: $PLUGIN_VERSION"
+
+		local PLUGIN_PATH=""
+		if which lib.json > /dev/null; then
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Resolving PLUGIN_NAME via lib.json"
+			PLUGIN_PATH=$(lib.json resolve.js "$PLUGIN_NAME/package.json" 2> /dev/null || true)
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] PLUGIN_PATH: $PLUGIN_PATH"
+			if [ "$PLUGIN_PATH" != "" ]; then
+				PLUGIN_PATH=$(dirname "$PLUGIN_PATH")
+			fi
+		fi
+
 		if [ ! -z "${PLUGIN_VERSION}" ]; then
 				local PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		else
 				local PLUGIN_VERSION=`echo "$2" | perl -wnE 'say for /@([^@]+)$/g'`
 				local PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/v$PLUGIN_VERSION.zip"
 		fi
-		local PLUGIN_PATH=""
-		if [ "$BO_SOURCE_DIRPATHS" != "" ] && [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
-				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_SOURCE_DIRPATHS'"
-				if [ ! -z "$BO_SOURCE_DIRPATHS" ]; then
-					# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
-					if [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_NAME" ]; then
-							PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_NAME"
-					elif [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_ID" ]; then
-							PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_ID"
-					fi
-					if [ "$PLUGIN_PATH" == "" ]; then
-						if [ -e "$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME" ]; then
-							PLUGIN_PATH="$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME"
+		if [ "$PLUGIN_PATH" == "" ]; then
+			if [ "$BO_SOURCE_DIRPATHS" != "" ] && [[ "$_BO_ensurePlugin__onlyDownloadedLocations" -ne 1 ]]; then
+					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Look for plugin in '$BO_SOURCE_DIRPATHS'"
+					if [ ! -z "$BO_SOURCE_DIRPATHS" ]; then
+						# TODO: Loop over multiple paths separated by ":" - http://stackoverflow.com/a/918931/330439
+						if [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_NAME" ]; then
+								PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_NAME"
+						elif [ -e "$BO_SOURCE_DIRPATHS/$PLUGIN_ID" ]; then
+								PLUGIN_PATH="$BO_SOURCE_DIRPATHS/$PLUGIN_ID"
+						fi
+						if [ "$PLUGIN_PATH" == "" ]; then
+							if [ -e "$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME" ]; then
+								PLUGIN_PATH="$BO_SOURCE_DIRPATHS/github.com~$PLUGIN_ORG~$PLUGIN_NAME"
+							fi
 						fi
 					fi
-				fi
+			fi
 		fi
 		if [ "$PLUGIN_PATH" == "" ] && [ "$PLUGIN_VERSION" == "" ]; then
 				local __latestVersionLookupUri="https://api.github.com/repos/$PLUGIN_ORG/$PLUGIN_NAME/tags"
@@ -1665,11 +1738,13 @@ function init {
 						PLUGIN_URL="https://github.com/$PLUGIN_ORG/$PLUGIN_NAME/archive/$PLUGIN_VERSION.zip"
 				fi
 		fi
+		PLUGIN_DID_DOWNLOAD=0
 		if [ "$PLUGIN_PATH" == "" ]; then
 			BO_isInSystemCache PLUGIN_PATH "github.com/$PLUGIN_ORG/$PLUGIN_NAME" "$PLUGIN_VERSION"
 			if [ "$PLUGIN_PATH" == "" ]; then
-				# TODO: Ask user before installing.
-				[ -z "$BO_VERBOSE" ] || echo >&2 "$BO_LOG_PREFIX""Installing plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
+				PLUGIN_DID_DOWNLOAD=1
+				# TODO: Ask user before provisioning.
+				[ -z "$BO_VERBOSE" ] || echo >&2 "$BO_LOG_PREFIX""Provisioning plugin '$PLUGIN_NAME' at version '$PLUGIN_VERSION'"
 				BO_ensureInSystemCache PLUGIN_PATH "github.com/$PLUGIN_ORG/$PLUGIN_NAME" "$PLUGIN_VERSION" "$PLUGIN_URL"
 			fi
 		fi
@@ -1677,8 +1752,8 @@ function init {
 
 		# Install dependencies
 		# TODO: Use 'smi' to install with better package type detection.
-		if [ -e "$PLUGIN_PATH/package.json" ]; then
-			if [ ! -e "$PLUGIN_PATH/.installed" ] && [ ! -e "$PLUGIN_PATH/.installed.production" ]; then
+		if [ -e "$PLUGIN_PATH/package.json" ] && [ $PLUGIN_DID_DOWNLOAD == 1 ]; then
+			if [ ! -e "$PLUGIN_PATH/.installed" ] && [ ! -e "$PLUGIN_PATH/.installed.production" ] && [ ! -e "$PLUGIN_PATH/node_modules/" ]; then
 				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_ensurePlugin] Installing dependencies for plugin path: $PLUGIN_PATH"
 
 				if [[ $BO_ALLOW_INSTALLS != 1 ]]; then
@@ -1793,6 +1868,9 @@ function init {
 					rm -f "$installTargetPath" || true
 				fi
 				if [ ! -e "$installTargetPath" ]; then
+					if [ ! -e "$(dirname "$installTargetPath")" ]; then
+						mkdir -p "$installTargetPath"
+					fi
 					[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "$BO_LOG_PREFIX""Copying '$1' to '$installTargetPath'"
 					cp -f "$1" "$installTargetPath"
 				else

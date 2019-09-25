@@ -1,10 +1,11 @@
 /.pio.cache/
 /.deps/
-/.installed.*
+/.installed*
 .tmp~*
-*~.compiled.bash
 /examples/*/.actual.*
 /examples/.deps/
 /node_modules/
 .rt/
 /examples/*/.cache
+.~*
+/package-lock.json

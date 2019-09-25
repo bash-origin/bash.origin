@@ -1,23 +1,21 @@
 {
-    "name": "bash.origin",
-    "version": "0.1.89",
-    "pm": {
-        "publish": "npm"
-    },
-    "repository": "https://github.com/bash-origin/bash.origin.git",
-    "bin": {
-        "bash.origin": "./bin/bash.origin",
-        "bash.origin.script": "./bin/bash.origin.script"
-    },
-    "main": "bash.origin.js",
-    "dependencies": {
-        "minimist": "^1.2.0"
-    },
-    "devDependencies": {
-        "bash.origin.workspace": "^0.2.66"
-    },
-    "scripts": {
-        "test": "bash.origin.test examples",
-        "publish-website": "bash.origin.script ./workspace.sh publish"
-    }
+  "name": "bash.origin",
+  "version": "0.2.0-pre.0",
+  "pm": {
+    "publish": "npm"
+  },
+  "repository": "https://github.com/bash-origin/bash.origin.git",
+  "bin": {
+    "bash.origin": "./bin/bash.origin",
+    "bash.origin.script": "./bin/bash.origin.script"
+  },
+  "main": "bash.origin.js",
+  "dependencies": {
+    "minimist": "^1.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "bash.origin.test examples",
+    "publish-website": "bash.origin.script ./workspace.sh publish"
+  }
 }
