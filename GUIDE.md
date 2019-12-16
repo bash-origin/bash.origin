@@ -26,7 +26,7 @@ Install
 
 Use in bash to copy the `bash.origin` script to `~/.bash.origin`:
 
-	#!/bin/bash
+	#!/usr/bin/env bash
 	# Source https://github.com/bash-origin/bash.origin
 	if [ -z "${BO_LOADED}" ]; then
 		if [ ! -f "$HOME/.bash.origin" ]; then
@@ -53,7 +53,7 @@ Usage
 No matter how `bash.origin` was installed above; it can be used in any script thereafter using:
 
 ````
-#!/bin/bash
+#!/usr/bin/env bash
 # Source https://github.com/cadorn/bash.origin
 if [ -z "$BO_ROOT_SCRIPT_PATH" ]; then . "$HOME/.bash.origin"; else . "$BO_ROOT_SCRIPT_PATH"; fi
 ...
@@ -82,7 +82,7 @@ Conventions
 
 ### 1. Bash Module Boilerplate
 
-	#!/bin/bash
+	#!/usr/bin/env bash
 	# Source https://github.com/cadorn/bash.origin
 	. "$HOME/.bash.origin"
 	function init {
@@ -406,7 +406,7 @@ NodeJS Install Script
 
 `bin/install`:
 
-	#!/bin/bash
+	#!/usr/bin/env bash
 	# Source https://github.com/cadorn/bash.origin
 	. "$HOME/.bash.origin"
 	function init {
