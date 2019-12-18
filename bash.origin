@@ -954,9 +954,9 @@ function init {
 		    . "${_proto_source_path}" ""
 			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call method 1"
 		else
-				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call method 2"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] Sourcing '${_proto_source_path}' using call method 2"
 		    . "${_proto_source_path}" ${*:2}
-				[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call method 2"
+			[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[BO_sourcePrototype] done: Sourcing '${_proto_source_path}' using call method 2"
 		fi
 		# TODO: Restore all relevant variables.
 		BO_IS_SOURCING="$__PREVIOUS_BO_IS_SOURCING"
