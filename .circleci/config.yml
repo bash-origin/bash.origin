@@ -17,5 +17,4 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      - run: node_modules/.bin/lib.json from node_modules > .~lib.json
       - run: npm test
