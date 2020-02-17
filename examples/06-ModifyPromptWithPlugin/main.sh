@@ -6,6 +6,8 @@ local __BO_DIR__="$___TMP___"
 
 echo "---"
 
+which bash.origin
+
 BO_VERBOSE=1
 
 echo "TEST_MATCH_IGNORE>>>"
