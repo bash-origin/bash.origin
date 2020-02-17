@@ -17,7 +17,7 @@
     "bash.origin.test": "^0.2.0-pre.7"    
   },
   "scripts": {
-    "test": "PATH=\"$(pwd)/bin:$PATH\" bash.origin.test examples",
+    "test": "export PATH=\"$(pwd)/bin:$PATH\"; bash.origin.test examples",
     "publish-website": "bash.origin.script ./workspace.sh publish"
   }
 }
