@@ -11,10 +11,12 @@
   },
   "main": "bash.origin.js",
   "dependencies": {
+    "jest": "^25.1.0",
     "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "bash.origin.test": "^0.2.0-pre.8"
+    "bash.origin.test": "^0.2.0-pre.10",
+    "jest": "^25.1.0"
   },
   "scripts": {
     "test": "export PATH=\"$(pwd)/bin:$PATH\"; bash.origin.test examples",
