@@ -6,10 +6,6 @@ local __BO_DIR__="$___TMP___"
 
 echo "---"
 
-which bash.origin
-/usr/bin/env bash.origin
-
-
 echo "TEST_MATCH_IGNORE>>>"
 BO_callDownloadedPlugin "bash.origin.prompt@0.2.0-pre.1#prompt/v0" setPrompt "workspace" "$__BO_DIR__"
 echo "<<<TEST_MATCH_IGNORE"
