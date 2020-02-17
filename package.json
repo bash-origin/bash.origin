@@ -14,7 +14,7 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "bash.origin.test": "^0.2.0-pre.7"    
+    "bash.origin.test": "^0.2.0-pre.8"
   },
   "scripts": {
     "test": "export PATH=\"$(pwd)/bin:$PATH\"; bash.origin.test examples",

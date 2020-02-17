@@ -9,6 +9,8 @@ const VERBOSE = !!process.env.BO_VERBOSE;
 
 exports.canonicalize = function (id) {
 
+    if (VERBOSE) console.error("[bash.origin] canonicalize(id)", id);
+
     var idParts = id.match(/^([^@#]+)(?:@([^#]+))?#(.+)$/);
 
     var lid = idParts[1];
@@ -180,6 +182,8 @@ if (process.env.BO_GLOBAL_SYSTEM_CACHE_DIR) {
 */
 exports.resolve = function (id) {
 
+    if (VERBOSE) console.error("[bash.origin] resolve(id)", id);
+
     var $id = exports.canonicalize(id);
 
     if (!$id.api) {
@@ -188,6 +192,9 @@ exports.resolve = function (id) {
 
     let path = null;
     try {
+
+        if (VERBOSE) console.error("[bash.origin] resolve(id) resolve via lib.json");
+
         path = require('lib.json').forModule(module).js.resolve($id.lid);
     } catch (err) {}
 
@@ -212,10 +219,14 @@ exports.resolve = function (id) {
     path = new String(path || "");
     path.$id = $id;
 
+    if (VERBOSE) console.error("[bash.origin] resolve(id) resolved:", path);
+
     return path;
 }
 
 exports.ensure = function (id) {
+
+    if (VERBOSE) console.error("[bash.origin] ensure(id)", id);
 
     var path = exports.resolve(id);
 
@@ -301,6 +312,8 @@ exports.ensure = function (id) {
 
 exports.depend = function (id, config) {
 
+    if (VERBOSE) console.error("[bash.origin] depend(id, config)", id, config);
+
     var path = exports.ensure(id);
 
     if (!/_#_[^\/]+\.js$/.test(path)) {
@@ -323,6 +336,8 @@ exports.isInvokable = function (obj) {
 }
 
 exports.invokeApi = function (obj, apiUri, apiArgsObj, options) {
+
+    if (VERBOSE) console.error("[bash.origin] depend(obj, apiUri, apiArgsObj, options)", obj, apiUri, apiArgsObj, options);
 
     apiArgsObj = apiArgsObj || {};
     if (!Array.isArray(apiArgsObj)) {
