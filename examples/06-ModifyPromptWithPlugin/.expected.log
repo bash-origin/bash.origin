@@ -1,1 +1,6 @@
+---
+\[\033[1;34m\]\[\033[47m\]$BO_PROMPT_ORIGIN_NAME\[\033[0m\] \[\033[1;35m\]$(module___parse_git_branch)\[\033[0m\]$(module___get_sub_path)$(module___get_context)\[\033[1;33m\]$\[\033[0m\] 
+---
+\[\033[1;34m\]\[\033[47m\]$BO_PROMPT_ORIGIN_NAME\[\033[0m\] \[\033[1;35m\]$(module___parse_git_branch)\[\033[0m\]$(module___get_sub_path)$(module___get_context)\[\033[1;33m\]$\[\033[0m\] 
+---
 OK
