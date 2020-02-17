@@ -6,6 +6,8 @@ local __BO_DIR__="$___TMP___"
 
 echo "---"
 
+BO_VERBOSE=1
+
 echo "TEST_MATCH_IGNORE>>>"
 BO_callDownloadedPlugin "bash.origin.prompt@0.2.0-pre.1#prompt/v0" setPrompt "workspace" "$__BO_DIR__"
 echo "<<<TEST_MATCH_IGNORE"
