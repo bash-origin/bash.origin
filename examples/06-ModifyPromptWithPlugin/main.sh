@@ -7,6 +7,7 @@ local __BO_DIR__="$___TMP___"
 echo "---"
 
 which bash.origin
+/usr/bin/env bash.origin
 
 
 echo "TEST_MATCH_IGNORE>>>"
