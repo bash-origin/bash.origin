@@ -1,6 +1,6 @@
 {
   "name": "bash.origin",
-  "version": "0.2.0-pre.2",
+  "version": "0.2.0-pre.3",
   "pm": {
     "publish": "npm"
   },
