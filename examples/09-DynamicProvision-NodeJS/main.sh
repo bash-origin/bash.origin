@@ -1,3 +1,10 @@
+#!/usr/bin/env bash
+
+echo "DEPRECATED: API no longer officially supported!'"
+
+echo ">>>SKIP_TEST<<<"
+exit 0
+
 #!/usr/bin/env bash.origin.test via github.com/facebook/jest
 
 process.env.BO_SYSTEM_CACHE_DIR = __dirname + "/.cache";

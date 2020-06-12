@@ -1,4 +1,6 @@
 
+// NOTE: This functionality is essentially DEPRECATED in favour of 'lib.json'.
+
 "use strict";
 
 const PATH = require("path");

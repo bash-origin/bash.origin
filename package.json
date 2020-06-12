@@ -15,7 +15,7 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "bash.origin.test": "^0.2.0-pre.10",
+    "bash.origin.test": "^0.2.0-pre.11",
     "jest": "^25.1.0"
   },
   "scripts": {
