@@ -1,6 +1,6 @@
 {
   "name": "bash.origin",
-  "version": "0.2.0-pre.4",
+  "version": "0.2.0-pre.5",
   "pm": {
     "publish": "npm"
   },
@@ -15,7 +15,7 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "bash.origin.test": "^0.2.0-pre.11",
+    "bash.origin.test": "^0.3.0-pre.0",
     "jest": "^25.1.0"
   },
   "scripts": {
